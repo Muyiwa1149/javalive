@@ -9,5 +9,9 @@ public interface DepositRepository extends JpaRepository<Deposit, Long> {
 
     List<Deposit> findByUserId(Long userId);
 
+    List<Deposit> findByUserIdOrderByIdDesc(Long userId);
+
     List<Deposit> findByStatus(String status);
+
+    List<Deposit> findByStatusOrderByIdDesc(String status);
 }

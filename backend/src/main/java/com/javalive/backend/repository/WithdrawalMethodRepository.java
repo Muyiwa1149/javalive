@@ -8,4 +8,6 @@ import java.util.List;
 public interface WithdrawalMethodRepository extends JpaRepository<WithdrawalMethod, Long> {
 
     List<WithdrawalMethod> findByType(String type);
+
+    List<WithdrawalMethod> findByTypeInAndStatus(List<String> types, String status);
 }

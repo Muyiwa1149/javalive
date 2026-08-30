@@ -87,6 +87,7 @@ const routes = [
     meta: { requiresAdminAuth: true },
     children: [
       { path: 'dashboard', name: 'admin.dashboard', component: () => import('@/pages/admin/Dashboard.vue') },
+      { path: 'deposits', name: 'admin.deposits', component: () => import('@/pages/admin/Deposits.vue') },
       // Remaining admin pages added in Phase 5.
     ],
   },
