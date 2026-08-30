@@ -70,7 +70,7 @@ Legend: `[ ]` not started · `[~]` in progress · `[x]` done
 | MT4 subscription (save/delete/renew) | [ ] | [ ] | [ ] | `UserSubscriptionController`, proxies external API |
 | Membership/Courses | [ ] | [ ] | [ ] | proxies external API — was fully commented out; **build it live** per decision |
 | Notifications: list/show/mark-read/delete/count | [x] | [x] | [ ] | backend done since Phase 2; `Notifications.vue` full page + topbar bell dropdown (real unread count/list) both built now |
-| Referral page + downline view | [ ] | [ ] | [ ] | |
+| Referral page + downline view | [x] | [x] | [ ] | `ReferralController`/`ReferralService`, mirrors `Controller::getdownlines` (recursive multi-level tree, "Direct referral"/"Indirect referral level N" labeling, 6-level depth cutoff — same bound as source). **Improvement**: source loaded `User::all()` into memory and filtered client-side in Blade for every downline level; here each level queries only its own children via `referred_by_code`, no full-table scan. Tested end-to-end with a real 3-level chain (root→child→grandchild): direct count, level labels, and parent names all correct at every level. Referrals.vue: stat cards, copyable referral link, downline table |
 | Support page | [ ] | [ ] | [ ] | |
 | Trading/account history pages | [ ] | [ ] | [ ] | |
 
