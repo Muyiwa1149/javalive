@@ -12,7 +12,25 @@ const routes = [
     component: PublicLayout,
     children: [
       { path: '', name: 'home', component: () => import('@/pages/public/Home.vue') },
-      // Remaining public pages (terms, privacy, about, faq, ...) added in Phase 3.
+      { path: 'about', name: 'about', component: () => import('@/pages/public/About.vue') },
+      { path: 'why-us', name: 'why-us', component: () => import('@/pages/public/WhyUs.vue') },
+      { path: 'trade', name: 'trade', component: () => import('@/pages/public/Trade.vue') },
+      { path: 'regulation', name: 'regulation', component: () => import('@/pages/public/Regulation.vue') },
+      { path: 'for-traders', name: 'for-traders', component: () => import('@/pages/public/ForTraders.vue') },
+      { path: 'automate', name: 'automate', component: () => import('@/pages/public/Automate.vue') },
+      { path: 'copy', name: 'copy', component: () => import('@/pages/public/Copy.vue') },
+      { path: 'faq', name: 'faq', component: () => import('@/pages/public/Faq.vue') },
+      { path: 'forex', name: 'forex', component: () => import('@/pages/public/Forex.vue') },
+      { path: 'etfs', name: 'etfs', component: () => import('@/pages/public/Etfs.vue') },
+      { path: 'shares', name: 'shares', component: () => import('@/pages/public/Shares.vue') },
+      { path: 'indices', name: 'indices', component: () => import('@/pages/public/Indices.vue') },
+      { path: 'cryptocurrencies', name: 'cryptocurrencies', component: () => import('@/pages/public/Cryptocurrencies.vue') },
+      { path: 'terms', name: 'terms', component: () => import('@/pages/public/Terms.vue') },
+      { path: 'trading-conditions', redirect: { name: 'terms' } },
+      { path: 'privacy', name: 'privacy', component: () => import('@/pages/public/Privacy.vue') },
+      { path: 'contact', name: 'contact', component: () => import('@/pages/public/Contact.vue') },
+      { path: 'contacts', redirect: { name: 'contact' } },
+      // Auth pages (login/register/password-reset/2FA/verify-email) added alongside auth wiring.
     ],
   },
   {
