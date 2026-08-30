@@ -38,6 +38,11 @@ public class LedgerTransaction {
     @JoinColumn(name = "user_plan_id")
     private UserPlan userPlan;
 
+    /** Scopes ROI/profit-withdrawal entries to one investment — see V6 migration. */
+    @ManyToOne(fetch = FetchType.LAZY)
+    @JoinColumn(name = "investment_id")
+    private Investment investment;
+
     @Column(name = "amount", nullable = false, precision = 20, scale = 8)
     private BigDecimal amount;
 
