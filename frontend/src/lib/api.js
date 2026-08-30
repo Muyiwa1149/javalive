@@ -8,6 +8,11 @@ const api = axios.create({
 })
 
 api.interceptors.request.use((config) => {
+  // A caller-supplied Authorization header (e.g. the admin 2FA pending-token exchange, which must
+  // use a short-lived token that isn't the stored admin_token) always wins over the stored token.
+  if (config.headers.Authorization) {
+    return config
+  }
   const isAdminRequest = config.url?.startsWith('/admin')
   const token = isAdminRequest
     ? localStorage.getItem('admin_token')

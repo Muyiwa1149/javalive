@@ -3,6 +3,7 @@ import { useAuthUserStore } from '@/stores/authUser'
 import { useAuthAdminStore } from '@/stores/authAdmin'
 
 const PublicLayout = () => import('@/layouts/PublicLayout.vue')
+const AuthLayout = () => import('@/layouts/AuthLayout.vue')
 const UserLayout = () => import('@/layouts/UserLayout.vue')
 const AdminLayout = () => import('@/layouts/AdminLayout.vue')
 
@@ -30,7 +31,23 @@ const routes = [
       { path: 'privacy', name: 'privacy', component: () => import('@/pages/public/Privacy.vue') },
       { path: 'contact', name: 'contact', component: () => import('@/pages/public/Contact.vue') },
       { path: 'contacts', redirect: { name: 'contact' } },
-      // Auth pages (login/register/password-reset/2FA/verify-email) added alongside auth wiring.
+    ],
+  },
+  {
+    path: '/',
+    component: AuthLayout,
+    children: [
+      { path: 'login', name: 'login', component: () => import('@/pages/auth/Login.vue') },
+      { path: 'register', name: 'register', component: () => import('@/pages/auth/Register.vue') },
+      { path: 'forgot-password', name: 'forgot-password', component: () => import('@/pages/auth/ForgotPassword.vue') },
+      { path: 'reset-password', name: 'reset-password', component: () => import('@/pages/auth/ResetPassword.vue') },
+      { path: 'confirm-password', name: 'confirm-password', meta: { requiresUserAuth: true }, component: () => import('@/pages/auth/ConfirmPassword.vue') },
+      { path: 'verify-email', name: 'verify-email', meta: { requiresUserAuth: true }, component: () => import('@/pages/auth/VerifyEmail.vue') },
+      { path: 'ref/:username', name: 'ref-capture', component: () => import('@/pages/auth/RefCapture.vue') },
+      { path: 'admin/login', name: 'admin.login', component: () => import('@/pages/auth/AdminLogin.vue') },
+      { path: 'admin/two-factor', name: 'admin.two-factor', component: () => import('@/pages/auth/AdminTwoFactor.vue') },
+      { path: 'admin/forgot-password', name: 'admin.forgot-password', component: () => import('@/pages/auth/AdminForgotPassword.vue') },
+      { path: 'admin/reset-password', name: 'admin.reset-password', component: () => import('@/pages/auth/AdminResetPassword.vue') },
     ],
   },
   {

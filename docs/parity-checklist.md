@@ -10,32 +10,35 @@ Legend: `[ ]` not started · `[~]` in progress · `[x]` done
 
 | Module | B | F | V | Notes |
 |---|---|---|---|---|
-| Layout shell (header/nav/footer/ticker/chat widgets) | [ ] | [ ] | [ ] | from `layouts/base.blade.php` |
-| Home `/` | [ ] | [ ] | [ ] | `home/index.blade.php` |
-| Terms `/terms`, trading-conditions alias | [ ] | [ ] | [ ] | |
-| Privacy `/privacy` | [ ] | [ ] | [ ] | fix unused `$policy` var while porting |
-| About `/about` | [ ] | [ ] | [ ] | |
-| Contact `/contact` + `/contacts` alias + contact form submit | [ ] | [ ] | [ ] | POST handled by `UsersController@sendcontact` today |
-| FAQ `/faq` | [ ] | [ ] | [ ] | hardcoded tabs; wire to real `Faq` model data instead of hardcoding (behavior-invisible improvement) |
-| Why Us `/why-us` | [ ] | [ ] | [ ] | |
-| Regulation `/regulation` | [ ] | [ ] | [ ] | |
-| ETFs `/etfs` | [ ] | [ ] | [ ] | |
-| Forex `/forex` | [ ] | [ ] | [ ] | |
-| For Traders `/for-traders` | [ ] | [ ] | [ ] | |
-| Cryptocurrencies `/cryptocurrencies` | [ ] | [ ] | [ ] | |
-| Indices `/indices` | [ ] | [ ] | [ ] | |
-| Shares `/shares` | [ ] | [ ] | [ ] | |
-| Trade `/trade` (marketing page, not the dashboard trade module) | [ ] | [ ] | [ ] | passes plans/mplans/pplans |
-| Automate `/automate` | [ ] | [ ] | [ ] | |
-| Copy (marketing) `/copy` | [ ] | [ ] | [ ] | |
+| Layout shell (header/nav/footer/ticker/chat widgets) | [x] | [x] | [ ] | `PublicLayout.vue`, ported from `layouts/base.blade.php`; site is dark-mode-only in source (toggle UI was dead code), so no light-mode toggle built |
+| Home `/` | — | [x] | [ ] | `Home.vue`; 15 sections ported (source has ~400 lines of genuinely dead code inside broken HTML comments, verified via comment-nesting trace, correctly excluded); plan cards + BTC hero stats stubbed pending a public plans API (BTC price itself already live via client-side CoinGecko fetch) |
+| Terms `/terms`, trading-conditions alias | — | [x] | [ ] | `Terms.vue`; fully static/hardcoded in source (does NOT use `$terms->description` — that's Privacy only) |
+| Privacy `/privacy` | [x] | [x] | [ ] | `Privacy.vue`, wired to new `GET /api/public/privacy-policy`. Finding: the checklist's earlier "`$policy` var" note was actually `$terms` (`TermsPrivacy::find(1)`) — not a bug, it's populated via a global `View::share` in `AppServiceProvider`, not the controller's `->with()` |
+| About `/about` | — | [x] | [ ] | `About.vue` |
+| Contact `/contact` + `/contacts` alias + contact form submit | [x] | [x] | [ ] | `Contact.vue` submits to new `POST /api/public/contact`. Finding: source form actually only builds a `mailto:` link client-side (Alpine `@click.prevent`) — `UsersController@sendcontact` exists but isn't wired to this UI. Deliberately used the real backend endpoint instead of replicating the mailto shortcut |
+| FAQ `/faq` | [x] | [x] | [ ] | `Faq.vue`, wired to new `GET /api/public/faqs` (confirmed live data, not hardcoded) |
+| Why Us `/why-us` | — | [x] | [ ] | `WhyUs.vue` |
+| Regulation `/regulation` | — | [x] | [ ] | `Regulation.vue` |
+| ETFs `/etfs` | — | [x] | [ ] | `Etfs.vue`; listings table has no data rows in source either (DataTables-populated, empty fallback) |
+| Forex `/forex` | — | [x] | [ ] | `Forex.vue` |
+| For Traders `/for-traders` | — | [x] | [ ] | `ForTraders.vue` (source file is `fortrader.blade.php`) |
+| Cryptocurrencies `/cryptocurrencies` | — | [x] | [ ] | `Cryptocurrencies.vue`; markets table empty in source too |
+| Indices `/indices` | — | [x] | [ ] | `Indices.vue` |
+| Shares `/shares` | — | [x] | [ ] | `Shares.vue`; table empty in source too |
+| Trade `/trade` (marketing page, not the dashboard trade module) | — | [x] | [ ] | `Trade.vue`; pricing-card `$plans` loop omitted (no fallback data in source, no public plans API yet) |
+| Automate `/automate` | — | [x] | [ ] | `Automate.vue` |
+| Copy (marketing) `/copy` | — | [x] | [ ] | `Copy.vue` |
 | ~~NFTs `/nfts`~~ | — | — | — | excluded: view doesn't exist today, route 500s |
 | ~~investment/license/security/assetss~~ | — | — | — | excluded: orphaned, no route |
-| Auth: login/register/forgot-password/reset-password/confirm-password/2FA/verify-email | [ ] | [ ] | [ ] | from `guest1` layout + `auth/*.blade.php` |
+| Auth: login/register | [x] | [ ] | [ ] | backend done since Phase 2; Vue pages (Login.vue/Register.vue) not yet built |
+| Auth: forgot-password/reset-password (both guards) | [x] | [ ] | [ ] | `PasswordResetService`, single-use 60min tokens, shared `password_reset_tokens` table (guard-tagged) — tested end-to-end incl. reuse rejection; pages not yet built |
+| Auth: confirm-password | [x] | [ ] | [ ] | simple re-auth check; page not yet built |
+| Auth: 2FA/verify-email | [ ] | [ ] | [ ] | **finding**: source's email-verification is dead code — `UserObserver` checks `$settings->enable_verification` (wrong column name; real column is `enable_email_verification`), so the condition is always false and `email_verified_at` is never auto-set; Laravel's `verified` route middleware is also never applied anywhere. Despite `enable_email_verification=1` in live data, nothing is actually gated. Plan: port the static verify-email page for parity but do not build enforcement/gating (would be inventing behavior the source never had) |
 | Social login redirect/callback (Google, Facebook live; Twitter/LinkedIn/GitHub/Bitbucket routed-but-inert) | [ ] | [ ] | [ ] | |
-| Referral capture `/ref/{id}` | [ ] | [ ] | [ ] | |
+| Referral capture `/ref/{id}` | — | [ ] | [ ] | backend already accepts `refBy` on register; just need a frontend route that captures the code and forwards to `/register` |
 | Language switch (session-only, no real i18n today) | [ ] | [ ] | [ ] | low priority — currently has no visible effect |
-| CoinGecko price ticker/hero stats | [ ] | [ ] | [ ] | server + client-side today |
-| FAQ/testimonial/content CMS read endpoints | [ ] | [ ] | [ ] | admin-manageable via `FrontendController` |
+| CoinGecko price ticker/hero stats | [x] | [x] | [ ] | client-side fetch, ported live in `Home.vue` |
+| FAQ/testimonial/content CMS read endpoints | [x] | [~] | [ ] | `GET /api/public/faqs`, `/testimonials`, `/privacy-policy` all built and tested; testimonials endpoint has no frontend consumer yet (0 rows in current data anyway) |
 
 ---
 

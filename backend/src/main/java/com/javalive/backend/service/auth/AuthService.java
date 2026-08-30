@@ -9,6 +9,7 @@ import com.javalive.backend.entity.User;
 import com.javalive.backend.repository.CryptoAccountRepository;
 import com.javalive.backend.repository.UserRepository;
 import com.javalive.backend.security.JwtService;
+import com.javalive.backend.service.mail.MailService;
 import com.javalive.backend.web.exception.ApiException;
 import org.springframework.http.HttpStatus;
 import org.springframework.security.authentication.BadCredentialsException;
@@ -26,13 +27,15 @@ public class AuthService {
     private final CryptoAccountRepository cryptoAccountRepository;
     private final PasswordEncoder passwordEncoder;
     private final JwtService jwtService;
+    private final MailService mailService;
 
     public AuthService(UserRepository userRepository, CryptoAccountRepository cryptoAccountRepository,
-                        PasswordEncoder passwordEncoder, JwtService jwtService) {
+                        PasswordEncoder passwordEncoder, JwtService jwtService, MailService mailService) {
         this.userRepository = userRepository;
         this.cryptoAccountRepository = cryptoAccountRepository;
         this.passwordEncoder = passwordEncoder;
         this.jwtService = jwtService;
+        this.mailService = mailService;
     }
 
     @Transactional
@@ -40,14 +43,28 @@ public class AuthService {
         if (userRepository.existsByEmail(request.email())) {
             throw new ApiException(HttpStatus.CONFLICT, "An account with this email already exists.");
         }
+        if (userRepository.existsByUsername(request.username())) {
+            throw new ApiException(HttpStatus.CONFLICT, "This username is already taken.");
+        }
+
+        // Source app's referral link (/ref/{username}) captures the sponsor's username; registration
+        // resolves it to the sponsor's numeric id, which is what referral-chain/commission logic
+        // actually keys on (see Controller::ref / CreateNewUser in the source app).
+        String referredByCode = null;
+        if (request.refBy() != null && !request.refBy().isBlank()) {
+            referredByCode = userRepository.findByUsername(request.refBy())
+                    .map(sponsor -> sponsor.getId().toString())
+                    .orElse(null);
+        }
 
         User user = User.builder()
                 .name(request.name())
+                .username(request.username())
                 .email(request.email())
                 .password(passwordEncoder.encode(request.password()))
                 .phone(request.phone())
                 .country(request.country())
-                .referredByCode(request.refBy())
+                .referredByCode(referredByCode)
                 .currencySymbol("$")
                 .currencyCode("USD")
                 .tradeType("Profit")
@@ -86,6 +103,9 @@ public class AuthService {
                 .xlm(BigDecimal.ZERO).bch(BigDecimal.ZERO).ada(BigDecimal.ZERO)
                 .createdAt(LocalDateTime.now()).updatedAt(LocalDateTime.now())
                 .build());
+
+        mailService.send(user.getEmail(), "Welcome to " + user.getName() + "'s new trading account",
+                "Hi " + user.getName() + ",\n\nWelcome aboard! Your account has been created successfully and you're ready to start trading.\n\nUsername: " + user.getUsername());
 
         String token = jwtService.generateToken(user.getId(), "USER", user.getEmail());
         return new AuthResponse(token, UserSummary.from(user));
