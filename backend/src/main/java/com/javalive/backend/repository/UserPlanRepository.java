@@ -10,4 +10,6 @@ public interface UserPlanRepository extends JpaRepository<UserPlan, Long> {
     List<UserPlan> findByUserId(Long userId);
 
     List<UserPlan> findByPlanId(Long planId);
+
+    List<UserPlan> findTop2ByUserIdAndActiveOrderByIdDesc(Long userId, String active);
 }

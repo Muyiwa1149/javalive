@@ -8,4 +8,6 @@ import java.util.List;
 public interface Mt4DetailRepository extends JpaRepository<Mt4Detail, Long> {
 
     List<Mt4Detail> findByUserId(Long userId);
+
+    long countByUserId(Long userId);
 }

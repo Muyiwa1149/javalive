@@ -48,10 +48,10 @@ Legend: `[ ]` not started · `[~]` in progress · `[x]` done
 
 | Module | B | F | V | Notes |
 |---|---|---|---|---|
-| Layout shell (sidebar/topbar/balance/notif bell/dark-mode/CoinGecko marquee) | [ ] | [ ] | [ ] | from `layouts/dasht.blade.php`; **all sections un-hidden** per user decision |
-| Dashboard home | [ ] | [ ] | [ ] | stat cards, KYC pill, recent plans/transactions |
-| Profile / account settings | [ ] | [ ] | [ ] | `ProfileController` |
-| Account security (2FA-ish settings page) | [ ] | [ ] | [ ] | `profile.show` composite |
+| Layout shell (sidebar/topbar/balance/notif bell/dark-mode/CoinGecko marquee) | — | [x] | [ ] | `UserLayout.vue`, ported from `layouts/dasht.blade.php`. **All previously-commented-out nav sections un-hidden** per decision: Trading & Markets, Trading Signals, Credit & Financing, Currency Exchange were all commented out in source — now live. **Added new nav items** not in source at all: Membership/Courses, MT4 Subscription, Connect Wallet, external Signal Providers — per "make hidden features live" decision. Dark/light toggle also made functional (source had full `dark:` CSS classes throughout but the toggle button itself was commented out — low-risk to enable since the styling was already there) |
+| Dashboard home | [x] | [x] | [ ] | `Dashboard.vue` + `GET /api/dashboard/summary`. Ported the source's lazy signup-bonus-crediting side effect (credited on first dashboard load) — tested end-to-end including double-credit protection. Stat cards, KYC pill, recent plans, recent activity all wired to real data. Referral link now computed client-side from username (`/ref/{username}`) rather than stored server-side — source stored a full absolute URL in `ref_link` that could go stale if the domain changed; this is a low-risk simplification |
+| Profile / account settings | [x] | [x] | [ ] | `Profile.vue` + `ProfileController`/`ProfileService` — profile info, payout/withdrawal details (bank + crypto addresses), password change, email preferences, matching the source's 4 separate update endpoints. Tested end-to-end including wrong-current-password rejection |
+| Account security (2FA-ish settings page) | [ ] | [ ] | [ ] | `profile.show` composite — not yet built, low priority (overlaps with Profile page) |
 | Connect wallet (mnemonic) | [ ] | [ ] | [ ] | **flag for security review before porting as-is** — currently stores phrase in plaintext; decide encryption-at-rest during Phase 2/4 build, don't silently replicate a plaintext-secret store |
 | KYC submission + status | [ ] | [ ] | [ ] | `VerifyController`, id front/back upload |
 | Deposits: method select, Stripe, Paystack, manual methods | [ ] | [ ] | [ ] | Flutterwave currently unwired in PHP — **include it live** per "make hidden features live" (it's fully implemented, just unrouted) |
@@ -70,7 +70,7 @@ Legend: `[ ]` not started · `[~]` in progress · `[x]` done
 | Signals (external SaaS broadcast + Telegram) | [ ] | [ ] | [ ] | user-facing subscriber view of `SignalProvderController` |
 | MT4 subscription (save/delete/renew) | [ ] | [ ] | [ ] | `UserSubscriptionController`, proxies external API |
 | Membership/Courses | [ ] | [ ] | [ ] | proxies external API — was fully commented out; **build it live** per decision |
-| Notifications: list/show/mark-read/delete/count | [ ] | [ ] | [ ] | |
+| Notifications: list/show/mark-read/delete/count | [x] | [x] | [ ] | backend done since Phase 2; `Notifications.vue` full page + topbar bell dropdown (real unread count/list) both built now |
 | Referral page + downline view | [ ] | [ ] | [ ] | |
 | Support page | [ ] | [ ] | [ ] | |
 | Trading/account history pages | [ ] | [ ] | [ ] | |

@@ -9,5 +9,9 @@ public interface LedgerTransactionRepository extends JpaRepository<LedgerTransac
 
     List<LedgerTransaction> findByUserId(Long userId);
 
+    List<LedgerTransaction> findByUserIdOrderByIdDesc(Long userId);
+
     List<LedgerTransaction> findByUserIdAndType(Long userId, String type);
+
+    List<LedgerTransaction> findTop5ByUserIdAndTypeInOrderByIdDesc(Long userId, List<String> types);
 }
