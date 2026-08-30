@@ -1,7 +1,7 @@
 <script setup>
 import { ref, onMounted } from 'vue'
 import { useRoute, useRouter, RouterLink, RouterView } from 'vue-router'
-import { LayoutDashboard, Banknote, LogOut, Menu, X } from 'lucide-vue-next'
+import { LayoutDashboard, Banknote, Send, LogOut, Menu, X } from 'lucide-vue-next'
 import { useAuthAdminStore } from '@/stores/authAdmin'
 
 /**
@@ -17,6 +17,7 @@ const sidebarOpen = ref(false)
 const NAV = [
   { name: 'admin.dashboard', label: 'Dashboard', icon: LayoutDashboard },
   { name: 'admin.deposits', label: 'Deposits', icon: Banknote },
+  { name: 'admin.withdrawals', label: 'Withdrawals', icon: Send },
 ]
 
 onMounted(() => {

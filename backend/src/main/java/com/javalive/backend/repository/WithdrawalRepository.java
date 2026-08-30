@@ -9,5 +9,9 @@ public interface WithdrawalRepository extends JpaRepository<Withdrawal, Long> {
 
     List<Withdrawal> findByUserId(Long userId);
 
+    List<Withdrawal> findByUserIdOrderByIdDesc(Long userId);
+
     List<Withdrawal> findByStatus(String status);
+
+    List<Withdrawal> findByStatusOrderByIdDesc(String status);
 }

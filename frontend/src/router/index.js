@@ -88,6 +88,7 @@ const routes = [
     children: [
       { path: 'dashboard', name: 'admin.dashboard', component: () => import('@/pages/admin/Dashboard.vue') },
       { path: 'deposits', name: 'admin.deposits', component: () => import('@/pages/admin/Deposits.vue') },
+      { path: 'withdrawals', name: 'admin.withdrawals', component: () => import('@/pages/admin/Withdrawals.vue') },
       // Remaining admin pages added in Phase 5.
     ],
   },
