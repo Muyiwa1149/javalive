@@ -1,3 +1,59 @@
 @import "tailwindcss";
 
 @custom-variant dark (&:where([data-theme="dark"], [data-theme="dark"] *));
+
+/* Design tokens ported from the source app's layouts/base.blade.php tailwind.config. */
+@theme {
+  --color-primary: #3B82F6;
+  --color-secondary: #10B981;
+  --color-accent: #6366F1;
+  --color-warning: #F59E0B;
+  --color-danger: #EF4444;
+  --color-dark-100: #374151;
+  --color-dark-200: #1F2937;
+  --color-dark-300: #111827;
+  --color-dark-400: #0F172A;
+  --color-dark-500: #0B1120;
+  --font-sans: 'Inter', sans-serif;
+}
+
+html,
+body {
+  background-color: var(--color-dark-300);
+}
+
+::-webkit-scrollbar {
+  width: 8px;
+  height: 8px;
+}
+::-webkit-scrollbar-track {
+  background: var(--color-dark-200);
+}
+::-webkit-scrollbar-thumb {
+  background: #4B5563;
+  border-radius: 4px;
+}
+::-webkit-scrollbar-thumb:hover {
+  background: #6B7280;
+}
+
+.form-input,
+.form-select {
+  @apply bg-dark-100 border-0 rounded-lg px-4 py-3 text-gray-100 font-medium focus:ring-2 focus:ring-primary focus:outline-none transition-all duration-200;
+}
+
+.btn-primary {
+  @apply bg-primary hover:bg-blue-700 text-white font-bold py-3 px-6 rounded-lg transition-all duration-200;
+}
+
+.btn-secondary {
+  @apply bg-dark-100 hover:bg-dark-200 text-white font-bold py-3 px-6 rounded-lg transition-all duration-200;
+}
+
+@keyframes fadeIn {
+  from { opacity: 0; transform: translateY(-10px); }
+  to { opacity: 1; transform: translateY(0); }
+}
+.animate-fadeIn {
+  animation: fadeIn 0.3s ease-out forwards;
+}

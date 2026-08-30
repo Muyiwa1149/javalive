@@ -1,5 +1,8 @@
 HELP.md
 target/
+
+### Storage (seeded from the Phase 1 migration + user uploads, not source) ###
+storage/public/
 .mvn/wrapper/maven-wrapper.jar
 !**/src/main/**/target/
 !**/src/test/**/target/

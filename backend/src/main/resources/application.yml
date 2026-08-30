@@ -44,6 +44,8 @@ management:
       enabled: false
 
 javalive:
+  storage:
+    public-path: ./storage/public
   jwt:
     secret: "dev-only-secret-change-in-production-CHANGE-ME-32bytes-min"
     access-token-minutes: 60
