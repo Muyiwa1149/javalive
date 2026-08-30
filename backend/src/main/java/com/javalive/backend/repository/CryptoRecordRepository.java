@@ -8,4 +8,6 @@ import java.util.List;
 public interface CryptoRecordRepository extends JpaRepository<CryptoRecord, Long> {
 
     List<CryptoRecord> findByUserId(Long userId);
+
+    List<CryptoRecord> findByUserIdOrderByIdDesc(Long userId);
 }
