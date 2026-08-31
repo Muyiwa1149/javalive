@@ -20,4 +20,7 @@ public interface DepositRepository extends JpaRepository<Deposit, Long> {
 
     @Query("select coalesce(sum(d.amount), 0) from Deposit d where d.status = :status")
     BigDecimal sumAmountByStatus(@Param("status") String status);
+
+    @Query("select distinct d.user.id from Deposit d")
+    List<Long> findDistinctUserIds();
 }

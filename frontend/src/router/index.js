@@ -44,6 +44,7 @@ const routes = [
       { path: 'confirm-password', name: 'confirm-password', meta: { requiresUserAuth: true }, component: () => import('@/pages/auth/ConfirmPassword.vue') },
       { path: 'verify-email', name: 'verify-email', meta: { requiresUserAuth: true }, component: () => import('@/pages/auth/VerifyEmail.vue') },
       { path: 'ref/:username', name: 'ref-capture', component: () => import('@/pages/auth/RefCapture.vue') },
+      { path: 'impersonate', name: 'impersonate', component: () => import('@/pages/auth/Impersonate.vue') },
       { path: 'admin/login', name: 'admin.login', component: () => import('@/pages/auth/AdminLogin.vue') },
       { path: 'admin/two-factor', name: 'admin.two-factor', component: () => import('@/pages/auth/AdminTwoFactor.vue') },
       { path: 'admin/forgot-password', name: 'admin.forgot-password', component: () => import('@/pages/auth/AdminForgotPassword.vue') },
@@ -88,6 +89,7 @@ const routes = [
     children: [
       { path: 'dashboard', name: 'admin.dashboard', component: () => import('@/pages/admin/Dashboard.vue') },
       { path: 'users', name: 'admin.users', component: () => import('@/pages/admin/Users.vue') },
+      { path: 'users/:id', name: 'admin.user-detail', component: () => import('@/pages/admin/UserDetail.vue') },
       { path: 'kyc', name: 'admin.kyc', component: () => import('@/pages/admin/Kyc.vue') },
       { path: 'deposits', name: 'admin.deposits', component: () => import('@/pages/admin/Deposits.vue') },
       { path: 'withdrawals', name: 'admin.withdrawals', component: () => import('@/pages/admin/Withdrawals.vue') },
