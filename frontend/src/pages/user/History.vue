@@ -39,6 +39,7 @@ const statusClass = (status) => ({
       <button type="button" class="px-4 py-2 text-sm font-medium" :class="tab === 'transactions' ? 'bg-blue-600 text-white' : 'bg-white dark:bg-gray-900 text-gray-600 dark:text-gray-300'" @click="tab = 'transactions'">Transactions</button>
       <button type="button" class="px-4 py-2 text-sm font-medium" :class="tab === 'deposits' ? 'bg-blue-600 text-white' : 'bg-white dark:bg-gray-900 text-gray-600 dark:text-gray-300'" @click="tab = 'deposits'">Deposits</button>
       <button type="button" class="px-4 py-2 text-sm font-medium" :class="tab === 'withdrawals' ? 'bg-blue-600 text-white' : 'bg-white dark:bg-gray-900 text-gray-600 dark:text-gray-300'" @click="tab = 'withdrawals'">Withdrawals</button>
+      <button type="button" class="px-4 py-2 text-sm font-medium" :class="tab === 'trades' ? 'bg-blue-600 text-white' : 'bg-white dark:bg-gray-900 text-gray-600 dark:text-gray-300'" @click="tab = 'trades'">Trading History</button>
     </div>
 
     <div v-if="loading" class="text-gray-500 dark:text-gray-400">Loading…</div>
@@ -78,7 +79,7 @@ const statusClass = (status) => ({
         </table>
       </div>
 
-      <div v-else class="bg-white dark:bg-gray-900 border border-gray-200 dark:border-gray-800 rounded-xl overflow-hidden overflow-x-auto">
+      <div v-else-if="tab === 'withdrawals'" class="bg-white dark:bg-gray-900 border border-gray-200 dark:border-gray-800 rounded-xl overflow-hidden overflow-x-auto">
         <div v-if="history.withdrawals.length === 0" class="p-8 text-center text-gray-500 dark:text-gray-400">No withdrawals yet.</div>
         <table v-else class="w-full text-sm">
           <thead class="bg-gray-50 dark:bg-gray-800 text-left text-gray-500 dark:text-gray-400">
@@ -90,6 +91,25 @@ const statusClass = (status) => ({
               <td class="px-4 py-3 text-right font-medium text-gray-900 dark:text-white">{{ money(w.amount) }}</td>
               <td class="px-4 py-3"><span class="px-2 py-1 rounded-full text-xs font-medium" :class="statusClass(w.status)">{{ w.status }}</span></td>
               <td class="px-4 py-3 text-gray-500 dark:text-gray-400">{{ new Date(w.createdAt).toLocaleString() }}</td>
+            </tr>
+          </tbody>
+        </table>
+      </div>
+
+      <div v-else class="bg-white dark:bg-gray-900 border border-gray-200 dark:border-gray-800 rounded-xl overflow-hidden overflow-x-auto">
+        <div v-if="history.trades.length === 0" class="p-8 text-center text-gray-500 dark:text-gray-400">No trades yet.</div>
+        <table v-else class="w-full text-sm">
+          <thead class="bg-gray-50 dark:bg-gray-800 text-left text-gray-500 dark:text-gray-400">
+            <tr><th class="px-4 py-3">Asset</th><th class="px-4 py-3">Type</th><th class="px-4 py-3 text-right">Amount</th><th class="px-4 py-3">Date</th></tr>
+          </thead>
+          <tbody class="divide-y divide-gray-100 dark:divide-gray-800">
+            <tr v-for="t in history.trades" :key="t.id">
+              <td class="px-4 py-3 text-gray-900 dark:text-white">{{ t.planLabel }}</td>
+              <td class="px-4 py-3">
+                <span class="px-2 py-1 rounded-full text-xs font-medium" :class="['Buy', 'WIN'].includes(t.type) ? 'bg-emerald-100 text-emerald-700 dark:bg-emerald-900/30 dark:text-emerald-300' : 'bg-red-100 text-red-700 dark:bg-red-900/30 dark:text-red-300'">{{ t.type }}</span>
+              </td>
+              <td class="px-4 py-3 text-right font-medium text-gray-900 dark:text-white">{{ money(t.amount) }}</td>
+              <td class="px-4 py-3 text-gray-500 dark:text-gray-400">{{ new Date(t.createdAt).toLocaleString() }}</td>
             </tr>
           </tbody>
         </table>

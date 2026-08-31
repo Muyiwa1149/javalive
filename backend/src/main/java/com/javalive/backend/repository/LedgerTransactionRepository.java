@@ -18,4 +18,6 @@ public interface LedgerTransactionRepository extends JpaRepository<LedgerTransac
     List<LedgerTransaction> findByInvestmentIdAndTypeInOrderByIdDesc(Long investmentId, List<String> types);
 
     List<LedgerTransaction> findByUserIdAndLeverageIsNullOrderByIdDesc(Long userId);
+
+    List<LedgerTransaction> findByUserIdAndTypeInOrderByIdDesc(Long userId, List<String> types);
 }

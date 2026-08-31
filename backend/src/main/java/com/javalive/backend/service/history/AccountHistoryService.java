@@ -10,9 +10,19 @@ import com.javalive.backend.repository.WithdrawalRepository;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
-/** Mirrors the source app's ViewsController@accounthistory — general ledger (excluding leveraged trade entries), deposits, withdrawals. */
+import java.util.List;
+
+/**
+ * Mirrors the source app's ViewsController@accounthistory (general ledger excluding leveraged
+ * trade entries, deposits, withdrawals) AND @tradinghistory (Sell/Buy/WIN/LOSE leveraged trade
+ * entries) as one combined endpoint — same underlying data, consolidated into one page with tabs
+ * instead of a separate nav entry (the source's own "Performance History" link was itself
+ * commented out of the sidebar, so this loses no reachability).
+ */
 @Service
 public class AccountHistoryService {
+
+    private static final List<String> TRADE_TYPES = List.of("Sell", "Buy", "WIN", "LOSE");
 
     private final LedgerTransactionRepository ledgerTransactionRepository;
     private final DepositRepository depositRepository;
@@ -31,6 +41,8 @@ public class AccountHistoryService {
                 .stream().map(LedgerEntrySummary::from).toList();
         var deposits = depositRepository.findByUserIdOrderByIdDesc(userId).stream().map(DepositSummary::from).toList();
         var withdrawals = withdrawalRepository.findByUserIdOrderByIdDesc(userId).stream().map(WithdrawalSummary::from).toList();
-        return new AccountHistory(transactions, deposits, withdrawals);
+        var trades = ledgerTransactionRepository.findByUserIdAndTypeInOrderByIdDesc(userId, TRADE_TYPES)
+                .stream().map(LedgerEntrySummary::from).toList();
+        return new AccountHistory(transactions, deposits, withdrawals, trades);
     }
 }
