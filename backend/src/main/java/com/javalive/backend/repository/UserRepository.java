@@ -20,4 +20,6 @@ public interface UserRepository extends JpaRepository<User, Long> {
     java.util.List<User> findByReferredByCode(String referredByCode);
 
     long countByStatus(String status);
+
+    java.util.List<User> findByCustomerStatusIsNullOrderByIdDesc();
 }
