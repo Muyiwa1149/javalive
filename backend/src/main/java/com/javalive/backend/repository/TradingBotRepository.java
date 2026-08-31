@@ -8,4 +8,12 @@ import java.util.List;
 public interface TradingBotRepository extends JpaRepository<TradingBot, Long> {
 
     List<TradingBot> findByStatus(String status);
+
+    List<TradingBot> findAllByOrderByCreatedAtDesc();
+
+    boolean existsByNameIgnoreCase(String name);
+
+    boolean existsByNameIgnoreCaseAndIdNot(String name, Long id);
+
+    long countByStatus(String status);
 }
