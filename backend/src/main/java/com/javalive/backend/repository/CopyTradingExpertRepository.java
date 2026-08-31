@@ -8,4 +8,8 @@ import java.util.List;
 public interface CopyTradingExpertRepository extends JpaRepository<CopyTradingExpert, Long> {
 
     List<CopyTradingExpert> findByStatusOrderByRatingDescWinRateDesc(String status);
+
+    List<CopyTradingExpert> findAllByOrderByIdDesc();
+
+    long countByStatus(String status);
 }
