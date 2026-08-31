@@ -58,3 +58,8 @@ javalive:
   cors:
     allowed-origins: "http://localhost:5173"
   frontend-url: "http://localhost:5173"
+  encryption:
+    # Dev-only AES-256 key (32 raw bytes, base64-encoded) — CHANGE IN PRODUCTION and manage via a
+    # real secrets store. Used for at-rest encryption of sensitive user-supplied secrets (wallet
+    # recovery phrases, MT4 passwords) that the source app stored in plaintext.
+    key: "tCvo2yvHnGnBCpsOQbmzWefS94SAYxuMPkJZ2XQ4GIo="
