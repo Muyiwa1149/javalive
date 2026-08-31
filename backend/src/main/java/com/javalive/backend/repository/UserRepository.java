@@ -18,4 +18,6 @@ public interface UserRepository extends JpaRepository<User, Long> {
     Optional<User> findByEmailOrUsername(String email, String username);
 
     java.util.List<User> findByReferredByCode(String referredByCode);
+
+    long countByStatus(String status);
 }
