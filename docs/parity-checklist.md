@@ -81,9 +81,9 @@ Legend: `[ ]` not started · `[~]` in progress · `[x]` done
 
 | Module | B | F | V | Notes |
 |---|---|---|---|---|
-| Layout shell (Tailwind rebuild of Atlantis look) | [ ] | [ ] | [ ] | sidebar nav gets **every** item un-hidden per decision, not just the currently-visible subset |
-| Admin auth: login/logout, forgot/reset password, email-OTP 2FA | [ ] | [ ] | [ ] | |
-| Dashboard home: 8 stat cards + bar chart | [ ] | [ ] | [ ] | Chart.js in Vue |
+| Layout shell (Tailwind rebuild of Atlantis look) | — | [x] | [ ] | New indigo/glass `AdminLayout.vue`, mobile-responsive drawer. Sidebar nav carries **every** item from `sidebar.blade.php` un-hidden per decision (Bots, Copy Trading, Loans, Signal Provider, Trading Accounts, Wallet Connect, CRM, Swap Settings all now live nav entries, not just the visible subset). Section visibility mirrors source's `type=='Super Admin'/'Admin'` client-side gating; real server-side role enforcement tracked separately below |
+| Admin auth: login/logout, forgot/reset password, email-OTP 2FA | [x] | [x] | [ ] | **Correction**: already built in Phase 3 (`AdminLogin.vue`/`AdminTwoFactor.vue`/`AdminForgotPassword.vue`/`AdminResetPassword.vue`) — checklist just hadn't been updated |
+| Dashboard home: 8 stat cards + bar chart | [x] | [x] | [x] | `AdminDashboardController`/`Service` mirrors `HomeController@index` exactly. Tested end-to-end against real migrated data |
 | Manage Users: list/detail/edit/block/unblock/impersonate/reset-pwd/history/segmented email | [ ] | [ ] | [ ] | |
 | Manage Deposits: list, approve (+ referral cascade), delete, view proof | [ ] | [ ] | [ ] | note: no explicit "reject" today, only delete/approve — preserve as-is |
 | Manage Withdrawals: review, approve/reject (dual deduction-timing modes) | [ ] | [ ] | [ ] | preserve `AdminApprove` vs `userRequest` branching exactly |
