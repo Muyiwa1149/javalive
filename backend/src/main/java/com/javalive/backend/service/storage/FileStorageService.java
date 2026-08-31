@@ -54,6 +54,16 @@ public class FileStorageService {
         }
     }
 
+    /** Silently no-ops if the path is blank or the file doesn't exist — mirrors source's exists-check-then-delete. */
+    public void delete(String relativePath) {
+        if (relativePath == null || relativePath.isBlank()) return;
+        try {
+            Files.deleteIfExists(Path.of(publicStoragePath, relativePath));
+        } catch (IOException ignored) {
+            // best-effort cleanup, matches source's silent behavior when the file is already gone
+        }
+    }
+
     private String extensionOf(MultipartFile file) {
         String original = file.getOriginalFilename();
         if (original == null || !original.contains(".")) {
