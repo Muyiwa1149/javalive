@@ -93,7 +93,7 @@ Legend: `[ ]` not started · `[~]` in progress · `[x]` done
 | Bots: full CRUD, per-bot analytics, bots-wide dashboard | [ ] | [ ] | [ ] | |
 | CRM: task CRUD, lead conversion, lead assignment | [ ] | [ ] | [ ] | |
 | Import: Excel bulk lead/user import + template download | [ ] | [ ] | [ ] | Apache POI |
-| IP blacklist: list/add/delete | [ ] | [ ] | [ ] | fix HTML-in-JSON response into a real JSON contract |
+| IP blacklist: list/add/delete | [x] | [x] | [x] | `AdminIpAddressController` is a thin wrapper over the `IpBlacklistService`/`IpBlacklistFilter` already built in Phase 2 — real JSON contract (`{id, ipAddress, createdAt}`) replacing source's HTML-string-in-a-JSON-field response. Tested end-to-end including the actual enforcement, not just CRUD: added an IP, confirmed a request carrying that `X-Forwarded-For` gets a real 403 from the live filter, deleted it, confirmed the same IP is immediately unblocked (cache invalidation works) |
 | Manage Admins: CRUD, block/unblock, 2FA toggle, roles | [ ] | [ ] | [ ] | **add server-side role enforcement** (security hardening, see plan) |
 | Settings: App settings | [ ] | [ ] | [ ] | |
 | Settings: Payment gateways (Stripe/Paystack/Flutterwave/CoinPayments/Binance/manual methods) | [ ] | [ ] | [ ] | |
