@@ -48,7 +48,8 @@ public class SettingsService {
         return saved;
     }
 
-    private AppSetting refresh() {
+    /** Public so the admin "Clear Cache" utility can force a re-read after an out-of-band DB change. */
+    public AppSetting refresh() {
         AppSetting settings = repository.findById(1L)
                 .orElseThrow(() -> new ApiException(HttpStatus.INTERNAL_SERVER_ERROR, "App settings row is missing."));
         cache.set(settings);

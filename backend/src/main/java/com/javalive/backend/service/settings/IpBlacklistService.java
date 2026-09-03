@@ -49,7 +49,8 @@ public class IpBlacklistService {
         });
     }
 
-    private void refresh() {
+    /** Public so the admin "Clear Cache" utility can force a re-read after an out-of-band DB change. */
+    public void refresh() {
         blocked.clear();
         ipAddressRepository.findAll().forEach(ip -> blocked.add(ip.getIpAddress()));
     }

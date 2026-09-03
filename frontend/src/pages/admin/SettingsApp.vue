@@ -1,12 +1,13 @@
 <script setup>
 import { ref, onMounted } from 'vue'
 import Swal from 'sweetalert2'
-import { Settings as SettingsIcon } from 'lucide-vue-next'
+import { Settings as SettingsIcon, RefreshCw } from 'lucide-vue-next'
 import api from '@/lib/api'
 import { storageUrl } from '@/lib/storage'
 
 const loading = ref(true)
 const saving = ref(false)
+const clearingCache = ref(false)
 const form = ref({})
 const logoFile = ref(null)
 const faviconFile = ref(null)
@@ -48,11 +49,26 @@ async function save() {
     saving.value = false
   }
 }
+
+async function clearCache() {
+  clearingCache.value = true
+  try {
+    await api.post('/admin/cache/clear')
+    Swal.fire({ icon: 'success', title: 'Cache cleared', timer: 1200, showConfirmButton: false })
+  } finally {
+    clearingCache.value = false
+  }
+}
 </script>
 
 <template>
   <div class="p-4 sm:p-6 lg:p-8 space-y-6 max-w-3xl">
-    <h1 class="text-2xl font-bold text-slate-900 dark:text-white flex items-center gap-2"><SettingsIcon class="w-6 h-6 text-indigo-500" /> App Settings</h1>
+    <div class="flex items-center justify-between">
+      <h1 class="text-2xl font-bold text-slate-900 dark:text-white flex items-center gap-2"><SettingsIcon class="w-6 h-6 text-indigo-500" /> App Settings</h1>
+      <button :disabled="clearingCache" class="inline-flex items-center gap-1.5 px-3 py-2 rounded-xl bg-slate-100 dark:bg-white/5 text-slate-600 dark:text-slate-300 text-xs font-medium hover:bg-slate-200 dark:hover:bg-white/10 disabled:opacity-50" @click="clearCache">
+        <RefreshCw class="w-3.5 h-3.5" :class="clearingCache ? 'animate-spin' : ''" /> Clear Cache
+      </button>
+    </div>
 
     <div v-if="loading" class="text-slate-500 dark:text-slate-400">Loading…</div>
 
