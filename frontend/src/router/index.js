@@ -120,6 +120,7 @@ const routes = [
       { path: 'admins', name: 'admin.admins', component: () => import('@/pages/admin/Admins.vue') },
       { path: 'settings/app', name: 'admin.settings-app', component: () => import('@/pages/admin/SettingsApp.vue') },
       { path: 'settings/referral', name: 'admin.settings-referral', component: () => import('@/pages/admin/SettingsReferral.vue') },
+      { path: 'settings/subscription', name: 'admin.settings-subscription', component: () => import('@/pages/admin/SettingsSubscription.vue') },
       { path: 'settings/payment', name: 'admin.settings-payment', component: () => import('@/pages/admin/SettingsPayment.vue') },
       { path: 'settings/crypto', name: 'admin.settings-crypto', component: () => import('@/pages/admin/SettingsCrypto.vue') },
       { path: 'ip-blacklist', name: 'admin.ip-blacklist', component: () => import('@/pages/admin/IpBlacklist.vue') },

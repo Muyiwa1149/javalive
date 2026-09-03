@@ -89,6 +89,7 @@ const NAV_SECTIONS = [
   { label: 'Settings', icon: SettingsIcon, roles: ['Super Admin'], items: [
     { name: 'admin.settings-app', label: 'App Settings', icon: SettingsIcon },
     { name: 'admin.settings-referral', label: 'Referral / Bonus', icon: Percent },
+    { name: 'admin.settings-subscription', label: 'Subscription Fees', icon: Wallet },
     { name: 'admin.settings-payment', label: 'Payment Gateways', icon: CreditCard },
     { name: 'admin.settings-crypto', label: 'Crypto / Exchange', icon: Repeat },
     { name: 'admin.ip-blacklist', label: 'IP Blacklist', icon: Ban },

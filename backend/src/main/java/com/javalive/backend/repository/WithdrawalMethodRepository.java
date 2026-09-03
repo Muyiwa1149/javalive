@@ -10,4 +10,6 @@ public interface WithdrawalMethodRepository extends JpaRepository<WithdrawalMeth
     List<WithdrawalMethod> findByType(String type);
 
     List<WithdrawalMethod> findByTypeInAndStatus(List<String> types, String status);
+
+    List<WithdrawalMethod> findAllByOrderByIdDesc();
 }
