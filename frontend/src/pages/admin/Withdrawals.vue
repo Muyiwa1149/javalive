@@ -1,7 +1,7 @@
 <script setup>
 import { ref, onMounted } from 'vue'
 import Swal from 'sweetalert2'
-import { Check, X } from 'lucide-vue-next'
+import { Send, Check, X } from 'lucide-vue-next'
 import api from '@/lib/api'
 
 const loading = ref(true)
@@ -25,16 +25,16 @@ async function approve(w) {
   const confirm = await Swal.fire({
     icon: 'question', title: 'Approve this withdrawal?',
     text: `Mark ${w.userName}'s withdrawal of ${w.amount} as paid?`,
-    showCancelButton: true, confirmButtonText: 'Approve', background: '#1F2937', color: '#E5E7EB',
+    showCancelButton: true, confirmButtonText: 'Approve', confirmButtonColor: '#6366f1',
   })
   if (!confirm.isConfirmed) return
   processingId.value = w.id
   try {
     await api.post(`/admin/withdrawals/${w.id}/approve`)
     await load()
-    Swal.fire({ icon: 'success', title: 'Approved', background: '#1F2937', color: '#E5E7EB', timer: 1500, showConfirmButton: false })
+    Swal.fire({ icon: 'success', title: 'Approved', timer: 1500, showConfirmButton: false })
   } catch (e) {
-    Swal.fire({ icon: 'error', title: 'Failed', text: e.response?.data?.message, background: '#1F2937', color: '#E5E7EB' })
+    Swal.fire({ icon: 'error', title: 'Failed', text: e.response?.data?.message })
   } finally {
     processingId.value = null
   }
@@ -46,8 +46,7 @@ async function reject(w) {
     input: 'textarea',
     inputLabel: 'Reason (sent to the user)',
     inputPlaceholder: 'e.g. Withdrawal details could not be verified',
-    showCancelButton: true, confirmButtonText: 'Reject', confirmButtonColor: '#DC2626',
-    background: '#1F2937', color: '#E5E7EB',
+    showCancelButton: true, confirmButtonText: 'Reject', confirmButtonColor: '#e11d48',
   })
   if (!isConfirmed) return
   processingId.value = w.id
@@ -55,24 +54,24 @@ async function reject(w) {
     await api.post(`/admin/withdrawals/${w.id}/reject`, { reason, subject: 'Withdrawal Rejected', sendEmail: true })
     await load()
   } catch (e) {
-    Swal.fire({ icon: 'error', title: 'Failed', text: e.response?.data?.message, background: '#1F2937', color: '#E5E7EB' })
+    Swal.fire({ icon: 'error', title: 'Failed', text: e.response?.data?.message })
   } finally {
     processingId.value = null
   }
 }
 
 const statusClass = (status) => ({
-  Processed: 'bg-green-100 text-green-700 dark:bg-green-900/30 dark:text-green-300',
-  Pending: 'bg-yellow-100 text-yellow-700 dark:bg-yellow-900/30 dark:text-yellow-300',
-  Rejected: 'bg-red-100 text-red-700 dark:bg-red-900/30 dark:text-red-300',
-}[status] || 'bg-gray-100 text-gray-700 dark:bg-gray-800 dark:text-gray-300')
+  Processed: 'bg-emerald-100 text-emerald-700 dark:bg-emerald-500/10 dark:text-emerald-400',
+  Pending: 'bg-amber-100 text-amber-700 dark:bg-amber-500/10 dark:text-amber-400',
+  Rejected: 'bg-rose-100 text-rose-700 dark:bg-rose-500/10 dark:text-rose-400',
+}[status] || 'bg-slate-100 text-slate-600 dark:bg-white/10 dark:text-slate-300')
 </script>
 
 <template>
-  <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8 space-y-6">
-    <div class="flex items-center justify-between">
-      <h1 class="text-2xl font-bold text-gray-900 dark:text-white">Manage Withdrawals</h1>
-      <select v-model="filter" class="rounded-lg border border-gray-300 dark:border-gray-700 bg-white dark:bg-gray-800 px-3 py-2 text-sm text-gray-900 dark:text-white" @change="load">
+  <div class="p-4 sm:p-6 lg:p-8 space-y-6">
+    <div class="flex flex-col sm:flex-row sm:items-center justify-between gap-4">
+      <h1 class="text-2xl font-bold text-slate-900 dark:text-white flex items-center gap-2"><Send class="w-6 h-6 text-indigo-500" /> Manage Withdrawals</h1>
+      <select v-model="filter" class="rounded-xl border border-slate-200 dark:border-white/10 bg-white dark:bg-[#0F1524] px-3 py-2.5 text-sm text-slate-900 dark:text-white" @change="load">
         <option value="Pending">Pending</option>
         <option value="Processed">Processed</option>
         <option value="Rejected">Rejected</option>
@@ -80,41 +79,41 @@ const statusClass = (status) => ({
       </select>
     </div>
 
-    <div v-if="loading" class="text-gray-500 dark:text-gray-400">Loading…</div>
-    <div v-else-if="withdrawals.length === 0" class="text-gray-500 dark:text-gray-400">No withdrawals found.</div>
+    <div v-if="loading" class="text-slate-500 dark:text-slate-400">Loading…</div>
+    <div v-else-if="withdrawals.length === 0" class="text-slate-500 dark:text-slate-400">No withdrawals found.</div>
 
-    <div v-else class="bg-white dark:bg-gray-900 border border-gray-200 dark:border-gray-800 rounded-xl overflow-x-auto">
+    <div v-else class="bg-white dark:bg-[#0F1524] border border-slate-200 dark:border-white/5 rounded-2xl overflow-x-auto">
       <table class="w-full text-sm">
         <thead>
-          <tr class="text-left text-gray-500 dark:text-gray-400 border-b border-gray-200 dark:border-gray-800">
-            <th class="py-3 px-4">User</th>
-            <th class="py-3 px-4">Method</th>
-            <th class="py-3 px-4">Amount</th>
-            <th class="py-3 px-4">Deducted</th>
-            <th class="py-3 px-4">Details</th>
-            <th class="py-3 px-4">Status</th>
-            <th class="py-3 px-4">Date</th>
-            <th class="py-3 px-4">Actions</th>
+          <tr class="text-left text-slate-500 dark:text-slate-400 border-b border-slate-200 dark:border-white/5">
+            <th class="py-3 px-4 font-medium">User</th>
+            <th class="py-3 px-4 font-medium">Method</th>
+            <th class="py-3 px-4 font-medium text-right">Amount</th>
+            <th class="py-3 px-4 font-medium text-right">Deducted</th>
+            <th class="py-3 px-4 font-medium">Details</th>
+            <th class="py-3 px-4 font-medium">Status</th>
+            <th class="py-3 px-4 font-medium">Date</th>
+            <th class="py-3 px-4 font-medium text-right">Actions</th>
           </tr>
         </thead>
         <tbody>
-          <tr v-for="w in withdrawals" :key="w.id" class="border-b border-gray-100 dark:border-gray-800 last:border-0">
+          <tr v-for="w in withdrawals" :key="w.id" class="border-b border-slate-100 dark:border-white/5 last:border-0 hover:bg-slate-50 dark:hover:bg-white/5">
             <td class="py-3 px-4">
-              <div class="text-gray-900 dark:text-white font-medium">{{ w.userName }}</div>
-              <div class="text-xs text-gray-500 dark:text-gray-400">{{ w.userEmail }}</div>
+              <div class="text-slate-900 dark:text-white font-medium">{{ w.userName }}</div>
+              <div class="text-xs text-slate-500 dark:text-slate-400">{{ w.userEmail }}</div>
             </td>
-            <td class="py-3 px-4 text-gray-700 dark:text-gray-300">{{ w.paymentMode }}</td>
-            <td class="py-3 px-4 text-gray-900 dark:text-white font-medium">{{ Number(w.amount).toLocaleString(undefined, { minimumFractionDigits: 2 }) }}</td>
-            <td class="py-3 px-4 text-gray-500 dark:text-gray-400">{{ Number(w.toDeduct).toLocaleString(undefined, { minimumFractionDigits: 2 }) }}</td>
-            <td class="py-3 px-4 text-gray-500 dark:text-gray-400 max-w-xs truncate" :title="w.payDetails">{{ w.payDetails }}</td>
+            <td class="py-3 px-4 text-slate-700 dark:text-slate-300">{{ w.paymentMode }}</td>
+            <td class="py-3 px-4 text-right text-slate-900 dark:text-white font-medium">{{ Number(w.amount).toLocaleString(undefined, { minimumFractionDigits: 2 }) }}</td>
+            <td class="py-3 px-4 text-right text-slate-500 dark:text-slate-400">{{ Number(w.toDeduct).toLocaleString(undefined, { minimumFractionDigits: 2 }) }}</td>
+            <td class="py-3 px-4 text-slate-500 dark:text-slate-400 max-w-xs truncate" :title="w.payDetails">{{ w.payDetails }}</td>
             <td class="py-3 px-4"><span class="px-2 py-1 rounded-full text-xs font-medium" :class="statusClass(w.status)">{{ w.status }}</span></td>
-            <td class="py-3 px-4 text-gray-500 dark:text-gray-400">{{ new Date(w.createdAt).toLocaleString() }}</td>
+            <td class="py-3 px-4 text-slate-500 dark:text-slate-400">{{ new Date(w.createdAt).toLocaleString() }}</td>
             <td class="py-3 px-4">
-              <div v-if="w.status === 'Pending'" class="flex items-center gap-2">
-                <button :disabled="processingId === w.id" class="p-2 text-green-600 hover:bg-green-50 dark:hover:bg-green-900/20 rounded-lg disabled:opacity-50" title="Approve" @click="approve(w)">
+              <div v-if="w.status === 'Pending'" class="flex items-center justify-end gap-1">
+                <button :disabled="processingId === w.id" class="p-2 text-emerald-500 hover:bg-emerald-50 dark:hover:bg-emerald-500/10 rounded-lg disabled:opacity-50" title="Approve" @click="approve(w)">
                   <Check class="w-4 h-4" />
                 </button>
-                <button :disabled="processingId === w.id" class="p-2 text-red-600 hover:bg-red-50 dark:hover:bg-red-900/20 rounded-lg disabled:opacity-50" title="Reject" @click="reject(w)">
+                <button :disabled="processingId === w.id" class="p-2 text-rose-500 hover:bg-rose-50 dark:hover:bg-rose-500/10 rounded-lg disabled:opacity-50" title="Reject" @click="reject(w)">
                   <X class="w-4 h-4" />
                 </button>
               </div>

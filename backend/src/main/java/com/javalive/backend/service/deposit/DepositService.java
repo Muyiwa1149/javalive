@@ -114,8 +114,8 @@ public class DepositService {
     @Transactional(readOnly = true)
     public List<AdminDepositSummary> adminList(String status) {
         List<Deposit> deposits = status != null && !status.isBlank()
-                ? depositRepository.findByStatusOrderByIdDesc(status)
-                : depositRepository.findAll();
+                ? depositRepository.findByStatusWithUserOrderByIdDesc(status)
+                : depositRepository.findAllWithUserOrderByIdDesc();
         return deposits.stream().map(AdminDepositSummary::from).toList();
     }
 

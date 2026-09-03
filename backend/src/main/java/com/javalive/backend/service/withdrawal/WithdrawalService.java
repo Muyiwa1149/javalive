@@ -142,8 +142,8 @@ public class WithdrawalService {
     @Transactional(readOnly = true)
     public List<AdminWithdrawalSummary> adminList(String status) {
         List<Withdrawal> withdrawals = status != null && !status.isBlank()
-                ? withdrawalRepository.findByStatusOrderByIdDesc(status)
-                : withdrawalRepository.findAll();
+                ? withdrawalRepository.findByStatusWithUserOrderByIdDesc(status)
+                : withdrawalRepository.findAllWithUserOrderByIdDesc();
         return withdrawals.stream().map(AdminWithdrawalSummary::from).toList();
     }
 

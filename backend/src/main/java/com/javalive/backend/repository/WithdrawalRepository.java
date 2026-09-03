@@ -18,6 +18,15 @@ public interface WithdrawalRepository extends JpaRepository<Withdrawal, Long> {
 
     List<Withdrawal> findByStatusOrderByIdDesc(String status);
 
-    @Query("select coalesce(sum(w.amount), 0) from Withdrawal w where w.status = :status")
+    /** Native SQL + inner join for the same reason as {@code DepositRepository.sumAmountByStatus} — see its javadoc. */
+    @Query(value = "select coalesce(sum(w.amount), 0) from withdrawals w inner join users u on u.id = w.user_id "
+            + "where w.status = :status", nativeQuery = true)
     BigDecimal sumAmountByStatus(@Param("status") String status);
+
+    /** Inner join deliberately excludes rows whose user_id no longer resolves (orphaned migration data). */
+    @Query("select w from Withdrawal w join fetch w.user order by w.id desc")
+    List<Withdrawal> findAllWithUserOrderByIdDesc();
+
+    @Query("select w from Withdrawal w join fetch w.user where w.status = :status order by w.id desc")
+    List<Withdrawal> findByStatusWithUserOrderByIdDesc(@Param("status") String status);
 }
