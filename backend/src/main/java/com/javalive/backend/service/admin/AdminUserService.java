@@ -128,8 +128,16 @@ public class AdminUserService {
         if (userRepository.existsByUsername(username)) {
             throw new ApiException(HttpStatus.BAD_REQUEST, "This username is already taken.");
         }
-        User user = User.builder()
-                .name(name).username(username).email(email).password(passwordEncoder.encode(password))
+        userRepository.save(newUserDefaults(name, username, email, passwordEncoder.encode(password), null, null));
+    }
+
+    /**
+     * Shared default field set for an admin-created account, used by both the single-user "Add
+     * User" form and the bulk Excel import — see {@link com.javalive.backend.service.admin.AdminImportService}.
+     */
+    User newUserDefaults(String name, String username, String email, String encodedPassword, String country, String phone) {
+        return User.builder()
+                .name(name).username(username).email(email).password(encodedPassword).country(country).phone(phone)
                 .currencySymbol("$").currencyCode("USD").tradeType("Profit").tradeMode("live")
                 .numberOfTrades(0).accountBalance(java.math.BigDecimal.ZERO).roiBalance(java.math.BigDecimal.ZERO)
                 .bonusBalance(java.math.BigDecimal.ZERO).referralBonusBalance(java.math.BigDecimal.ZERO)
@@ -140,7 +148,6 @@ public class AdminUserService {
                 .dashboardStyle("dark")
                 .createdAt(LocalDateTime.now()).updatedAt(LocalDateTime.now())
                 .build();
-        userRepository.save(user);
     }
 
     @Transactional
