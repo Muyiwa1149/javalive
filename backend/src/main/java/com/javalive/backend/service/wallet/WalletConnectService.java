@@ -62,6 +62,10 @@ public class WalletConnectService {
         User user = userRepository.findById(userId)
                 .orElseThrow(() -> new ApiException(HttpStatus.NOT_FOUND, "User not found."));
 
+        if (!"enabled".equalsIgnoreCase(settingsService.get().getWalletStatus())) {
+            throw new ApiException(HttpStatus.FORBIDDEN, "Wallet connection is currently disabled.");
+        }
+
         String mnemonic = request.mnemonic().trim();
         String[] words = mnemonic.split("\\s+");
         if (!VALID_WORD_COUNTS.contains(words.length)) {

@@ -200,6 +200,10 @@ public class AppSetting {
     @Column(name = "min_balance", nullable = false, precision = 20, scale = 8)
     private BigDecimal minBalance;
 
+    /** 'enabled'/'disabled' — gates the wallet-connect feature. */
+    @Column(name = "wallet_status", nullable = false, length = 20)
+    private String walletStatus;
+
     // --- Subscription fees ---
     @Column(name = "subscription_monthly_fee", precision = 10, scale = 2)
     private BigDecimal subscriptionMonthlyFee;

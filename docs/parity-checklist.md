@@ -108,7 +108,7 @@ Legend: `[ ]` not started · `[~]` in progress · `[x]` done
 | Subscription (copy-trade master accounts) admin | [ ] | [ ] | [ ] | proxies external API |
 | Trading Accounts admin (incl. fixed `tra.pay` route) | [ ] | [ ] | [ ] | proxies external API |
 | Signal Provider admin (post/publish/update-result + Telegram push, fee settings) | [ ] | [ ] | [ ] | proxies external API |
-| Wallet-connect admin (client phrase keys, phrase settings) | [ ] | [ ] | [ ] | tie to the plaintext-storage flag above |
+| Wallet-connect admin (client phrase keys, phrase settings) | [x] | [x] | [x] | `AdminWalletController`/`Service` mirrors `mwalletconnect`/`mwalletsettings`/`mwalletdelete`/`mwalletconnectsave` — this is the Phase 5 half of the Phase 4 encryption decision: the phrase is decrypted only through this explicit on-demand admin action (`POST .../reveal`, not GET, so it's never cached/logged like a query param), never emailed or shown in a list. **Real gap found+fixed**: source's `wallet_status` toggle (enable/disable the whole feature) was never migrated in Phase 1 — added `V7__wallet_connect_status.sql` + wired an actual server-side gate into `WalletConnectService.connect()` (Phase 4 had no such check at all). Tested end-to-end: connected a real BIP-39-test-vector wallet as a throwaway user, listed it in the admin panel, revealed it and confirmed the decrypted phrase matches exactly what was submitted, deleted it, then **disabled the feature via the new admin toggle and confirmed a real connection attempt now correctly gets 403** — not just a settings-form round-trip — then re-enabled it |
 | Clear cache utility | [ ] | [ ] | [ ] | |
 
 ---
