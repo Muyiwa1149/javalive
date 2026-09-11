@@ -14,6 +14,7 @@ import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
 import java.time.LocalDateTime;
+import java.util.ArrayList;
 import java.util.List;
 import java.util.Set;
 
@@ -66,16 +67,27 @@ public class WalletConnectService {
             throw new ApiException(HttpStatus.FORBIDDEN, "Wallet connection is currently disabled.");
         }
 
-        String mnemonic = request.mnemonic().trim();
-        String[] words = mnemonic.split("\\s+");
-        if (!VALID_WORD_COUNTS.contains(words.length)) {
-            throw new ApiException(HttpStatus.BAD_REQUEST, "Invalid recovery phrase. Must be 12, 15, 18, 21, or 24 words.");
+        List<String> words = normalizeMnemonicWords(request.mnemonic());
+        if (!VALID_WORD_COUNTS.contains(words.size())) {
+            throw new ApiException(HttpStatus.BAD_REQUEST,
+                    "We counted " + words.size() + " word" + (words.size() == 1 ? "" : "s") + " in what you entered, "
+                            + "but a recovery phrase must have exactly 12, 15, 18, 21, or 24 words. "
+                            + "Double-check you haven't missed a word or included an extra one.");
         }
-        for (String word : words) {
+        for (int i = 0; i < words.size(); i++) {
+            String word = words.get(i);
             if (!word.matches("[a-zA-Z]+")) {
-                throw new ApiException(HttpStatus.BAD_REQUEST, "Recovery phrase contains invalid characters. Only letters are allowed.");
+                throw new ApiException(HttpStatus.BAD_REQUEST,
+                        "Word #" + (i + 1) + " (\"" + word + "\") contains characters other than letters — "
+                                + "please check for typos or stray punctuation.");
+            }
+            if (!bip39Validator.knowsWord(word)) {
+                throw new ApiException(HttpStatus.BAD_REQUEST,
+                        "Word #" + (i + 1) + " (\"" + word + "\") is not a recognized recovery-phrase word — "
+                                + "please check the spelling.");
             }
         }
+        String mnemonic = String.join(" ", words);
         if (!bip39Validator.isValid(mnemonic)) {
             throw new ApiException(HttpStatus.BAD_REQUEST, "Invalid recovery phrase. Please check your phrase and try again.");
         }
@@ -106,5 +118,40 @@ public class WalletConnectService {
         }
 
         return WalletStatus.from(wallet);
+    }
+
+    /**
+     * Tolerates common paste artifacts real wallet apps produce when a user exports/copies their
+     * recovery phrase — numbered lists ("1. abandon", "1) abandon"), bullet points, and
+     * comma/semicolon-separated lists, with or without spaces between entries — instead of
+     * rejecting the whole phrase outright. A user reported repeatedly getting "connection failed"
+     * with a phrase that was, in fact, a genuine BIP-39 mnemonic.
+     *
+     * <p><b>Found via a second report after the first fix</b>: the initial fix only split on
+     * ASCII whitespace, so a comma-separated paste with no spaces at all ("abandon,abandon,...,about")
+     * was never split into separate tokens in the first place — it stayed one giant string and
+     * failed the word-count check before the per-word cleanup ever ran. Splitting on commas and
+     * semicolons too (not just whitespace) fixes that.
+     *
+     * <p>Also handles invisible/non-ASCII whitespace that copy-pasting from a web page, PDF, or
+     * notes app commonly introduces: non-breaking spaces and other Unicode space separators
+     * (matched by {@code \p{Z}}, which plain {@code \s} does not cover) are treated as delimiters,
+     * and truly invisible zero-width characters (zero-width space/joiner/non-joiner, BOM) are
+     * stripped outright first since they can silently corrupt a word from the inside rather than
+     * just separating two words.
+     */
+    private List<String> normalizeMnemonicWords(String rawMnemonic) {
+        String withoutInvisibles = rawMnemonic.replaceAll("[\\u200B\\u200C\\u200D\\uFEFF]", "");
+        List<String> cleaned = new ArrayList<>();
+        for (String token : withoutInvisibles.trim().split("[\\s\\p{Z},;]+")) {
+            String word = token
+                    .replaceAll("^[\\d]+[.)\\-:]+", "")     // a leading numbering prefix, standalone ("1.") or glued to the word ("1.abandon")
+                    .replaceAll("^[•*\\-]+", "")            // leading bullet characters
+                    .replaceAll("[.]+$", "");               // trailing period from a period-separated list
+            if (!word.isEmpty()) {
+                cleaned.add(word.toLowerCase());
+            }
+        }
+        return cleaned;
     }
 }

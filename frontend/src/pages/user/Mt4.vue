@@ -78,8 +78,8 @@ const statusClass = (status) => ({
 <template>
   <div class="max-w-4xl mx-auto px-4 sm:px-6 lg:px-8 py-8 space-y-6">
     <div class="flex items-center justify-between flex-wrap gap-4">
-      <h1 class="text-2xl font-bold text-gray-900 dark:text-white flex items-center gap-2">
-        <Server class="w-6 h-6 text-blue-500" /> MT4 Subscription
+      <h1 class="text-xl sm:text-2xl font-bold text-gray-900 dark:text-white flex items-center gap-2">
+        <Server class="w-5 h-5 sm:w-6 sm:h-6 text-blue-500" /> MT4 Subscription
       </h1>
       <button type="button" class="flex items-center gap-2 px-4 py-2 bg-blue-600 hover:bg-blue-700 text-white text-sm font-medium rounded-lg" @click="showForm = !showForm">
         <PlusCircle class="w-4 h-4" /> New Subscription

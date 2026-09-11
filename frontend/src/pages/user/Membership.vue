@@ -26,9 +26,9 @@ onMounted(async () => {
 
 <template>
   <div class="max-w-6xl mx-auto px-4 sm:px-6 lg:px-8 py-8 space-y-6">
-    <div class="flex items-center justify-between">
-      <h1 class="text-2xl font-bold text-gray-900 dark:text-white flex items-center gap-2">
-        <GraduationCap class="w-6 h-6 text-blue-500" /> Membership &amp; Courses
+    <div class="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-1 sm:gap-0">
+      <h1 class="text-xl sm:text-2xl font-bold text-gray-900 dark:text-white flex items-center gap-2">
+        <GraduationCap class="w-5 h-5 sm:w-6 sm:h-6 text-blue-500" /> Membership &amp; Courses
       </h1>
       <RouterLink to="#" class="text-sm text-blue-600 dark:text-blue-400 hover:underline">My Courses</RouterLink>
     </div>

@@ -5,8 +5,13 @@ spring:
   profiles:
     active: dev
 
+  # Optional, gitignored local overlay for secrets that shouldn't live in source control even as
+  # dev defaults (e.g. a real third-party API key) — see application-local.yml.example.
+  config:
+    import: "optional:classpath:application-local.yml"
+
   datasource:
-    url: jdbc:mysql://localhost:3306/javalive_db?useSSL=false&allowPublicKeyRetrieval=true&serverTimezone=UTC
+    url: jdbc:mysql://localhost:3306/javalive_db?useSSL=false&allowPublicKeyRetrieval=true&serverTimezone=UTC&useUnicode=true&characterEncoding=UTF-8
     username: root
     password: ""
     driver-class-name: com.mysql.cj.jdbc.Driver
@@ -39,6 +44,18 @@ spring:
     multipart:
       max-file-size: 10MB
       max-request-size: 25MB
+    encoding:
+      charset: UTF-8
+      enabled: true
+      force: true
+
+  task:
+    scheduling:
+      pool:
+        # Spring Boot's default @Scheduled executor is single-threaded, which lets one slow job
+        # (MarketPriceScheduler's rate-limited per-instrument CoinGecko loop, observed taking 2+
+        # minutes) starve every other @Scheduled job behind it. One thread per scheduler class.
+        size: 8
 
 server:
   port: 8080
@@ -63,3 +80,7 @@ javalive:
     # real secrets store. Used for at-rest encryption of sensitive user-supplied secrets (wallet
     # recovery phrases, MT4 passwords) that the source app stored in plaintext.
     key: "tCvo2yvHnGnBCpsOQbmzWefS94SAYxuMPkJZ2XQ4GIo="
+  finnhub:
+    # Real key lives in the gitignored application-local.yml (see application-local.yml.example) —
+    # empty here means the stock/forex/index/commodity price jobs just no-op until it's supplied.
+    api-key: ""

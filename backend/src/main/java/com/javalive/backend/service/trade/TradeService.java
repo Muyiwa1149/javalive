@@ -18,6 +18,7 @@ import com.javalive.backend.repository.UserRepository;
 import com.javalive.backend.service.mail.MailService;
 import com.javalive.backend.service.notification.NotificationService;
 import com.javalive.backend.service.settings.SettingsService;
+import com.javalive.backend.util.MoneyFormat;
 import com.javalive.backend.web.exception.ApiException;
 import org.springframework.http.HttpStatus;
 import org.springframework.stereotype.Service;
@@ -139,14 +140,14 @@ public class TradeService {
 
         notificationService.notifyUser(user, "Trade placed",
                 "Your " + request.orderType() + " trade on " + request.assetSymbol() + " for "
-                        + user.getCurrencySymbol() + request.amount() + " with " + request.leverage() + "x leverage is now active.",
+                        + user.getCurrencySymbol() + MoneyFormat.of(request.amount()) + " with " + request.leverage() + "x leverage is now active.",
                 "success", trade.getId(), "trade");
 
         String contactEmail = settingsService.get().getContactEmail();
         if (contactEmail != null) {
             mailService.send(contactEmail, user.getName() + " just traded " + request.assetSymbol() + " asset",
                     user.getName() + " just placed a trade on " + request.assetSymbol() + " asset for "
-                            + user.getCurrencySymbol() + request.amount() + " with " + request.leverage()
+                            + user.getCurrencySymbol() + MoneyFormat.of(request.amount()) + " with " + request.leverage()
                             + "x leverage. Order type: " + request.orderType());
         }
 

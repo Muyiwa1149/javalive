@@ -38,6 +38,7 @@ const routes = [
     component: AuthLayout,
     children: [
       { path: 'login', name: 'login', component: () => import('@/pages/auth/Login.vue') },
+      { path: 'two-factor', name: 'two-factor', component: () => import('@/pages/auth/TwoFactorChallenge.vue') },
       { path: 'register', name: 'register', component: () => import('@/pages/auth/Register.vue') },
       { path: 'forgot-password', name: 'forgot-password', component: () => import('@/pages/auth/ForgotPassword.vue') },
       { path: 'reset-password', name: 'reset-password', component: () => import('@/pages/auth/ResetPassword.vue') },
@@ -67,6 +68,7 @@ const routes = [
       { path: 'signals/premium', name: 'user.signals-premium', component: () => import('@/pages/user/SignalsPremium.vue') },
       { path: 'signals/external', name: 'user.signals-external', component: () => import('@/pages/user/SignalsExternal.vue') },
       { path: 'deposits', name: 'user.deposits', component: () => import('@/pages/user/Deposits.vue') },
+      { path: 'deposits/history', name: 'user.deposits-history', component: () => import('@/pages/user/DepositHistory.vue') },
       { path: 'withdrawals', name: 'user.withdrawals', component: () => import('@/pages/user/Withdrawals.vue') },
       { path: 'transfer', name: 'user.transfer', component: () => import('@/pages/user/Transfer.vue') },
       { path: 'exchange', name: 'user.exchange', component: () => import('@/pages/user/Exchange.vue') },

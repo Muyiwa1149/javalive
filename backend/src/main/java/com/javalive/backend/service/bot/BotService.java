@@ -16,6 +16,7 @@ import com.javalive.backend.repository.TradingBotRepository;
 import com.javalive.backend.repository.UserBotInvestmentRepository;
 import com.javalive.backend.repository.UserRepository;
 import com.javalive.backend.service.mail.MailService;
+import com.javalive.backend.util.MoneyFormat;
 import com.javalive.backend.web.exception.ApiException;
 import org.springframework.http.HttpStatus;
 import org.springframework.stereotype.Service;
@@ -85,8 +86,8 @@ public class BotService {
         }
         if (request.amount().compareTo(bot.getMinInvestment()) < 0 || request.amount().compareTo(bot.getMaxInvestment()) > 0) {
             throw new ApiException(HttpStatus.BAD_REQUEST,
-                    "Investment amount must be between " + user.getCurrencySymbol() + bot.getMinInvestment()
-                            + " and " + user.getCurrencySymbol() + bot.getMaxInvestment() + ".");
+                    "Investment amount must be between " + user.getCurrencySymbol() + MoneyFormat.of(bot.getMinInvestment())
+                            + " and " + user.getCurrencySymbol() + MoneyFormat.of(bot.getMaxInvestment()) + ".");
         }
         if (user.getAccountBalance().compareTo(request.amount()) < 0) {
             throw new ApiException(HttpStatus.BAD_REQUEST, "Insufficient account balance. Please fund your account first.");
@@ -119,7 +120,7 @@ public class BotService {
 
         if (Boolean.TRUE.equals(user.getSendRoiEmail())) {
             mailService.send(user.getEmail(), "Bot Investment Confirmed - " + bot.getName(),
-                    "You have successfully invested " + request.amount() + " in the " + bot.getName()
+                    "You have successfully invested " + user.getCurrencySymbol() + MoneyFormat.of(request.amount()) + " in the " + bot.getName()
                             + " trading bot. Your investment will be active for " + bot.getDurationDays() + " days.");
         }
 

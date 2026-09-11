@@ -6,7 +6,9 @@ import com.javalive.backend.dto.auth.ForgotPasswordRequest;
 import com.javalive.backend.dto.auth.LoginRequest;
 import com.javalive.backend.dto.auth.RegisterRequest;
 import com.javalive.backend.dto.auth.ResetPasswordRequest;
+import com.javalive.backend.dto.auth.UserLoginResponse;
 import com.javalive.backend.dto.auth.UserSummary;
+import com.javalive.backend.dto.auth.UserTwoFactorVerifyRequest;
 import com.javalive.backend.entity.User;
 import com.javalive.backend.repository.UserRepository;
 import com.javalive.backend.security.UserPrincipal;
@@ -44,8 +46,19 @@ public class AuthController {
     }
 
     @PostMapping("/login")
-    public AuthResponse login(@Valid @RequestBody LoginRequest request) {
+    public UserLoginResponse login(@Valid @RequestBody LoginRequest request) {
         return authService.login(request);
+    }
+
+    /** Body carries the code; the pending-2FA token travels in the Authorization header like a normal Bearer token. */
+    @PostMapping("/2fa/verify")
+    public UserLoginResponse verifyTwoFactor(@RequestHeader(value = "Authorization", required = false) String authHeader,
+                                              @Valid @RequestBody UserTwoFactorVerifyRequest request) {
+        if (authHeader == null || !authHeader.startsWith("Bearer ")) {
+            throw new ApiException(HttpStatus.UNAUTHORIZED, "Missing verification session.");
+        }
+        String pendingToken = authHeader.substring(7);
+        return authService.verifyTwoFactor(pendingToken, request.code());
     }
 
     @GetMapping("/me")

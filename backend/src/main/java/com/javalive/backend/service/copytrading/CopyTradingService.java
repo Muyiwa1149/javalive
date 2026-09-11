@@ -14,6 +14,7 @@ import com.javalive.backend.repository.LedgerTransactionRepository;
 import com.javalive.backend.repository.UserCopyTradeRepository;
 import com.javalive.backend.repository.UserRepository;
 import com.javalive.backend.service.mail.MailService;
+import com.javalive.backend.util.MoneyFormat;
 import com.javalive.backend.web.exception.ApiException;
 import org.springframework.http.HttpStatus;
 import org.springframework.stereotype.Service;
@@ -88,7 +89,7 @@ public class CopyTradingService {
         }
         if (expert.getPrice() != null && request.amount().compareTo(expert.getPrice()) < 0) {
             throw new ApiException(HttpStatus.BAD_REQUEST,
-                    "Minimum investment for " + expert.getName() + " is " + user.getCurrencySymbol() + expert.getPrice() + ".");
+                    "Minimum investment for " + expert.getName() + " is " + user.getCurrencySymbol() + MoneyFormat.of(expert.getPrice()) + ".");
         }
         if (user.getAccountBalance().compareTo(request.amount()) < 0) {
             throw new ApiException(HttpStatus.BAD_REQUEST, "Insufficient account balance. Please fund your account first.");
@@ -120,7 +121,7 @@ public class CopyTradingService {
         if (Boolean.TRUE.equals(user.getSendRoiEmail())) {
             mailService.send(user.getEmail(), "Copy Trading Started - " + expert.getName(),
                     "You have successfully started copying " + expert.getName() + " with an investment of "
-                            + user.getCurrencySymbol() + request.amount() + ". You'll receive profits based on the expert's trading performance.");
+                            + user.getCurrencySymbol() + MoneyFormat.of(request.amount()) + ". You'll receive profits based on the expert's trading performance.");
         }
 
         return CopyTradeSummary.from(copyTrade);
@@ -156,8 +157,8 @@ public class CopyTradingService {
         if (Boolean.TRUE.equals(user.getSendRoiEmail())) {
             mailService.send(user.getEmail(), "Copy Trading Stopped - " + copyTrade.getExpert().getName(),
                     "You have stopped copying " + copyTrade.getExpert().getName() + ". Your total return of "
-                            + user.getCurrencySymbol() + totalReturn + " (including " + user.getCurrencySymbol()
-                            + copyTrade.getTotalProfit() + " profit) has been credited to your account.");
+                            + user.getCurrencySymbol() + MoneyFormat.of(totalReturn) + " (including " + user.getCurrencySymbol()
+                            + MoneyFormat.of(copyTrade.getTotalProfit()) + " profit) has been credited to your account.");
         }
     }
 

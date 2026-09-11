@@ -45,8 +45,8 @@ async function submit() {
         <Headphones class="w-8 h-8 text-blue-600 dark:text-blue-400" />
       </div>
       <div>
-        <h1 class="text-3xl font-light text-gray-800 dark:text-white">Support Center</h1>
-        <p class="text-gray-500 dark:text-gray-400">We're here to help you with any questions or concerns</p>
+        <h1 class="text-2xl sm:text-3xl font-light text-gray-800 dark:text-white">Support Center</h1>
+        <p class="text-sm sm:text-base text-gray-500 dark:text-gray-400">We're here to help you with any questions or concerns</p>
       </div>
     </div>
 

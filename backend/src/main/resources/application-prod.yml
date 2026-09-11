@@ -1,0 +1,50 @@
+# Production profile overrides — activate with SPRING_PROFILES_ACTIVE=prod (or
+# --spring.profiles.active=prod). Every secret/environment-specific value below comes from an
+# environment variable with NO fallback default, so the app refuses to start with dev credentials
+# by accident; application.yml's dev values stay untouched as the local-development baseline.
+spring:
+  datasource:
+    url: ${DB_URL}
+    username: ${DB_USERNAME}
+    password: ${DB_PASSWORD}
+
+  jpa:
+    properties:
+      hibernate:
+        format_sql: false
+
+  mail:
+    host: ${MAIL_HOST}
+    port: ${MAIL_PORT}
+    username: ${MAIL_USERNAME:}
+    password: ${MAIL_PASSWORD:}
+    from: ${MAIL_FROM}
+    properties:
+      mail:
+        smtp:
+          auth: ${MAIL_SMTP_AUTH:true}
+          starttls:
+            enable: ${MAIL_SMTP_STARTTLS:true}
+
+server:
+  port: ${PORT:8080}
+
+logging:
+  level:
+    root: INFO
+    com.javalive.backend: INFO
+
+javalive:
+  storage:
+    public-path: ${STORAGE_PUBLIC_PATH}
+  jwt:
+    secret: ${JWT_SECRET}
+    access-token-minutes: ${JWT_ACCESS_TOKEN_MINUTES:60}
+    refresh-token-days: ${JWT_REFRESH_TOKEN_DAYS:14}
+  cors:
+    allowed-origins: ${CORS_ALLOWED_ORIGINS}
+  frontend-url: ${FRONTEND_URL}
+  encryption:
+    key: ${ENCRYPTION_KEY}
+  finnhub:
+    api-key: ${FINNHUB_API_KEY:}

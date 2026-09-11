@@ -1,5 +1,5 @@
 <script setup>
-import { ref, computed, onMounted, onBeforeUnmount } from 'vue'
+import { ref, computed, watch, onMounted, onBeforeUnmount } from 'vue'
 import { useRoute, useRouter, RouterLink, RouterView } from 'vue-router'
 import { onClickOutside } from '@vueuse/core'
 import {
@@ -22,6 +22,10 @@ const settingsStore = usePublicSettingsStore()
 const notifications = useNotificationsStore()
 
 const sidebarOpen = ref(false)
+// Close the mobile sidebar automatically whenever the route changes, regardless of which link
+// (or the logo, or a nested link like "Verify Now") was clicked.
+watch(() => route.fullPath, () => { sidebarOpen.value = false })
+
 const notifOpen = ref(false)
 const notifRef = ref(null)
 onClickOutside(notifRef, () => { notifOpen.value = false })
@@ -141,12 +145,31 @@ async function logout() {
   router.push({ name: 'login' })
 }
 
+// Source's dashboard layout embeds a GTranslate widget (a real third-party page-translation
+// service, not the app's own dead LanguageController/session-based routes, which nothing in the
+// UI actually calls) — mirrored here so the same real language-switching affordance exists.
+const gtranslateContainer = ref(null)
+function loadLanguageWidget() {
+  if (!gtranslateContainer.value || window.gtranslateSettings) return
+  window.gtranslateSettings = {
+    default_language: 'en',
+    alt_flags: { en: 'usa' },
+    wrapper_selector: '.gtranslate_wrapper',
+    flag_style: '3d',
+  }
+  const script = document.createElement('script')
+  script.src = 'https://cdn.gtranslate.net/widgets/latest/float.js'
+  script.defer = true
+  document.body.appendChild(script)
+}
+
 onMounted(() => {
   document.documentElement.setAttribute('data-theme', isDark.value ? 'dark' : 'light')
   settingsStore.ensureLoaded()
   authUser.fetchProfile().catch(() => {})
   notifications.fetchCount().catch(() => {})
   startPrices()
+  loadLanguageWidget()
 })
 onBeforeUnmount(() => stopPrices())
 
@@ -159,16 +182,16 @@ const ethPrice = computed(() => prices.value?.ethereum?.usd)
     <div class="flex">
       <!-- Sidebar -->
       <aside
-        class="fixed inset-y-0 left-0 z-40 w-72 bg-white dark:bg-gray-900 border-r border-gray-200 dark:border-gray-800 transform transition-transform duration-200 overflow-y-auto no-scrollbar lg:translate-x-0"
+        class="fixed inset-y-0 left-0 z-40 w-72 bg-white dark:bg-gray-900 border-r border-gray-200 dark:border-gray-800 transform transition-transform duration-200 flex flex-col lg:translate-x-0"
         :class="sidebarOpen ? 'translate-x-0' : '-translate-x-full'">
-        <div class="p-4 border-b border-gray-200 dark:border-gray-800 flex items-center justify-between">
+        <div class="flex-shrink-0 p-4 border-b border-gray-200 dark:border-gray-800 flex items-center justify-between">
           <RouterLink :to="{ name: 'user.dashboard' }" class="flex items-center gap-2">
             <img v-if="settingsStore.settings?.logo" :src="storageUrl(settingsStore.settings.logo)" class="h-8 w-auto" :alt="settingsStore.settings?.siteName">
           </RouterLink>
           <button class="lg:hidden text-gray-500" @click="sidebarOpen = false"><X class="w-5 h-5" /></button>
         </div>
 
-        <nav class="p-4 space-y-6 text-sm pb-20">
+        <nav class="flex-1 overflow-y-auto no-scrollbar p-4 space-y-6 text-sm pb-20">
           <div v-for="section in NAV_SECTIONS" :key="section.label" class="space-y-2">
             <div class="flex items-center gap-2 px-2 text-xs font-semibold text-gray-500 dark:text-gray-400 uppercase">
               <component :is="section.icon" class="w-4 h-4" />
@@ -239,11 +262,14 @@ const ethPrice = computed(() => prices.value?.ethereum?.usd)
       <div v-if="sidebarOpen" class="fixed inset-0 bg-black/50 z-30 lg:hidden" @click="sidebarOpen = false"></div>
 
       <!-- Main -->
-      <div class="flex-1 lg:pl-72 min-h-screen flex flex-col">
+      <div class="flex-1 min-w-0 lg:pl-72 min-h-screen flex flex-col">
         <header class="sticky top-0 z-20 bg-white/95 dark:bg-gray-900/95 backdrop-blur-xl border-b border-gray-200 dark:border-gray-800">
           <div class="px-4 sm:px-6 h-20 flex items-center justify-between gap-4">
-            <div class="flex items-center gap-4">
+            <div class="flex items-center gap-3">
               <button class="lg:hidden text-gray-500" @click="sidebarOpen = true"><Menu class="w-6 h-6" /></button>
+              <RouterLink :to="{ name: 'user.dashboard' }" class="lg:hidden flex items-center">
+                <img v-if="settingsStore.settings?.logo" :src="storageUrl(settingsStore.settings.logo)" class="h-6 w-auto" :alt="settingsStore.settings?.siteName">
+              </RouterLink>
               <div class="hidden lg:flex items-center gap-4 text-sm">
                 <div class="flex items-center gap-2">
                   <div class="w-2 h-2 bg-green-500 rounded-full animate-pulse"></div>
@@ -251,6 +277,7 @@ const ethPrice = computed(() => prices.value?.ethereum?.usd)
                 </div>
                 <div><span class="text-gray-500 dark:text-gray-400">BTC:</span> <span class="font-mono ml-1">${{ btcPrice ? btcPrice.toLocaleString() : '…' }}</span></div>
                 <div><span class="text-gray-500 dark:text-gray-400">ETH:</span> <span class="font-mono ml-1">${{ ethPrice ? ethPrice.toLocaleString() : '…' }}</span></div>
+                <div ref="gtranslateContainer" class="gtranslate_wrapper"></div>
               </div>
             </div>
 
@@ -338,7 +365,7 @@ const ethPrice = computed(() => prices.value?.ethereum?.usd)
           </div>
         </header>
 
-        <main class="flex-1 pb-20 lg:pb-6">
+        <main class="flex-1 min-w-0 pb-20 lg:pb-6">
           <RouterView />
         </main>
 

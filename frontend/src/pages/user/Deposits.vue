@@ -1,7 +1,8 @@
 <script setup>
 import { ref, computed, onMounted } from 'vue'
 import Swal from 'sweetalert2'
-import { Landmark, Bitcoin, Mail, Upload, Copy, Check } from 'lucide-vue-next'
+import { RouterLink } from 'vue-router'
+import { Landmark, Bitcoin, Mail, Upload, Copy, Check, History } from 'lucide-vue-next'
 import { useAuthUserStore } from '@/stores/authUser'
 import api from '@/lib/api'
 
@@ -9,7 +10,6 @@ const authUser = useAuthUserStore()
 const loading = ref(true)
 const submitting = ref(false)
 const methods = ref([])
-const history = ref([])
 const selectedMethodId = ref(null)
 const amount = ref('')
 const txnId = ref('')
@@ -22,12 +22,8 @@ const methodIcon = (methodType) => ({ bank: Landmark, crypto: Bitcoin, mail: Mai
 
 onMounted(async () => {
   try {
-    const [methodsRes, historyRes] = await Promise.all([
-      api.get('/deposits/methods'),
-      api.get('/deposits'),
-    ])
-    methods.value = methodsRes.data
-    history.value = historyRes.data
+    const { data } = await api.get('/deposits/methods')
+    methods.value = data
     if (methods.value.length > 0) selectedMethodId.value = methods.value[0].id
   } finally {
     loading.value = false
@@ -55,8 +51,7 @@ async function submit() {
     payload.append('amount', amount.value)
     if (txnId.value) payload.append('txnId', txnId.value)
     payload.append('proof', proofFile.value)
-    const { data } = await api.post('/deposits', payload, { headers: { 'Content-Type': 'multipart/form-data' } })
-    history.value.unshift(data)
+    await api.post('/deposits', payload, { headers: { 'Content-Type': 'multipart/form-data' } })
     amount.value = ''
     txnId.value = ''
     proofFile.value = null
@@ -72,17 +67,19 @@ async function submit() {
   }
 }
 
-const statusClass = (status) => ({
-  Processed: 'bg-green-100 text-green-700 dark:bg-green-900/30 dark:text-green-300',
-  Pending: 'bg-yellow-100 text-yellow-700 dark:bg-yellow-900/30 dark:text-yellow-300',
-}[status] || 'bg-gray-100 text-gray-700 dark:bg-gray-800 dark:text-gray-300')
 </script>
 
 <template>
   <div class="max-w-4xl mx-auto px-4 sm:px-6 lg:px-8 py-8 space-y-8">
-    <div>
-      <h1 class="text-2xl font-bold text-gray-900 dark:text-white">Deposit Funds</h1>
-      <p class="text-gray-500 dark:text-gray-400 mt-1">Fund your account balance using one of the methods below. All deposits are reviewed before your balance is updated.</p>
+    <div class="flex items-start justify-between gap-4">
+      <div>
+        <h1 class="text-xl sm:text-2xl font-bold text-gray-900 dark:text-white">Deposit Funds</h1>
+        <p class="text-sm sm:text-base text-gray-500 dark:text-gray-400 mt-1">Fund your account balance using one of the methods below. All deposits are reviewed before your balance is updated.</p>
+      </div>
+      <RouterLink :to="{ name: 'user.deposits-history' }"
+        class="flex-shrink-0 inline-flex items-center gap-2 px-4 py-2 bg-gray-100 dark:bg-gray-800 hover:bg-gray-200 dark:hover:bg-gray-700 text-gray-700 dark:text-gray-200 text-sm font-medium rounded-lg">
+        <History class="w-4 h-4" /> History
+      </RouterLink>
     </div>
 
     <div v-if="loading" class="text-gray-500 dark:text-gray-400">Loading…</div>
@@ -127,13 +124,24 @@ const statusClass = (status) => ({
             </div>
           </template>
           <template v-else-if="selectedMethod.methodType === 'bank'">
-            <div class="pt-2 border-t border-gray-200 dark:border-gray-700 text-gray-500 dark:text-gray-400">
-              Bank account details for {{ selectedMethod.name }} will be provided by support after you submit your request — or check with support if you need them in advance.
+            <div v-if="selectedMethod.bankName || selectedMethod.accountName || selectedMethod.accountNumber || selectedMethod.swiftCode"
+              class="pt-2 border-t border-gray-200 dark:border-gray-700 space-y-1">
+              <div v-if="selectedMethod.bankName" class="flex justify-between"><span class="text-gray-500 dark:text-gray-400">Bank Name</span><span class="text-gray-900 dark:text-white font-medium">{{ selectedMethod.bankName }}</span></div>
+              <div v-if="selectedMethod.accountName" class="flex justify-between"><span class="text-gray-500 dark:text-gray-400">Account Name</span><span class="text-gray-900 dark:text-white font-medium">{{ selectedMethod.accountName }}</span></div>
+              <div v-if="selectedMethod.accountNumber" class="flex justify-between"><span class="text-gray-500 dark:text-gray-400">Account Number</span><span class="text-gray-900 dark:text-white font-medium">{{ selectedMethod.accountNumber }}</span></div>
+              <div v-if="selectedMethod.swiftCode" class="flex justify-between"><span class="text-gray-500 dark:text-gray-400">Swift Code</span><span class="text-gray-900 dark:text-white font-medium">{{ selectedMethod.swiftCode }}</span></div>
+            </div>
+            <div v-else class="pt-2 border-t border-gray-200 dark:border-gray-700 text-gray-500 dark:text-gray-400">
+              Bank account details for {{ selectedMethod.name }} haven't been set up yet — please check with support.
             </div>
           </template>
           <template v-else-if="selectedMethod.methodType === 'mail'">
-            <div class="pt-2 border-t border-gray-200 dark:border-gray-700 text-gray-500 dark:text-gray-400">
-              Mail a check to the address provided by support, then submit this form with your mailing receipt as proof.
+            <div v-if="selectedMethod.walletAddress" class="pt-2 border-t border-gray-200 dark:border-gray-700">
+              <div class="text-gray-500 dark:text-gray-400 mb-1">Mail your check to:</div>
+              <div class="text-gray-900 dark:text-white font-medium whitespace-pre-line">{{ selectedMethod.walletAddress }}</div>
+            </div>
+            <div v-else class="pt-2 border-t border-gray-200 dark:border-gray-700 text-gray-500 dark:text-gray-400">
+              A mailing address for {{ selectedMethod.name }} hasn't been set up yet — please check with support.
             </div>
           </template>
         </div>
@@ -162,32 +170,6 @@ const statusClass = (status) => ({
             {{ submitting ? 'Submitting…' : 'Submit Deposit Request' }}
           </button>
         </form>
-      </div>
-
-      <!-- History -->
-      <div class="bg-white dark:bg-gray-900 border border-gray-200 dark:border-gray-800 rounded-xl p-6">
-        <h2 class="font-semibold text-gray-900 dark:text-white mb-4">Deposit History</h2>
-        <div v-if="history.length === 0" class="text-sm text-gray-500 dark:text-gray-400">No deposits yet.</div>
-        <div v-else class="overflow-x-auto">
-          <table class="w-full text-sm">
-            <thead>
-              <tr class="text-left text-gray-500 dark:text-gray-400 border-b border-gray-200 dark:border-gray-800">
-                <th class="py-2 pr-4">Method</th>
-                <th class="py-2 pr-4">Amount</th>
-                <th class="py-2 pr-4">Status</th>
-                <th class="py-2 pr-4">Date</th>
-              </tr>
-            </thead>
-            <tbody>
-              <tr v-for="d in history" :key="d.id" class="border-b border-gray-100 dark:border-gray-800 last:border-0">
-                <td class="py-3 pr-4 text-gray-900 dark:text-white">{{ d.paymentMode }}</td>
-                <td class="py-3 pr-4 text-gray-900 dark:text-white">{{ authUser.user?.currencySymbol }}{{ Number(d.amount).toLocaleString(undefined, { minimumFractionDigits: 2 }) }}</td>
-                <td class="py-3 pr-4"><span class="px-2 py-1 rounded-full text-xs font-medium" :class="statusClass(d.status)">{{ d.status }}</span></td>
-                <td class="py-3 pr-4 text-gray-500 dark:text-gray-400">{{ new Date(d.createdAt).toLocaleDateString() }}</td>
-              </tr>
-            </tbody>
-          </table>
-        </div>
       </div>
     </template>
   </div>

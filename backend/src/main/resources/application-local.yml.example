@@ -1,0 +1,5 @@
+# Copy this file to application-local.yml (gitignored) to supply real local-dev secrets that
+# should never be committed, even as dev defaults. application.yml optionally imports it.
+javalive:
+  finnhub:
+    api-key: "your-finnhub-api-key-here"

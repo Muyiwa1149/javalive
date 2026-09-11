@@ -106,8 +106,8 @@ const statusClass = (status) => ({
 <template>
   <div class="max-w-4xl mx-auto px-4 sm:px-6 lg:px-8 py-8 space-y-8">
     <div>
-      <h1 class="text-2xl font-bold text-gray-900 dark:text-white">Withdraw Funds</h1>
-      <p class="text-gray-500 dark:text-gray-400 mt-1">Request a withdrawal from your account balance. All requests are reviewed by our team.</p>
+      <h1 class="text-xl sm:text-2xl font-bold text-gray-900 dark:text-white">Withdraw Funds</h1>
+      <p class="text-sm sm:text-base text-gray-500 dark:text-gray-400 mt-1">Request a withdrawal from your account balance. All requests are reviewed by our team.</p>
     </div>
 
     <div v-if="loading" class="text-gray-500 dark:text-gray-400">Loading…</div>
@@ -190,28 +190,49 @@ const statusClass = (status) => ({
       <div class="bg-white dark:bg-gray-900 border border-gray-200 dark:border-gray-800 rounded-xl p-6">
         <h2 class="font-semibold text-gray-900 dark:text-white mb-4">Withdrawal History</h2>
         <div v-if="history.length === 0" class="text-sm text-gray-500 dark:text-gray-400">No withdrawals yet.</div>
-        <div v-else class="overflow-x-auto">
-          <table class="w-full text-sm">
-            <thead>
-              <tr class="text-left text-gray-500 dark:text-gray-400 border-b border-gray-200 dark:border-gray-800">
-                <th class="py-2 pr-4">Method</th>
-                <th class="py-2 pr-4">Amount</th>
-                <th class="py-2 pr-4">Deducted</th>
-                <th class="py-2 pr-4">Status</th>
-                <th class="py-2 pr-4">Date</th>
-              </tr>
-            </thead>
-            <tbody>
-              <tr v-for="w in history" :key="w.id" class="border-b border-gray-100 dark:border-gray-800 last:border-0">
-                <td class="py-3 pr-4 text-gray-900 dark:text-white">{{ w.paymentMode }}</td>
-                <td class="py-3 pr-4 text-gray-900 dark:text-white">{{ authUser.user?.currencySymbol }}{{ Number(w.amount).toLocaleString(undefined, { minimumFractionDigits: 2 }) }}</td>
-                <td class="py-3 pr-4 text-gray-500 dark:text-gray-400">{{ authUser.user?.currencySymbol }}{{ Number(w.toDeduct).toLocaleString(undefined, { minimumFractionDigits: 2 }) }}</td>
-                <td class="py-3 pr-4"><span class="px-2 py-1 rounded-full text-xs font-medium" :class="statusClass(w.status)">{{ w.status }}</span></td>
-                <td class="py-3 pr-4 text-gray-500 dark:text-gray-400">{{ new Date(w.createdAt).toLocaleDateString() }}</td>
-              </tr>
-            </tbody>
-          </table>
-        </div>
+        <template v-else>
+          <!-- Mobile: card list -->
+          <div class="sm:hidden space-y-3">
+            <div v-for="w in history" :key="w.id" class="border border-gray-100 dark:border-gray-800 rounded-lg p-3">
+              <div class="flex items-center justify-between mb-2">
+                <span class="font-medium text-gray-900 dark:text-white">{{ w.paymentMode }}</span>
+                <span class="px-2 py-1 rounded-full text-xs font-medium" :class="statusClass(w.status)">{{ w.status }}</span>
+              </div>
+              <div class="flex items-center justify-between text-sm mb-1">
+                <span class="text-gray-500 dark:text-gray-400">Amount</span>
+                <span class="font-semibold text-gray-900 dark:text-white">{{ authUser.user?.currencySymbol }}{{ Number(w.amount).toLocaleString(undefined, { minimumFractionDigits: 2 }) }}</span>
+              </div>
+              <div class="flex items-center justify-between text-sm mb-1">
+                <span class="text-gray-500 dark:text-gray-400">Deducted</span>
+                <span class="text-gray-700 dark:text-gray-300">{{ authUser.user?.currencySymbol }}{{ Number(w.toDeduct).toLocaleString(undefined, { minimumFractionDigits: 2 }) }}</span>
+              </div>
+              <div class="text-xs text-gray-500 dark:text-gray-400 mt-1">{{ new Date(w.createdAt).toLocaleDateString() }}</div>
+            </div>
+          </div>
+          <!-- Desktop: table -->
+          <div class="hidden sm:block overflow-x-auto">
+            <table class="w-full text-sm">
+              <thead>
+                <tr class="text-left text-gray-500 dark:text-gray-400 border-b border-gray-200 dark:border-gray-800">
+                  <th class="py-2 pr-4">Method</th>
+                  <th class="py-2 pr-4">Amount</th>
+                  <th class="py-2 pr-4">Deducted</th>
+                  <th class="py-2 pr-4">Status</th>
+                  <th class="py-2 pr-4">Date</th>
+                </tr>
+              </thead>
+              <tbody>
+                <tr v-for="w in history" :key="w.id" class="border-b border-gray-100 dark:border-gray-800 last:border-0">
+                  <td class="py-3 pr-4 text-gray-900 dark:text-white">{{ w.paymentMode }}</td>
+                  <td class="py-3 pr-4 text-gray-900 dark:text-white">{{ authUser.user?.currencySymbol }}{{ Number(w.amount).toLocaleString(undefined, { minimumFractionDigits: 2 }) }}</td>
+                  <td class="py-3 pr-4 text-gray-500 dark:text-gray-400">{{ authUser.user?.currencySymbol }}{{ Number(w.toDeduct).toLocaleString(undefined, { minimumFractionDigits: 2 }) }}</td>
+                  <td class="py-3 pr-4"><span class="px-2 py-1 rounded-full text-xs font-medium" :class="statusClass(w.status)">{{ w.status }}</span></td>
+                  <td class="py-3 pr-4 text-gray-500 dark:text-gray-400">{{ new Date(w.createdAt).toLocaleDateString() }}</td>
+                </tr>
+              </tbody>
+            </table>
+          </div>
+        </template>
       </div>
     </template>
   </div>

@@ -3,6 +3,7 @@ package com.javalive.backend.service.auth;
 import com.javalive.backend.dto.auth.AuthResponse;
 import com.javalive.backend.dto.auth.LoginRequest;
 import com.javalive.backend.dto.auth.RegisterRequest;
+import com.javalive.backend.dto.auth.UserLoginResponse;
 import com.javalive.backend.dto.auth.UserSummary;
 import com.javalive.backend.entity.CryptoAccount;
 import com.javalive.backend.entity.User;
@@ -10,7 +11,9 @@ import com.javalive.backend.repository.CryptoAccountRepository;
 import com.javalive.backend.repository.UserRepository;
 import com.javalive.backend.security.JwtService;
 import com.javalive.backend.service.mail.MailService;
+import com.javalive.backend.service.twofactor.TwoFactorService;
 import com.javalive.backend.web.exception.ApiException;
+import io.jsonwebtoken.JwtException;
 import org.springframework.http.HttpStatus;
 import org.springframework.security.authentication.BadCredentialsException;
 import org.springframework.security.crypto.password.PasswordEncoder;
@@ -23,19 +26,24 @@ import java.time.LocalDateTime;
 @Service
 public class AuthService {
 
+    private static final int PENDING_2FA_EXPIRY_MINUTES = 10;
+
     private final UserRepository userRepository;
     private final CryptoAccountRepository cryptoAccountRepository;
     private final PasswordEncoder passwordEncoder;
     private final JwtService jwtService;
     private final MailService mailService;
+    private final TwoFactorService twoFactorService;
 
     public AuthService(UserRepository userRepository, CryptoAccountRepository cryptoAccountRepository,
-                        PasswordEncoder passwordEncoder, JwtService jwtService, MailService mailService) {
+                        PasswordEncoder passwordEncoder, JwtService jwtService, MailService mailService,
+                        TwoFactorService twoFactorService) {
         this.userRepository = userRepository;
         this.cryptoAccountRepository = cryptoAccountRepository;
         this.passwordEncoder = passwordEncoder;
         this.jwtService = jwtService;
         this.mailService = mailService;
+        this.twoFactorService = twoFactorService;
     }
 
     @Transactional
@@ -111,7 +119,7 @@ public class AuthService {
         return new AuthResponse(token, UserSummary.from(user));
     }
 
-    public AuthResponse login(LoginRequest request) {
+    public UserLoginResponse login(LoginRequest request) {
         User user = userRepository.findByEmail(request.email())
                 .orElseThrow(() -> new BadCredentialsException("Invalid email or password."));
 
@@ -122,8 +130,36 @@ public class AuthService {
             throw new ApiException(HttpStatus.FORBIDDEN, "This account has been blocked.");
         }
 
+        if (user.getTwoFactorConfirmedAt() != null) {
+            String pendingToken = jwtService.generateToken(user.getId(), "USER_2FA_PENDING", user.getEmail(),
+                    PENDING_2FA_EXPIRY_MINUTES);
+            return new UserLoginResponse(true, pendingToken, null);
+        }
+
         String token = jwtService.generateToken(user.getId(), "USER", user.getEmail());
-        return new AuthResponse(token, UserSummary.from(user));
+        return new UserLoginResponse(false, token, UserSummary.from(user));
+    }
+
+    public UserLoginResponse verifyTwoFactor(String pendingToken, String code) {
+        Long userId;
+        try {
+            if (!jwtService.isValid(pendingToken) || !"USER_2FA_PENDING".equals(jwtService.extractRole(pendingToken))) {
+                throw new ApiException(HttpStatus.UNAUTHORIZED, "Your verification session has expired. Please log in again.");
+            }
+            userId = jwtService.extractSubjectId(pendingToken);
+        } catch (JwtException e) {
+            throw new ApiException(HttpStatus.UNAUTHORIZED, "Your verification session has expired. Please log in again.");
+        }
+
+        User user = userRepository.findById(userId)
+                .orElseThrow(() -> new ApiException(HttpStatus.UNAUTHORIZED, "Account not found."));
+
+        if (user.getTwoFactorConfirmedAt() == null || !twoFactorService.verifyLoginChallenge(user, code)) {
+            throw new ApiException(HttpStatus.BAD_REQUEST, "Invalid verification code.");
+        }
+
+        String token = jwtService.generateToken(user.getId(), "USER", user.getEmail());
+        return new UserLoginResponse(false, token, UserSummary.from(user));
     }
 
     public UserSummary me(Long userId) {

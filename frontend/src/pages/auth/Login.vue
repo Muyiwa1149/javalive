@@ -30,7 +30,12 @@ async function submit() {
   error.value = ''
   submitting.value = true
   try {
-    await authUser.login({ email: email.value, password: password.value })
+    const data = await authUser.login({ email: email.value, password: password.value })
+    if (data.twoFactorRequired) {
+      const redirect = typeof route.query.redirect === 'string' ? route.query.redirect : null
+      router.push({ name: 'two-factor', query: redirect ? { redirect } : {} })
+      return
+    }
     const redirect = typeof route.query.redirect === 'string' ? route.query.redirect : null
     router.push(redirect || { name: 'user.dashboard' })
   } catch (e) {

@@ -13,6 +13,8 @@ public interface InvestmentRepository extends JpaRepository<Investment, Long> {
 
     List<Investment> findByUserIdAndActiveOrderByIdDesc(Long userId, String active);
 
+    List<Investment> findTop2ByUserIdAndActiveOrderByIdDesc(Long userId, String active);
+
     List<Investment> findByPlanId(Long planId);
 
     @org.springframework.data.jpa.repository.Query("select i from Investment i join fetch i.user join fetch i.plan order by i.id desc")

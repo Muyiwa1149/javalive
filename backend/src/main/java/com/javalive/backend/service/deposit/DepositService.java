@@ -17,6 +17,7 @@ import com.javalive.backend.service.mail.MailService;
 import com.javalive.backend.service.notification.NotificationService;
 import com.javalive.backend.service.settings.SettingsService;
 import com.javalive.backend.service.storage.FileStorageService;
+import com.javalive.backend.util.MoneyFormat;
 import com.javalive.backend.web.exception.ApiException;
 import org.springframework.http.HttpStatus;
 import org.springframework.stereotype.Service;
@@ -103,10 +104,10 @@ public class DepositService {
         AppSetting settings = settingsService.get();
         if (settings.getContactEmail() != null) {
             mailService.send(settings.getContactEmail(), "New deposit request from " + user.getName(),
-                    user.getName() + " submitted a " + method.getName() + " deposit of " + amount + ". Please review and approve.");
+                    user.getName() + " submitted a " + method.getName() + " deposit of " + user.getCurrencySymbol() + MoneyFormat.of(amount) + ". Please review and approve.");
         }
         mailService.send(user.getEmail(), "Deposit request received",
-                "We've received your " + method.getName() + " deposit request for " + amount + ". Please wait while we validate this transaction.");
+                "We've received your " + method.getName() + " deposit request for " + user.getCurrencySymbol() + MoneyFormat.of(amount) + ". Please wait while we validate this transaction.");
 
         return DepositSummary.from(deposit);
     }
@@ -145,7 +146,7 @@ public class DepositService {
 
         if (bonus.signum() > 0) {
             ledgerTransactionRepository.save(LedgerTransaction.builder()
-                    .user(user).planLabel("Deposit Bonus for " + user.getCurrencySymbol() + amount + " deposited")
+                    .user(user).planLabel("Deposit Bonus for " + user.getCurrencySymbol() + MoneyFormat.of(amount) + " deposited")
                     .amount(bonus).type("Bonus")
                     .createdAt(LocalDateTime.now()).updatedAt(LocalDateTime.now())
                     .build());
@@ -158,10 +159,10 @@ public class DepositService {
         referralCommissionService.creditChain(user, amount, settings);
 
         notificationService.notifyUser(user, "Deposit approved",
-                "Your deposit of " + user.getCurrencySymbol() + amount + " has been approved and credited to your account.",
+                "Your deposit of " + user.getCurrencySymbol() + MoneyFormat.of(amount) + " has been approved and credited to your account.",
                 "success", deposit.getId(), "deposit");
         mailService.send(user.getEmail(), "Deposit approved",
-                "Your deposit of " + amount + " has been approved and credited to your account.");
+                "Your deposit of " + user.getCurrencySymbol() + MoneyFormat.of(amount) + " has been approved and credited to your account.");
 
         return AdminDepositSummary.from(deposit);
     }

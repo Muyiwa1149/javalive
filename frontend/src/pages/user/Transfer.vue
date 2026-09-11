@@ -45,8 +45,8 @@ async function submit() {
 <template>
   <div class="max-w-3xl mx-auto px-4 sm:px-6 lg:px-8 py-8 space-y-8">
     <div>
-      <h1 class="text-2xl font-bold text-gray-900 dark:text-white flex items-center gap-2">
-        <ArrowLeftRight class="w-6 h-6 text-blue-500" /> Internal Transfer
+      <h1 class="text-xl sm:text-2xl font-bold text-gray-900 dark:text-white flex items-center gap-2">
+        <ArrowLeftRight class="w-5 h-5 sm:w-6 sm:h-6 text-blue-500" /> Internal Transfer
       </h1>
       <p class="text-gray-500 dark:text-gray-400 mt-1">Send funds directly to another user's account by email or username.</p>
     </div>

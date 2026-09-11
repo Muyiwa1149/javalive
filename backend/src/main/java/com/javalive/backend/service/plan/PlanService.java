@@ -17,6 +17,7 @@ import com.javalive.backend.repository.UserRepository;
 import com.javalive.backend.service.mail.MailService;
 import com.javalive.backend.service.notification.NotificationService;
 import com.javalive.backend.service.settings.SettingsService;
+import com.javalive.backend.util.MoneyFormat;
 import com.javalive.backend.web.exception.ApiException;
 import org.springframework.http.HttpStatus;
 import org.springframework.stereotype.Service;
@@ -91,11 +92,11 @@ public class PlanService {
         BigDecimal price = request.amount() != null ? request.amount() : plan.getPrice();
         if (plan.getMinPrice() != null && price.compareTo(plan.getMinPrice()) < 0) {
             throw new ApiException(HttpStatus.BAD_REQUEST,
-                    "The minimum investment for " + plan.getName() + " is " + user.getCurrencySymbol() + plan.getMinPrice() + ".");
+                    "The minimum investment for " + plan.getName() + " is " + user.getCurrencySymbol() + MoneyFormat.of(plan.getMinPrice()) + ".");
         }
         if (plan.getMaxPrice() != null && price.compareTo(plan.getMaxPrice()) > 0) {
             throw new ApiException(HttpStatus.BAD_REQUEST,
-                    "The maximum investment for " + plan.getName() + " is " + user.getCurrencySymbol() + plan.getMaxPrice() + ".");
+                    "The maximum investment for " + plan.getName() + " is " + user.getCurrencySymbol() + MoneyFormat.of(plan.getMaxPrice()) + ".");
         }
         if (user.getAccountBalance().compareTo(price) < 0) {
             throw new ApiException(HttpStatus.BAD_REQUEST, "Your account is insufficient to purchase this plan. Please make a deposit.");
@@ -132,13 +133,13 @@ public class PlanService {
 
         notificationService.notifyUser(user, "Plan purchased",
                 "You have successfully purchased the " + plan.getName() + " investment plan for "
-                        + user.getCurrencySymbol() + price + ".", "success", investment.getId(), "investment");
+                        + user.getCurrencySymbol() + MoneyFormat.of(price) + ".", "success", investment.getId(), "investment");
 
         String contactEmail = settingsService.get().getContactEmail();
         if (contactEmail != null) {
             mailService.send(contactEmail, user.getName() + " purchased " + plan.getName() + " Plan",
                     "This is to inform you that " + user.getName() + " just purchased the " + plan.getName()
-                            + " investment plan for " + user.getCurrencySymbol() + price + ".");
+                            + " investment plan for " + user.getCurrencySymbol() + MoneyFormat.of(price) + ".");
         }
 
         return InvestmentSummary.from(investment);

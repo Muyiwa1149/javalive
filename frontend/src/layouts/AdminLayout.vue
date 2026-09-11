@@ -9,10 +9,12 @@ import {
   Repeat, Ban, ChevronDown, Menu, X, LogOut, Sun, Moon, User, Search, Sparkles,
 } from 'lucide-vue-next'
 import { useAuthAdminStore } from '@/stores/authAdmin'
+import { usePublicSettingsStore } from '@/stores/publicSettings'
 
 const route = useRoute()
 const router = useRouter()
 const authAdmin = useAuthAdminStore()
+const settingsStore = usePublicSettingsStore()
 
 const sidebarOpen = ref(false)
 const userMenuOpen = ref(false)
@@ -108,6 +110,7 @@ async function logout() {
 
 onMounted(() => {
   authAdmin.fetchProfile().catch(() => {})
+  settingsStore.ensureLoaded()
 })
 </script>
 

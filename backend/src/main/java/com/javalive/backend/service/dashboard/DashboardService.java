@@ -6,9 +6,9 @@ import com.javalive.backend.dto.dashboard.DashboardSummary;
 import com.javalive.backend.entity.LedgerTransaction;
 import com.javalive.backend.entity.User;
 import com.javalive.backend.repository.DepositRepository;
+import com.javalive.backend.repository.InvestmentRepository;
 import com.javalive.backend.repository.LedgerTransactionRepository;
 import com.javalive.backend.repository.Mt4DetailRepository;
-import com.javalive.backend.repository.UserPlanRepository;
 import com.javalive.backend.repository.UserRepository;
 import com.javalive.backend.repository.WithdrawalRepository;
 import com.javalive.backend.service.settings.SettingsService;
@@ -34,19 +34,19 @@ public class DashboardService {
     private final UserRepository userRepository;
     private final DepositRepository depositRepository;
     private final WithdrawalRepository withdrawalRepository;
-    private final UserPlanRepository userPlanRepository;
+    private final InvestmentRepository investmentRepository;
     private final Mt4DetailRepository mt4DetailRepository;
     private final LedgerTransactionRepository ledgerTransactionRepository;
     private final SettingsService settingsService;
 
     public DashboardService(UserRepository userRepository, DepositRepository depositRepository,
-                             WithdrawalRepository withdrawalRepository, UserPlanRepository userPlanRepository,
+                             WithdrawalRepository withdrawalRepository, InvestmentRepository investmentRepository,
                              Mt4DetailRepository mt4DetailRepository, LedgerTransactionRepository ledgerTransactionRepository,
                              SettingsService settingsService) {
         this.userRepository = userRepository;
         this.depositRepository = depositRepository;
         this.withdrawalRepository = withdrawalRepository;
-        this.userPlanRepository = userPlanRepository;
+        this.investmentRepository = investmentRepository;
         this.mt4DetailRepository = mt4DetailRepository;
         this.ledgerTransactionRepository = ledgerTransactionRepository;
         this.settingsService = settingsService;
@@ -69,7 +69,7 @@ public class DashboardService {
                 .map(w -> w.getAmount() == null ? BigDecimal.ZERO : w.getAmount())
                 .reduce(BigDecimal.ZERO, BigDecimal::add);
 
-        List<DashboardPlanSummary> recentPlans = userPlanRepository
+        List<DashboardPlanSummary> recentPlans = investmentRepository
                 .findTop2ByUserIdAndActiveOrderByIdDesc(userId, "yes").stream()
                 .map(DashboardPlanSummary::from).toList();
 
@@ -82,10 +82,15 @@ public class DashboardService {
         boolean kycRequired = Boolean.TRUE.equals(settingsService.get().getEnableKyc());
         String referralLink = user.getUsername() != null ? "/ref/" + user.getUsername() : null;
 
+        var settings = settingsService.get();
+        boolean walletFeatureEnabled = "enabled".equalsIgnoreCase(settings.getWalletStatus());
+        boolean walletConnected = Boolean.TRUE.equals(user.getWalletConnected());
+
         return new DashboardSummary(
                 user.getAccountBalance(), user.getRoiBalance(), user.getBonusBalance(), user.getCurrencySymbol(),
                 user.getAccountVerifyStatus(), kycRequired, referralLink,
-                totalDeposited, totalWithdrawn, tradingAccounts, recentPlans, recentActivity
+                totalDeposited, totalWithdrawn, tradingAccounts, recentPlans, recentActivity,
+                user.getCopyTradingProgress(), walletFeatureEnabled, walletConnected, settings.getMinReturn()
         );
     }
 

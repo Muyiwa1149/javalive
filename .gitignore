@@ -5,3 +5,9 @@
 *.log
 .DS_Store
 Thumbs.db
+
+# Phase 7 Playwright QA harness — scripts are useful to keep, but not their node_modules/output.
+qa-testing/node_modules/
+qa-testing/screenshots/
+qa-testing/*.json
+qa-testing/*token*.txt

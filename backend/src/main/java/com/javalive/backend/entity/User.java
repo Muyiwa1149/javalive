@@ -49,11 +49,19 @@ public class User {
     @Column(name = "password", nullable = false)
     private String password;
 
+    /** Encrypted at rest via {@code AesEncryptionService}, same pattern as wallet/MT4 secrets. Set as soon as
+     *  setup starts, but login is only gated once {@link #twoFactorConfirmedAt} is non-null. */
     @Column(name = "two_factor_secret")
     private String twoFactorSecret;
 
+    /** JSON array of encrypted single-use recovery codes. */
     @Column(name = "two_factor_recovery_codes")
     private String twoFactorRecoveryCodes;
+
+    /** Null while setup is pending confirmation (see V8 migration) — matches Jetstream's real semantics,
+     *  which this source app's migrated schema was actually missing. */
+    @Column(name = "two_factor_confirmed_at")
+    private LocalDateTime twoFactorConfirmedAt;
 
     @Column(name = "dob")
     private LocalDate dob;

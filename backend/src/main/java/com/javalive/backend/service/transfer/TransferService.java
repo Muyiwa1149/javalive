@@ -9,6 +9,7 @@ import com.javalive.backend.repository.LedgerTransactionRepository;
 import com.javalive.backend.repository.UserRepository;
 import com.javalive.backend.service.mail.MailService;
 import com.javalive.backend.service.settings.SettingsService;
+import com.javalive.backend.util.MoneyFormat;
 import com.javalive.backend.web.exception.ApiException;
 import org.springframework.http.HttpStatus;
 import org.springframework.security.crypto.password.PasswordEncoder;
@@ -62,7 +63,7 @@ public class TransferService {
 
         if (settings.getMinTransferAmount() != null && request.amount().compareTo(settings.getMinTransferAmount()) < 0) {
             throw new ApiException(HttpStatus.BAD_REQUEST,
-                    "The minimum amount you can transfer is " + sender.getCurrencySymbol() + settings.getMinTransferAmount() + ".");
+                    "The minimum amount you can transfer is " + sender.getCurrencySymbol() + MoneyFormat.of(settings.getMinTransferAmount()) + ".");
         }
         if (sender.getAccountBalance().compareTo(toDeduct) < 0) {
             throw new ApiException(HttpStatus.BAD_REQUEST, "Insufficient funds.");
@@ -85,8 +86,8 @@ public class TransferService {
                 .type("Fund Transfer").createdAt(now).updatedAt(now).build());
 
         mailService.send(receiver.getEmail(), "Credit Alert",
-                "You just received " + receiver.getCurrencySymbol() + request.amount() + " from " + sender.getName()
-                        + " and your account balance is now " + receiver.getCurrencySymbol() + receiver.getAccountBalance() + ".");
+                "You just received " + receiver.getCurrencySymbol() + MoneyFormat.of(request.amount()) + " from " + sender.getName()
+                        + " and your account balance is now " + receiver.getCurrencySymbol() + MoneyFormat.of(receiver.getAccountBalance()) + ".");
     }
 
     @Transactional(readOnly = true)

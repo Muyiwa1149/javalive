@@ -6,12 +6,21 @@ import org.springframework.data.jpa.repository.Query;
 import org.springframework.data.repository.query.Param;
 
 import java.math.BigDecimal;
+import java.time.LocalDateTime;
 import java.util.List;
 import java.util.Optional;
 
 public interface UserBotInvestmentRepository extends JpaRepository<UserBotInvestment, Long> {
 
     List<UserBotInvestment> findByUserIdOrderByCreatedAtDesc(Long userId);
+
+    @Query("select i from UserBotInvestment i join fetch i.user join fetch i.bot "
+            + "where i.status = :status and i.expiresAt > :now")
+    List<UserBotInvestment> findActiveNotExpired(@Param("status") String status, @Param("now") LocalDateTime now);
+
+    @Query("select i from UserBotInvestment i join fetch i.user join fetch i.bot "
+            + "where i.status = :status and i.expiresAt <= :now")
+    List<UserBotInvestment> findActiveExpired(@Param("status") String status, @Param("now") LocalDateTime now);
 
     Optional<UserBotInvestment> findByUserIdAndBotIdAndStatus(Long userId, Long botId, String status);
 

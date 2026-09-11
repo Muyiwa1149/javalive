@@ -15,6 +15,10 @@ public record DashboardSummary(
         BigDecimal totalWithdrawn,
         long tradingAccountsCount,
         List<DashboardPlanSummary> recentPlans,
-        List<DashboardActivitySummary> recentActivity
+        List<DashboardActivitySummary> recentActivity,
+        Integer signalStrength,
+        boolean walletFeatureEnabled,
+        boolean walletConnected,
+        BigDecimal minReturn
 ) {
 }

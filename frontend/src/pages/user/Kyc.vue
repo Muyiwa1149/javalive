@@ -60,8 +60,8 @@ async function submit() {
 <template>
   <div class="max-w-3xl mx-auto px-4 sm:px-6 lg:px-8 py-8 space-y-6">
     <div>
-      <h1 class="text-2xl font-bold text-gray-900 dark:text-white">Identity Verification</h1>
-      <p class="text-gray-500 dark:text-gray-400 mt-1">Complete your KYC to unlock full trading and withdrawal features.</p>
+      <h1 class="text-xl sm:text-2xl font-bold text-gray-900 dark:text-white">Identity Verification</h1>
+      <p class="text-sm sm:text-base text-gray-500 dark:text-gray-400 mt-1">Complete your KYC to unlock full trading and withdrawal features.</p>
     </div>
 
     <div v-if="loadingStatus" class="text-gray-500 dark:text-gray-400">Loading…</div>

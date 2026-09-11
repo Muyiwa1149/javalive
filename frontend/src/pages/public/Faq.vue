@@ -1,18 +1,53 @@
 <script setup>
 import { onMounted, onUnmounted, ref } from 'vue'
-import api from '@/lib/api'
 
-// FAQ list — the source blade hardcoded its Q&A text inside category tabs (About Us / Cryptocurrencies /
-// My Account / Investment / NFP) with no category field in the data model. Per the parity checklist this is
-// intentionally replaced with the real CMS-managed list from GET /api/public/faqs (fields: id, question,
-// answer) rendered as a single accordion — the category tabs are dropped since the API has no category info.
-const faqs = ref([])
-const loadingFaqs = ref(true)
-const faqError = ref(false)
+// Corrected in Phase 7 (found via a live screenshot diff against the running source app): this
+// entire FAQ page is hardcoded Blade content, not driven by the `faqs` table at all (that table's
+// one real row, "How can i withdraw", never actually appears in home/faq.blade.php) — same
+// "fully static" category as Terms/Privacy's hardcoded text. Ported verbatim, category tabs included.
+const categories = [
+  { key: 'about', label: 'About Us', icon: 'building' },
+  { key: 'crypto', label: 'Cryptocurrencies', icon: 'coins' },
+  { key: 'account', label: 'My Account', icon: 'user' },
+  { key: 'investment', label: 'Investment', icon: 'wallet' },
+  { key: 'other', label: 'NFP', icon: 'question' },
+]
+
+const faqsByCategory = {
+  about: [
+    { q: 'What is Keystone Bit-Fx?', a: 'Keystone Bit-Fx is a licensed multi-investment company that obtained a license to trade the financial markets for investors worldwide. We primarily trade forex, cryptocurrencies, and commodities unless instructed otherwise.' },
+    { q: 'In what countries is Keystone Bit-Fx available?', a: 'Keystone Bit-Fx is a worldwide platform, hence available to investors from all around the world.' },
+  ],
+  crypto: [
+    { q: 'What are cryptocurrencies and is it Bitcoin?', a: 'A cryptocurrency is a digital or virtual currency secured by cryptography, making it nearly impossible to counterfeit or double-spend. Many cryptocurrencies are decentralized networks based on blockchain technology—a distributed ledger enforced by a disparate network of computers. Bitcoin is a cryptocurrency, but not all cryptocurrencies are Bitcoins.' },
+    { q: 'Why Bitcoin?', a: 'Bitcoin is fast, has lower fees, is global, and is tax-free in many jurisdictions.' },
+    { q: 'How to create a wallet in my country?', a: 'It is easy to create a blockchain wallet. Visit blockchain.com or contact us for the most convenient crypto exchange in your country.', link: { text: 'blockchain.com', href: 'https://blockchain.com' } },
+  ],
+  account: [
+    { q: "What do I do if I can't log into my account because I forgot my password?", a: 'Click the "Forgot Password" link, type your username or email, and you\'ll receive a link to change your password.' },
+    { q: 'How do I register on this website?', a: 'Go to Keystone Bit-Fx and click Sign Up. Fill in the sign-up form. After everything is correctly filled and our T&Cs agreed to, your account will be automatically created.' },
+    { q: 'How safe is it to use Keystone Bit-Fx?', a: 'We use industry-standard processes and technical safeguards to preserve the integrity and security of your personal information. We regularly back up your data to prevent data loss and the company has put all the necessary anti-malware software, advanced protection technology, and employ SSL encryption to ensure that information passed between our site and your browser is secure. SSL-encryption is in place to guard all the transferred data between your browser and our website. Also, the website is adequately protected by the latest technology from DDoS attacks.' },
+  ],
+  investment: [
+    { q: 'How can I invest with Keystone Bit-Fx?', a: 'To start an investment, you must first become a registered member of Keystone Bit-Fx by signing up. After registration, investors can make their first deposit. All deposits must be made through the investor’s personal account at sign-in. To log in, use the member username and password you signed up with.' },
+    { q: 'Can I open multiple investments?', a: 'Yes, you can open as many investments as possible on a single account. Multiple accounts are also accepted.' },
+    { q: 'What are your investment plans?', a: 'To learn more about our investment offers, please go to the Investment Plans section of our website.', link: { text: 'Investment Plans', href: '/trade' } },
+  ],
+  other: [
+    { q: 'What is NFP?', a: 'Nonfarm Payroll (NFP) employment is a compiled name for goods, construction, and manufacturing companies in the US. It does not include farm workers, private household employees, or non-profit organization employees.' },
+  ],
+}
+
+const activeCategory = ref('about')
 const active = ref(null)
 
-function toggle(id) {
-  active.value = active.value !== id ? id : null
+function selectCategory(key) {
+  activeCategory.value = key
+  active.value = null
+}
+
+function toggle(index) {
+  active.value = active.value !== index ? index : null
 }
 
 // Back-to-top button (mirrors the source's DOMContentLoaded/scroll script).
@@ -24,16 +59,8 @@ function scrollToTop() {
   window.scrollTo({ top: 0, behavior: 'smooth' })
 }
 
-onMounted(async () => {
+onMounted(() => {
   window.addEventListener('scroll', onScroll)
-  try {
-    const { data } = await api.get('/public/faqs')
-    faqs.value = data
-  } catch (e) {
-    faqError.value = true
-  } finally {
-    loadingFaqs.value = false
-  }
 })
 
 onUnmounted(() => {
@@ -92,22 +119,33 @@ onUnmounted(() => {
     <section class="py-12 bg-gray-900">
       <div class="max-w-5xl mx-auto px-4 sm:px-6 lg:px-8">
         <div class="space-y-10">
+          <!-- FAQ Category Tabs -->
+          <div class="flex flex-wrap justify-center gap-2 md:gap-4">
+            <button
+              v-for="cat in categories" :key="cat.key"
+              @click="selectCategory(cat.key)"
+              class="px-4 py-2 rounded-lg transition-all duration-200 text-sm md:text-base font-medium focus:outline-none focus:ring-2 focus:ring-blue-500 focus:ring-offset-2 focus:ring-offset-gray-900"
+              :class="activeCategory === cat.key ? 'bg-blue-600 text-white' : 'bg-gray-800 text-gray-300 hover:bg-gray-700'"
+            >
+              {{ cat.label }}
+            </button>
+          </div>
+
           <div class="bg-gray-800 bg-opacity-70 backdrop-blur-sm rounded-2xl border border-gray-700 shadow-xl overflow-hidden">
             <div class="p-6 md:p-8">
-              <p v-if="loadingFaqs" class="text-gray-400 text-center py-4">Loading questions…</p>
-              <p v-else-if="faqError" class="text-gray-400 text-center py-4">We couldn't load the FAQ list right now. Please try again later.</p>
-              <p v-else-if="!faqs.length" class="text-gray-400 text-center py-4">No questions have been published yet.</p>
-
-              <div v-else class="divide-y divide-gray-700">
-                <div v-for="faq in faqs" :key="faq.id" class="py-4">
-                  <button @click="toggle(faq.id)" class="flex justify-between items-center w-full focus:outline-none">
-                    <h4 class="text-lg font-medium text-white text-left">{{ faq.question }}</h4>
-                    <svg :class="{ 'rotate-180': active === faq.id }" class="w-5 h-5 text-blue-400 transform transition-transform duration-300 flex-shrink-0 ml-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+              <div class="divide-y divide-gray-700">
+                <div v-for="(faq, index) in faqsByCategory[activeCategory]" :key="index" class="py-4">
+                  <button @click="toggle(index)" class="flex justify-between items-center w-full focus:outline-none">
+                    <h4 class="text-lg font-medium text-white text-left">{{ faq.q }}</h4>
+                    <svg :class="{ 'rotate-180': active === index }" class="w-5 h-5 text-blue-400 transform transition-transform duration-300 flex-shrink-0 ml-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                       <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 9l-7 7-7-7"></path>
                     </svg>
                   </button>
-                  <div v-show="active === faq.id" class="mt-3 text-gray-300">
-                    <p>{{ faq.answer }}</p>
+                  <div v-show="active === index" class="mt-3 text-gray-300">
+                    <p v-if="faq.link">
+                      {{ faq.a.split(faq.link.text)[0] }}<a :href="faq.link.href" class="text-blue-400 hover:underline">{{ faq.link.text }}</a>{{ faq.a.split(faq.link.text)[1] }}
+                    </p>
+                    <p v-else>{{ faq.a }}</p>
                   </div>
                 </div>
               </div>

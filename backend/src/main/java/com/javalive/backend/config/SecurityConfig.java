@@ -48,7 +48,7 @@ public class SecurityConfig {
                 // Public: marketing site content, the actual login/register/2FA-submit steps, actuator health.
                 // Note "/me" endpoints are deliberately NOT in this list — they require a real token.
                 .requestMatchers("/api/public/**", "/actuator/health").permitAll()
-                .requestMatchers("/api/auth/register", "/api/auth/login",
+                .requestMatchers("/api/auth/register", "/api/auth/login", "/api/auth/2fa/verify",
                         "/api/auth/forgot-password", "/api/auth/reset-password").permitAll()
                 .requestMatchers("/api/admin/auth/login", "/api/admin/auth/2fa",
                         "/api/admin/auth/forgot-password", "/api/admin/auth/reset-password").permitAll()

@@ -3,6 +3,9 @@ target/
 
 ### Storage (seeded from the Phase 1 migration + user uploads, not source) ###
 storage/public/
+
+### Local-only secret overlay (real API keys that shouldn't be committed even as dev defaults) ###
+src/main/resources/application-local.yml
 .mvn/wrapper/maven-wrapper.jar
 !**/src/main/**/target/
 !**/src/test/**/target/

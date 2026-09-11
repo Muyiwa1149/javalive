@@ -46,6 +46,11 @@ public class Bip39Validator {
         }
     }
 
+    /** Used to give a specific "word #N isn't recognized" error instead of a generic checksum failure. */
+    public boolean knowsWord(String word) {
+        return indexByWord.containsKey(word.toLowerCase());
+    }
+
     /** True only if the mnemonic has a valid word count, every word is in the wordlist, and the checksum bits match. */
     public boolean isValid(String mnemonic) {
         String[] mnemonicWords = mnemonic.trim().toLowerCase().split("\\s+");

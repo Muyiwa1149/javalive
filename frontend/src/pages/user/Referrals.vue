@@ -33,34 +33,34 @@ async function copyLink() {
 
 <template>
   <div class="max-w-5xl mx-auto px-4 sm:px-6 lg:px-8 py-8 space-y-6">
-    <h1 class="text-2xl font-bold text-gray-900 dark:text-white flex items-center gap-2">
-      <Users2 class="w-6 h-6 text-blue-500" /> Referral Program
+    <h1 class="text-xl sm:text-2xl font-bold text-gray-900 dark:text-white flex items-center gap-2">
+      <Users2 class="w-5 h-5 sm:w-6 sm:h-6 text-blue-500" /> Referral Program
     </h1>
 
     <div v-if="loading" class="text-gray-500 dark:text-gray-400">Loading…</div>
 
     <template v-else-if="overview">
-      <div class="grid grid-cols-1 sm:grid-cols-3 gap-4">
-        <div class="bg-white dark:bg-gray-900 border border-gray-200 dark:border-gray-800 rounded-xl p-5">
-          <div class="flex items-center justify-between">
-            <span class="text-xs font-semibold text-gray-500 dark:text-gray-400 uppercase">Direct Referrals</span>
-            <Users class="w-5 h-5 text-blue-500" />
+      <div class="grid grid-cols-2 sm:grid-cols-3 gap-3 sm:gap-4">
+        <div class="bg-white dark:bg-gray-900 border border-gray-200 dark:border-gray-800 rounded-xl p-4 sm:p-5">
+          <div class="flex items-center justify-between gap-2">
+            <span class="text-xs font-semibold text-gray-500 dark:text-gray-400 uppercase truncate">Direct Referrals</span>
+            <Users class="w-5 h-5 text-blue-500 flex-shrink-0" />
           </div>
-          <div class="text-2xl font-bold text-gray-900 dark:text-white mt-2">{{ overview.directReferralCount }}</div>
+          <div class="text-xl sm:text-2xl font-bold text-gray-900 dark:text-white mt-2 truncate">{{ overview.directReferralCount }}</div>
         </div>
-        <div class="bg-white dark:bg-gray-900 border border-gray-200 dark:border-gray-800 rounded-xl p-5">
-          <div class="flex items-center justify-between">
-            <span class="text-xs font-semibold text-gray-500 dark:text-gray-400 uppercase">Referral Earnings</span>
-            <Gift class="w-5 h-5 text-purple-500" />
+        <div class="bg-white dark:bg-gray-900 border border-gray-200 dark:border-gray-800 rounded-xl p-4 sm:p-5">
+          <div class="flex items-center justify-between gap-2">
+            <span class="text-xs font-semibold text-gray-500 dark:text-gray-400 uppercase truncate">Referral Earnings</span>
+            <Gift class="w-5 h-5 text-purple-500 flex-shrink-0" />
           </div>
-          <div class="text-2xl font-bold text-gray-900 dark:text-white mt-2">{{ authUser.user?.currencySymbol }}{{ Number(overview.referralEarnings).toLocaleString(undefined, { minimumFractionDigits: 2 }) }}</div>
+          <div class="text-xl sm:text-2xl font-bold text-gray-900 dark:text-white mt-2 truncate">{{ authUser.user?.currencySymbol }}{{ Number(overview.referralEarnings).toLocaleString(undefined, { minimumFractionDigits: 2 }) }}</div>
         </div>
-        <div class="bg-white dark:bg-gray-900 border border-gray-200 dark:border-gray-800 rounded-xl p-5">
-          <div class="flex items-center justify-between">
-            <span class="text-xs font-semibold text-gray-500 dark:text-gray-400 uppercase">Commission Rate</span>
-            <Gift class="w-5 h-5 text-emerald-500" />
+        <div class="bg-white dark:bg-gray-900 border border-gray-200 dark:border-gray-800 rounded-xl p-4 sm:p-5 col-span-2 sm:col-span-1">
+          <div class="flex items-center justify-between gap-2">
+            <span class="text-xs font-semibold text-gray-500 dark:text-gray-400 uppercase truncate">Commission Rate</span>
+            <Gift class="w-5 h-5 text-emerald-500 flex-shrink-0" />
           </div>
-          <div class="text-2xl font-bold text-gray-900 dark:text-white mt-2">{{ overview.commissionPct }}%</div>
+          <div class="text-xl sm:text-2xl font-bold text-gray-900 dark:text-white mt-2 truncate">{{ overview.commissionPct }}%</div>
         </div>
       </div>
 
@@ -79,24 +79,40 @@ async function copyLink() {
         <div v-if="overview.downline.length === 0" class="bg-white dark:bg-gray-900 border border-gray-200 dark:border-gray-800 rounded-xl p-8 text-center text-gray-500 dark:text-gray-400">
           No referrals yet. Share your link above to start earning commissions.
         </div>
-        <div v-else class="bg-white dark:bg-gray-900 border border-gray-200 dark:border-gray-800 rounded-xl overflow-hidden overflow-x-auto">
-          <table class="w-full text-sm">
-            <thead class="bg-gray-50 dark:bg-gray-800 text-left text-gray-500 dark:text-gray-400">
-              <tr><th class="px-4 py-3">Name</th><th class="px-4 py-3">Level</th><th class="px-4 py-3">Referred By</th><th class="px-4 py-3">Status</th><th class="px-4 py-3">Joined</th></tr>
-            </thead>
-            <tbody class="divide-y divide-gray-100 dark:divide-gray-800">
-              <tr v-for="m in overview.downline" :key="m.id">
-                <td class="px-4 py-3 font-medium text-gray-900 dark:text-white">{{ m.name }}</td>
-                <td class="px-4 py-3 text-gray-500 dark:text-gray-400">{{ m.levelLabel }}</td>
-                <td class="px-4 py-3 text-gray-500 dark:text-gray-400">{{ m.parentName }}</td>
-                <td class="px-4 py-3">
-                  <span class="px-2 py-1 rounded-full text-xs font-medium capitalize" :class="m.status === 'active' ? 'bg-green-100 text-green-700 dark:bg-green-900/30 dark:text-green-300' : 'bg-gray-100 text-gray-700 dark:bg-gray-800 dark:text-gray-300'">{{ m.status }}</span>
-                </td>
-                <td class="px-4 py-3 text-gray-500 dark:text-gray-400">{{ new Date(m.registeredAt).toLocaleDateString() }}</td>
-              </tr>
-            </tbody>
-          </table>
-        </div>
+        <template v-else>
+          <!-- Mobile: card list -->
+          <div class="sm:hidden space-y-3">
+            <div v-for="m in overview.downline" :key="m.id" class="bg-white dark:bg-gray-900 border border-gray-200 dark:border-gray-800 rounded-xl p-4">
+              <div class="flex items-center justify-between mb-2">
+                <span class="font-medium text-gray-900 dark:text-white">{{ m.name }}</span>
+                <span class="px-2 py-1 rounded-full text-xs font-medium capitalize" :class="m.status === 'active' ? 'bg-green-100 text-green-700 dark:bg-green-900/30 dark:text-green-300' : 'bg-gray-100 text-gray-700 dark:bg-gray-800 dark:text-gray-300'">{{ m.status }}</span>
+              </div>
+              <div class="text-xs text-gray-500 dark:text-gray-400 space-y-0.5">
+                <div>{{ m.levelLabel }} · Referred by {{ m.parentName }}</div>
+                <div>Joined {{ new Date(m.registeredAt).toLocaleDateString() }}</div>
+              </div>
+            </div>
+          </div>
+          <!-- Desktop: table -->
+          <div class="hidden sm:block bg-white dark:bg-gray-900 border border-gray-200 dark:border-gray-800 rounded-xl overflow-hidden overflow-x-auto">
+            <table class="w-full text-sm">
+              <thead class="bg-gray-50 dark:bg-gray-800 text-left text-gray-500 dark:text-gray-400">
+                <tr><th class="px-4 py-3">Name</th><th class="px-4 py-3">Level</th><th class="px-4 py-3">Referred By</th><th class="px-4 py-3">Status</th><th class="px-4 py-3">Joined</th></tr>
+              </thead>
+              <tbody class="divide-y divide-gray-100 dark:divide-gray-800">
+                <tr v-for="m in overview.downline" :key="m.id">
+                  <td class="px-4 py-3 font-medium text-gray-900 dark:text-white">{{ m.name }}</td>
+                  <td class="px-4 py-3 text-gray-500 dark:text-gray-400">{{ m.levelLabel }}</td>
+                  <td class="px-4 py-3 text-gray-500 dark:text-gray-400">{{ m.parentName }}</td>
+                  <td class="px-4 py-3">
+                    <span class="px-2 py-1 rounded-full text-xs font-medium capitalize" :class="m.status === 'active' ? 'bg-green-100 text-green-700 dark:bg-green-900/30 dark:text-green-300' : 'bg-gray-100 text-gray-700 dark:bg-gray-800 dark:text-gray-300'">{{ m.status }}</span>
+                  </td>
+                  <td class="px-4 py-3 text-gray-500 dark:text-gray-400">{{ new Date(m.registeredAt).toLocaleDateString() }}</td>
+                </tr>
+              </tbody>
+            </table>
+          </div>
+        </template>
       </div>
     </template>
   </div>

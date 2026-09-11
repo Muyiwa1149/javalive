@@ -96,8 +96,8 @@ async function toggleExpand(inv) {
 <template>
   <div class="max-w-6xl mx-auto px-4 sm:px-6 lg:px-8 py-8 space-y-6">
     <div class="flex items-center justify-between flex-wrap gap-4">
-      <h1 class="text-2xl font-bold text-gray-900 dark:text-white flex items-center gap-2">
-        <Bot class="w-6 h-6 text-blue-500" /> AI Trading Bots
+      <h1 class="text-xl sm:text-2xl font-bold text-gray-900 dark:text-white flex items-center gap-2">
+        <Bot class="w-5 h-5 sm:w-6 sm:h-6 text-blue-500" /> AI Trading Bots
       </h1>
       <div class="flex rounded-lg border border-gray-200 dark:border-gray-800 overflow-hidden">
         <button type="button" class="px-4 py-2 text-sm font-medium" :class="tab === 'browse' ? 'bg-blue-600 text-white' : 'bg-white dark:bg-gray-900 text-gray-600 dark:text-gray-300'" @click="tab = 'browse'">Browse Bots</button>

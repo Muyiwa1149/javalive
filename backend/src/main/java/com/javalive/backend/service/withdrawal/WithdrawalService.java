@@ -16,6 +16,7 @@ import com.javalive.backend.service.mail.MailService;
 import com.javalive.backend.service.notification.NotificationService;
 import com.javalive.backend.service.settings.KycGuardService;
 import com.javalive.backend.service.settings.SettingsService;
+import com.javalive.backend.util.MoneyFormat;
 import com.javalive.backend.web.exception.ApiException;
 import org.springframework.http.HttpStatus;
 import org.springframework.stereotype.Service;
@@ -109,7 +110,7 @@ public class WithdrawalService {
         }
         if (method.getMinimumAmount() != null && request.amount().compareTo(method.getMinimumAmount()) < 0) {
             throw new ApiException(HttpStatus.BAD_REQUEST,
-                    "Sorry, the minimum amount you can withdraw is " + user.getCurrencySymbol() + method.getMinimumAmount()
+                    "Sorry, the minimum amount you can withdraw is " + user.getCurrencySymbol() + MoneyFormat.of(method.getMinimumAmount())
                             + ", please try another payment method.");
         }
 
@@ -131,10 +132,10 @@ public class WithdrawalService {
 
         if (settings.getContactEmail() != null) {
             mailService.send(settings.getContactEmail(), "Withdrawal request from " + user.getName(),
-                    user.getName() + " requested a " + method.getName() + " withdrawal of " + request.amount() + ". Please review.");
+                    user.getName() + " requested a " + method.getName() + " withdrawal of " + user.getCurrencySymbol() + MoneyFormat.of(request.amount()) + ". Please review.");
         }
         mailService.send(user.getEmail(), "Withdrawal request received",
-                "Your withdrawal request of " + request.amount() + " has been received. Please wait while we process it.");
+                "Your withdrawal request of " + user.getCurrencySymbol() + MoneyFormat.of(request.amount()) + " has been received. Please wait while we process it.");
 
         return WithdrawalSummary.from(withdrawal);
     }
@@ -166,11 +167,11 @@ public class WithdrawalService {
         withdrawalRepository.save(withdrawal);
 
         notificationService.notifyUser(user, "Withdrawal Approved",
-                "Your withdrawal request of " + user.getCurrencySymbol() + withdrawal.getAmount()
+                "Your withdrawal request of " + user.getCurrencySymbol() + MoneyFormat.of(withdrawal.getAmount())
                         + " has been approved and processed. Funds have been sent to your selected account.",
                 "success", withdrawal.getId(), "withdrawal");
         mailService.send(user.getEmail(), "Successful Withdrawal",
-                "This is to inform you that your withdrawal request of " + user.getCurrencySymbol() + withdrawal.getAmount()
+                "This is to inform you that your withdrawal request of " + user.getCurrencySymbol() + MoneyFormat.of(withdrawal.getAmount())
                         + " has been approved and funds have been sent to your selected account.");
 
         return AdminWithdrawalSummary.from(withdrawal);
@@ -195,7 +196,7 @@ public class WithdrawalService {
         withdrawalRepository.save(withdrawal);
 
         String reason = (request.reason() == null || request.reason().isBlank())
-                ? "Your withdrawal request of " + user.getCurrencySymbol() + withdrawal.getAmount() + " has been rejected."
+                ? "Your withdrawal request of " + user.getCurrencySymbol() + MoneyFormat.of(withdrawal.getAmount()) + " has been rejected."
                 : request.reason();
         notificationService.notifyUser(user, "Withdrawal Rejected", reason, "danger", withdrawal.getId(), "withdrawal");
 
