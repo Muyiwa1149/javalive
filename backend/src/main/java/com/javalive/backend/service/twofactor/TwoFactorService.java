@@ -90,7 +90,7 @@ public class TwoFactorService {
 
         String issuer = settingsService.get().getSiteName();
         if (issuer == null || issuer.isBlank()) {
-            issuer = "Keystone Bit-Forex";
+            issuer = "Velnora Partners";
         }
         String otpauthUri = GoogleAuthenticatorQRGenerator.getOtpAuthTotpURL(issuer, user.getEmail(), credentials);
 

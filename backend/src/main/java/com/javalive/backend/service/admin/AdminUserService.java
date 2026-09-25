@@ -235,7 +235,7 @@ public class AdminUserService {
 
     /** Mirrors source's {@code sendmailtoall} — mail merged categories (All/No active plans/No deposit/Select Users). */
     @Transactional(readOnly = true)
-    public int emailSegment(String category, List<Long> userIds, String subject, String message) {
+    public int emailSegment(String category, List<Long> userIds, String subject, String message, String greet, String title) {
         List<User> recipients = switch (category) {
             case "No active plans" -> {
                 var activeIds = userPlanRepository.findDistinctUserIdsByActive("yes");
@@ -248,8 +248,10 @@ public class AdminUserService {
             case "Select Users" -> userRepository.findAllById(userIds);
             default -> userRepository.findAll();
         };
+        String salutation = (greet == null || greet.isBlank() ? "Hello" : greet) + " " + (title == null || title.isBlank() ? "Investor" : title);
+        String body = salutation + ",\n\n" + message;
         for (User user : recipients) {
-            mailService.send(user.getEmail(), subject, message);
+            mailService.send(user.getEmail(), subject, body);
         }
         return recipients.size();
     }

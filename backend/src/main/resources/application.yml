@@ -59,6 +59,10 @@ spring:
 
 server:
   port: 8080
+  tomcat:
+    # App Settings posts every field as its own multipart part alongside the logo/favicon files
+    # (AppSetting has 90+ columns) — Tomcat's default cap of 10 parts per request rejects that.
+    max-part-count: 200
 
 management:
   health:
@@ -73,7 +77,9 @@ javalive:
     access-token-minutes: 60
     refresh-token-days: 14
   cors:
-    allowed-origins: "http://localhost:5173"
+    # Pattern, not a fixed list — this machine runs several unrelated projects that grab Vite's
+    # default port first, so the dev frontend often ends up on a different localhost port than 5173.
+    allowed-origins: "http://localhost:*"
   frontend-url: "http://localhost:5173"
   encryption:
     # Dev-only AES-256 key (32 raw bytes, base64-encoded) — CHANGE IN PRODUCTION and manage via a

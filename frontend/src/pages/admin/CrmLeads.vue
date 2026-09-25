@@ -50,14 +50,36 @@ async function assign(lead) {
 <template>
   <div class="p-4 sm:p-6 lg:p-8 space-y-6">
     <div>
-      <h1 class="text-2xl font-bold text-slate-900 dark:text-white flex items-center gap-2"><UserPlus class="w-6 h-6 text-indigo-500" /> Leads</h1>
+      <h1 class="text-xl sm:text-2xl font-bold text-slate-900 dark:text-white flex items-center gap-2"><UserPlus class="w-5 h-5 sm:w-6 sm:h-6 text-indigo-500" /> Leads</h1>
       <p class="text-sm text-slate-500 dark:text-slate-400">{{ leads.length }} not-yet-converted registrations</p>
     </div>
 
     <div v-if="loading" class="text-slate-500 dark:text-slate-400">Loading…</div>
     <div v-else-if="leads.length === 0" class="text-slate-500 dark:text-slate-400">No leads at the moment.</div>
 
-    <div v-else class="bg-white dark:bg-[#0F1524] border border-slate-200 dark:border-white/5 rounded-2xl overflow-x-auto">
+    <!-- Mobile: stacked cards -->
+    <div v-else class="sm:hidden space-y-3">
+      <div v-for="l in leads" :key="l.id" class="bg-white dark:bg-[#0F1524] border border-slate-200 dark:border-white/5 rounded-2xl p-4 space-y-2">
+        <div class="min-w-0">
+          <div class="text-slate-900 dark:text-white font-medium truncate">{{ l.name }}</div>
+          <div class="text-xs text-slate-500 dark:text-slate-400 truncate">{{ l.email }}</div>
+          <div class="text-xs text-slate-500 dark:text-slate-400">{{ l.phone }}</div>
+        </div>
+        <div class="grid grid-cols-2 gap-2 text-sm pt-1">
+          <div><div class="text-[11px] text-slate-500">Agent</div><div class="text-slate-700 dark:text-slate-300">{{ adminName(l.assignedAgent) || '—' }}</div></div>
+          <div><div class="text-[11px] text-slate-500">Registered</div><div class="text-slate-500 dark:text-slate-400">{{ l.createdAt ? new Date(l.createdAt).toLocaleDateString() : '—' }}</div></div>
+        </div>
+        <div class="flex items-center gap-2 pt-2 border-t border-slate-100 dark:border-white/5">
+          <button class="flex-1 py-2 rounded-lg bg-slate-100 dark:bg-white/5 text-slate-700 dark:text-slate-200 text-xs font-medium hover:bg-slate-200 dark:hover:bg-white/10" @click="assign(l)">Assign</button>
+          <button class="flex-1 inline-flex items-center justify-center gap-1 py-2 rounded-lg bg-indigo-500 hover:bg-indigo-600 text-white text-xs font-medium" @click="convert(l)">
+            <UserCheck class="w-3.5 h-3.5" /> Convert
+          </button>
+        </div>
+      </div>
+    </div>
+
+    <!-- Desktop: table -->
+    <div v-if="!loading && leads.length" class="hidden sm:block bg-white dark:bg-[#0F1524] border border-slate-200 dark:border-white/5 rounded-2xl overflow-x-auto">
       <table class="w-full text-sm">
         <thead>
           <tr class="text-left text-slate-500 dark:text-slate-400 border-b border-slate-200 dark:border-white/5">

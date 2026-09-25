@@ -23,14 +23,33 @@ function money(v) {
 <template>
   <div class="p-4 sm:p-6 lg:p-8 space-y-6">
     <div>
-      <h1 class="text-2xl font-bold text-slate-900 dark:text-white flex items-center gap-2"><Activity class="w-6 h-6 text-indigo-500" /> Active Copy Trades</h1>
+      <h1 class="text-xl sm:text-2xl font-bold text-slate-900 dark:text-white flex items-center gap-2"><Activity class="w-5 h-5 sm:w-6 sm:h-6 text-indigo-500" /> Active Copy Trades</h1>
       <p class="text-sm text-slate-500 dark:text-slate-400">{{ trades.length }} users currently copying an expert</p>
     </div>
 
     <div v-if="loading" class="text-slate-500 dark:text-slate-400">Loading…</div>
     <div v-else-if="trades.length === 0" class="text-slate-500 dark:text-slate-400">No active copy trades.</div>
 
-    <div v-else class="bg-white dark:bg-[#0F1524] border border-slate-200 dark:border-white/5 rounded-2xl overflow-x-auto">
+    <!-- Mobile: stacked cards -->
+    <div v-else class="sm:hidden space-y-3">
+      <div v-for="t in trades" :key="t.id" class="bg-white dark:bg-[#0F1524] border border-slate-200 dark:border-white/5 rounded-2xl p-4 space-y-2">
+        <div class="min-w-0">
+          <div class="text-slate-900 dark:text-white font-medium truncate">{{ t.userName }}</div>
+          <div class="text-xs text-slate-500 dark:text-slate-400 truncate">{{ t.userEmail }}</div>
+        </div>
+        <div class="text-xs text-indigo-500">Copying {{ t.expertName }}</div>
+        <div class="grid grid-cols-2 gap-2 text-sm pt-1">
+          <div><div class="text-[11px] text-slate-500">Invested</div><div class="text-slate-900 dark:text-white">{{ money(t.price) }}</div></div>
+          <div><div class="text-[11px] text-slate-500">Balance</div><div class="text-slate-900 dark:text-white">{{ money(t.currentBalance) }}</div></div>
+          <div><div class="text-[11px] text-slate-500">Profit</div><div class="text-emerald-600 dark:text-emerald-400">{{ money(t.totalProfit) }}</div></div>
+          <div><div class="text-[11px] text-slate-500">Trades (W)</div><div class="text-slate-500 dark:text-slate-400">{{ t.totalTrades }} ({{ t.winningTrades }}W)</div></div>
+        </div>
+        <div class="text-xs text-slate-500 dark:text-slate-400 pt-1 border-t border-slate-100 dark:border-white/5">Started {{ t.startedAt ? new Date(t.startedAt).toLocaleDateString() : '—' }}</div>
+      </div>
+    </div>
+
+    <!-- Desktop: table -->
+    <div v-if="!loading && trades.length" class="hidden sm:block bg-white dark:bg-[#0F1524] border border-slate-200 dark:border-white/5 rounded-2xl overflow-x-auto">
       <table class="w-full text-sm">
         <thead>
           <tr class="text-left text-slate-500 dark:text-slate-400 border-b border-slate-200 dark:border-white/5">

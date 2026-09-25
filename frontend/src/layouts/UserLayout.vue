@@ -4,8 +4,8 @@ import { useRoute, useRouter, RouterLink, RouterView } from 'vue-router'
 import { onClickOutside } from '@vueuse/core'
 import {
   LayoutDashboard, Receipt, Briefcase, Target, PieChart, TrendingUp, CandlestickChart, Users2, Bot,
-  Radio, Signal, Zap, Wallet, PlusCircle, MinusCircle, ArrowLeftRight, Repeat, CreditCard, FilePlus,
-  FileText, UserCircle, User, ShieldAlert, ShieldCheck, Clock, KeyRound, GraduationCap, Server,
+  Wallet, PlusCircle, MinusCircle, ArrowLeftRight, Repeat,
+  UserCircle, User, ShieldAlert, ShieldCheck, Clock, KeyRound,
   TrendingUp as TrendingUpIcon, Headphones, HelpCircle, Bell, ChevronDown, Menu, X, LogOut, Sun, Moon,
   BellOff, AlertTriangle, CheckCircle, AlertOctagon, Info, Home, Banknote,
 } from 'lucide-vue-next'
@@ -13,7 +13,6 @@ import { useAuthUserStore } from '@/stores/authUser'
 import { usePublicSettingsStore } from '@/stores/publicSettings'
 import { useNotificationsStore } from '@/stores/notifications'
 import { storageUrl } from '@/lib/storage'
-import { useCryptoPrices } from '@/lib/cryptoPrices'
 
 const route = useRoute()
 const router = useRouter()
@@ -41,8 +40,6 @@ function toggleTheme() {
   document.documentElement.setAttribute('data-theme', isDark.value ? 'dark' : 'light')
 }
 
-const { prices, start: startPrices, stop: stopPrices } = useCryptoPrices(['bitcoin', 'ethereum'])
-
 const NAV_SECTIONS = [
   {
     label: 'Overview', icon: LayoutDashboard,
@@ -67,34 +64,12 @@ const NAV_SECTIONS = [
     ],
   },
   {
-    label: 'Market Intelligence', icon: Radio,
-    items: [
-      { name: 'user.signals', label: 'My Signals', icon: Signal },
-      { name: 'user.signals-premium', label: 'Premium Signals', icon: Zap },
-      { name: 'user.signals-external', label: 'Signal Providers', icon: Radio },
-    ],
-  },
-  {
     label: 'Wallet & Funds', icon: Wallet,
     items: [
       { name: 'user.deposits', label: 'Deposit Funds', icon: PlusCircle },
       { name: 'user.withdrawals', label: 'Withdraw Funds', icon: MinusCircle },
       { name: 'user.transfer', label: 'Internal Transfer', icon: ArrowLeftRight },
       { name: 'user.exchange', label: 'Currency Exchange', icon: Repeat },
-    ],
-  },
-  {
-    label: 'Credit & Financing', icon: CreditCard,
-    items: [
-      { name: 'user.loans', label: 'Apply for Credit', icon: FilePlus },
-      { name: 'user.loans-history', label: 'Credit History', icon: FileText },
-    ],
-  },
-  {
-    label: 'Learning & Tools', icon: GraduationCap,
-    items: [
-      { name: 'user.membership', label: 'Membership & Courses', icon: GraduationCap },
-      { name: 'user.mt4', label: 'MT4 Subscription', icon: Server },
     ],
   },
   {
@@ -168,13 +143,8 @@ onMounted(() => {
   settingsStore.ensureLoaded()
   authUser.fetchProfile().catch(() => {})
   notifications.fetchCount().catch(() => {})
-  startPrices()
   loadLanguageWidget()
 })
-onBeforeUnmount(() => stopPrices())
-
-const btcPrice = computed(() => prices.value?.bitcoin?.usd)
-const ethPrice = computed(() => prices.value?.ethereum?.usd)
 </script>
 
 <template>
@@ -186,7 +156,7 @@ const ethPrice = computed(() => prices.value?.ethereum?.usd)
         :class="sidebarOpen ? 'translate-x-0' : '-translate-x-full'">
         <div class="flex-shrink-0 p-4 border-b border-gray-200 dark:border-gray-800 flex items-center justify-between">
           <RouterLink :to="{ name: 'user.dashboard' }" class="flex items-center gap-2">
-            <img v-if="settingsStore.settings?.logo" :src="storageUrl(settingsStore.settings.logo)" class="h-8 w-auto" :alt="settingsStore.settings?.siteName">
+            <img v-if="settingsStore.settings?.logo" :src="storageUrl(settingsStore.settings.logo)" class="h-14 w-auto" :alt="settingsStore.settings?.siteName">
           </RouterLink>
           <button class="lg:hidden text-gray-500" @click="sidebarOpen = false"><X class="w-5 h-5" /></button>
         </div>
@@ -268,15 +238,9 @@ const ethPrice = computed(() => prices.value?.ethereum?.usd)
             <div class="flex items-center gap-3">
               <button class="lg:hidden text-gray-500" @click="sidebarOpen = true"><Menu class="w-6 h-6" /></button>
               <RouterLink :to="{ name: 'user.dashboard' }" class="lg:hidden flex items-center">
-                <img v-if="settingsStore.settings?.logo" :src="storageUrl(settingsStore.settings.logo)" class="h-6 w-auto" :alt="settingsStore.settings?.siteName">
+                <img v-if="settingsStore.settings?.logo" :src="storageUrl(settingsStore.settings.logo)" class="h-11 w-auto" :alt="settingsStore.settings?.siteName">
               </RouterLink>
-              <div class="hidden lg:flex items-center gap-4 text-sm">
-                <div class="flex items-center gap-2">
-                  <div class="w-2 h-2 bg-green-500 rounded-full animate-pulse"></div>
-                  <span class="text-xs font-medium text-gray-500 dark:text-gray-400">LIVE</span>
-                </div>
-                <div><span class="text-gray-500 dark:text-gray-400">BTC:</span> <span class="font-mono ml-1">${{ btcPrice ? btcPrice.toLocaleString() : '…' }}</span></div>
-                <div><span class="text-gray-500 dark:text-gray-400">ETH:</span> <span class="font-mono ml-1">${{ ethPrice ? ethPrice.toLocaleString() : '…' }}</span></div>
+              <div class="hidden lg:flex items-center">
                 <div ref="gtranslateContainer" class="gtranslate_wrapper"></div>
               </div>
             </div>

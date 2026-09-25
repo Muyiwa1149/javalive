@@ -15,6 +15,7 @@ import org.springframework.security.web.authentication.UsernamePasswordAuthentic
 import org.springframework.web.cors.CorsConfiguration;
 import org.springframework.web.cors.CorsConfigurationSource;
 import org.springframework.web.cors.UrlBasedCorsConfigurationSource;
+import jakarta.servlet.http.HttpServletResponse;
 
 import java.util.List;
 
@@ -58,6 +59,14 @@ public class SecurityConfig {
                 .requestMatchers("/api/**").hasRole("USER")
                 .anyRequest().permitAll()
             )
+            // Without this, Spring Security's default entry point (Http403ForbiddenEntryPoint) returns
+            // 403 for a missing/invalid/expired token too, indistinguishable from a real role mismatch —
+            // the frontend needs 401 specifically to tell "your session is gone, log in again" apart from
+            // "you're logged in but not allowed here", so it can auto-redirect only on the former.
+            .exceptionHandling(ex -> ex
+                .authenticationEntryPoint((request, response, authException) -> response.sendError(HttpServletResponse.SC_UNAUTHORIZED))
+                .accessDeniedHandler((request, response, accessDeniedException) -> response.sendError(HttpServletResponse.SC_FORBIDDEN))
+            )
             .addFilterBefore(jwtAuthenticationFilter, UsernamePasswordAuthenticationFilter.class)
             .addFilterBefore(ipBlacklistFilter, JwtAuthenticationFilter.class);
 
@@ -66,7 +75,7 @@ public class SecurityConfig {
 
     private CorsConfigurationSource corsConfigurationSource() {
         CorsConfiguration configuration = new CorsConfiguration();
-        configuration.setAllowedOrigins(List.of(allowedOrigins.split(",")));
+        configuration.setAllowedOriginPatterns(List.of(allowedOrigins.split(",")));
         configuration.setAllowedMethods(List.of("GET", "POST", "PUT", "PATCH", "DELETE", "OPTIONS"));
         configuration.setAllowedHeaders(List.of("*"));
         configuration.setAllowCredentials(true);

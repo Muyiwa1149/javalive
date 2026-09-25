@@ -1,8 +1,10 @@
 package com.javalive.backend.service.admin;
 
 import com.javalive.backend.dto.admin.AdminInvestmentSummary;
+import com.javalive.backend.dto.admin.AdminInvestmentUpdateRequest;
 import com.javalive.backend.dto.admin.AdminPlanRequest;
 import com.javalive.backend.dto.admin.AdminPlanSummary;
+import com.javalive.backend.entity.Investment;
 import com.javalive.backend.entity.Plan;
 import com.javalive.backend.repository.InvestmentRepository;
 import com.javalive.backend.repository.PlanRepository;
@@ -85,6 +87,29 @@ public class AdminPlanService {
     public List<AdminInvestmentSummary> activeInvestments() {
         return investmentRepository.findByActiveWithUserAndPlanOrderByIdDesc("yes")
                 .stream().map(AdminInvestmentSummary::from).toList();
+    }
+
+    /** Full admin correction of an investment — amount, plan (which carries the ROI rate/interval), every date, and the accumulated profit figures. */
+    @Transactional
+    public AdminInvestmentSummary updateInvestment(Long id, AdminInvestmentUpdateRequest request) {
+        Investment investment = investmentRepository.findById(id)
+                .orElseThrow(() -> new ApiException(HttpStatus.NOT_FOUND, "Investment not found."));
+
+        if (request.planId() != null) {
+            investment.setPlan(getPlan(request.planId()));
+        }
+        investment.setAmount(request.amount());
+        investment.setActive(request.active());
+        investment.setInvDuration(request.invDuration());
+        investment.setActivatedAt(request.activatedAt());
+        investment.setExpireDate(request.expireDate());
+        investment.setLastGrowth(request.lastGrowth());
+        investment.setProfitEarned(request.profitEarned());
+        investment.setProfitWithdrawn(request.profitWithdrawn());
+        investment.setWithdrawalDisabled(request.withdrawalDisabled());
+        investment.setUpdatedAt(LocalDateTime.now());
+
+        return AdminInvestmentSummary.from(investmentRepository.save(investment));
     }
 
     private Plan getPlan(Long id) {

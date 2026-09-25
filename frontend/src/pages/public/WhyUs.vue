@@ -110,7 +110,7 @@
                     The market is <span class="font-semibold text-blue-400">highly volatile</span>, offering strong profit potential with significant trading volumes.
                   </p>
                   <p>
-                    <span class="font-semibold text-blue-400">Keystone Bit-Fx</span> expands its portfolio into this market with
+                    <span class="font-semibold text-blue-400">Velnora Partners</span> expands its portfolio into this market with
                     self-learning and diversified bots, designed to capitalize on volatility while following a strategic, rationed approach.
                   </p>
                 </div>
@@ -143,7 +143,7 @@
                     <span class="font-semibold">Ethereum</span>, <span class="font-semibold">Litecoin</span>, and <span class="font-semibold">Ripple</span>.
                   </p>
                   <p>
-                    <span class="font-semibold text-yellow-400">Keystone Bit-Fx</span> bots are trained to capture both
+                    <span class="font-semibold text-yellow-400">Velnora Partners</span> bots are trained to capture both
                     short-term volatility and long-term momentum in crypto markets, balancing high-risk/high-reward strategies.
                   </p>
                 </div>
@@ -175,7 +175,7 @@
                     Forex trading involves buying one currency while simultaneously selling another, e.g., <span class="font-semibold">EUR/USD</span>.
                   </p>
                   <p>
-                    <span class="font-semibold text-green-400">Keystone Bit-Fx</span> applies quantitative models and adaptive bots
+                    <span class="font-semibold text-green-400">Velnora Partners</span> applies quantitative models and adaptive bots
                     to capture profits from volatility while minimizing downside risks.
                   </p>
                 </div>
@@ -208,7 +208,7 @@
                     <span class="font-semibold">portfolio diversification</span>.
                   </p>
                   <p>
-                    <span class="font-semibold text-gray-300">Keystone Bit-Fx</span> integrates metals trading into its strategies,
+                    <span class="font-semibold text-gray-300">Velnora Partners</span> integrates metals trading into its strategies,
                     hedging risks while capitalizing on cyclical market trends.
                   </p>
                 </div>
@@ -240,7 +240,7 @@
                     <span class="font-semibold">long-term growth</span> and <span class="font-semibold">short-term opportunities</span>.
                   </p>
                   <p>
-                    <span class="font-semibold text-red-400">Keystone Bit-Fx</span> bots scan global equity markets, balancing
+                    <span class="font-semibold text-red-400">Velnora Partners</span> bots scan global equity markets, balancing
                     growth and defensive sectors for optimized performance.
                   </p>
                 </div>

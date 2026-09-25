@@ -8,6 +8,8 @@ public record AdminEmailSegmentRequest(
         @NotBlank String category,
         List<Long> userIds,
         @NotBlank String subject,
-        @NotBlank String message
+        @NotBlank String message,
+        String greet,
+        String title
 ) {
 }

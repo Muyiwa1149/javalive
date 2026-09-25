@@ -38,7 +38,7 @@ public class AdminUserController {
 
     @PostMapping("/email-segment")
     public Map<String, Integer> emailSegment(@Valid @RequestBody AdminEmailSegmentRequest request) {
-        int sent = adminUserService.emailSegment(request.category(), request.userIds(), request.subject(), request.message());
+        int sent = adminUserService.emailSegment(request.category(), request.userIds(), request.subject(), request.message(), request.greet(), request.title());
         return Map.of("sent", sent);
     }
 

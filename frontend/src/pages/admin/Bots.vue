@@ -128,10 +128,10 @@ function money(v) {
   <div class="p-4 sm:p-6 lg:p-8 space-y-6">
     <div class="flex flex-col sm:flex-row sm:items-center justify-between gap-4">
       <div>
-        <h1 class="text-2xl font-bold text-slate-900 dark:text-white flex items-center gap-2"><Bot class="w-6 h-6 text-indigo-500" /> Trading Bots</h1>
+        <h1 class="text-xl sm:text-2xl font-bold text-slate-900 dark:text-white flex items-center gap-2"><Bot class="w-5 h-5 sm:w-6 sm:h-6 text-indigo-500" /> Trading Bots</h1>
         <p class="text-sm text-slate-500 dark:text-slate-400">{{ bots.length }} bots configured</p>
       </div>
-      <button class="inline-flex items-center gap-2 px-4 py-2.5 rounded-xl bg-gradient-to-r from-indigo-500 to-blue-600 text-white text-sm font-medium shadow-lg shadow-indigo-500/20" @click="openCreate">
+      <button class="inline-flex items-center justify-center gap-2 px-3.5 py-2 sm:px-4 sm:py-2.5 rounded-xl bg-gradient-to-r from-indigo-500 to-blue-600 text-white text-sm font-medium shadow-lg shadow-indigo-500/20" @click="openCreate">
         <Plus class="w-4 h-4" /> New Bot
       </button>
     </div>
@@ -235,7 +235,21 @@ function money(v) {
           </div>
           <h3 class="text-sm font-semibold text-slate-900 dark:text-white mb-2">Recent Trades</h3>
           <div v-if="detail.recentTrades.length === 0" class="text-sm text-slate-500 dark:text-slate-400">No trades recorded yet.</div>
-          <div v-else class="overflow-x-auto">
+          <!-- Mobile: stacked cards -->
+          <div v-else class="sm:hidden space-y-2">
+            <div v-for="t in detail.recentTrades" :key="t.id" class="bg-slate-50 dark:bg-white/5 rounded-xl p-3 space-y-1">
+              <div class="flex items-center justify-between">
+                <span class="text-sm font-medium text-slate-800 dark:text-slate-200">{{ t.userName || '—' }}</span>
+                <span class="text-sm font-medium" :class="Number(t.profitLoss) >= 0 ? 'text-emerald-500' : 'text-rose-500'">{{ money(t.profitLoss) }}</span>
+              </div>
+              <div class="flex items-center justify-between text-xs text-slate-500 dark:text-slate-400">
+                <span>{{ t.tradingPair }} · {{ t.tradeType }}</span>
+                <span class="capitalize">{{ t.result }}</span>
+              </div>
+            </div>
+          </div>
+          <!-- Desktop: table -->
+          <div v-if="detail.recentTrades.length" class="hidden sm:block overflow-x-auto">
             <table class="w-full text-xs">
               <thead>
                 <tr class="text-left text-slate-500 dark:text-slate-400 border-b border-slate-200 dark:border-white/5">

@@ -15,8 +15,8 @@ const categories = [
 
 const faqsByCategory = {
   about: [
-    { q: 'What is Keystone Bit-Fx?', a: 'Keystone Bit-Fx is a licensed multi-investment company that obtained a license to trade the financial markets for investors worldwide. We primarily trade forex, cryptocurrencies, and commodities unless instructed otherwise.' },
-    { q: 'In what countries is Keystone Bit-Fx available?', a: 'Keystone Bit-Fx is a worldwide platform, hence available to investors from all around the world.' },
+    { q: 'What is Velnora Partners?', a: 'Velnora Partners is a licensed multi-investment company that obtained a license to trade the financial markets for investors worldwide. We primarily trade forex, cryptocurrencies, and commodities unless instructed otherwise.' },
+    { q: 'In what countries is Velnora Partners available?', a: 'Velnora Partners is a worldwide platform, hence available to investors from all around the world.' },
   ],
   crypto: [
     { q: 'What are cryptocurrencies and is it Bitcoin?', a: 'A cryptocurrency is a digital or virtual currency secured by cryptography, making it nearly impossible to counterfeit or double-spend. Many cryptocurrencies are decentralized networks based on blockchain technology—a distributed ledger enforced by a disparate network of computers. Bitcoin is a cryptocurrency, but not all cryptocurrencies are Bitcoins.' },
@@ -25,11 +25,11 @@ const faqsByCategory = {
   ],
   account: [
     { q: "What do I do if I can't log into my account because I forgot my password?", a: 'Click the "Forgot Password" link, type your username or email, and you\'ll receive a link to change your password.' },
-    { q: 'How do I register on this website?', a: 'Go to Keystone Bit-Fx and click Sign Up. Fill in the sign-up form. After everything is correctly filled and our T&Cs agreed to, your account will be automatically created.' },
-    { q: 'How safe is it to use Keystone Bit-Fx?', a: 'We use industry-standard processes and technical safeguards to preserve the integrity and security of your personal information. We regularly back up your data to prevent data loss and the company has put all the necessary anti-malware software, advanced protection technology, and employ SSL encryption to ensure that information passed between our site and your browser is secure. SSL-encryption is in place to guard all the transferred data between your browser and our website. Also, the website is adequately protected by the latest technology from DDoS attacks.' },
+    { q: 'How do I register on this website?', a: 'Go to Velnora Partners and click Sign Up. Fill in the sign-up form. After everything is correctly filled and our T&Cs agreed to, your account will be automatically created.' },
+    { q: 'How safe is it to use Velnora Partners?', a: 'We use industry-standard processes and technical safeguards to preserve the integrity and security of your personal information. We regularly back up your data to prevent data loss and the company has put all the necessary anti-malware software, advanced protection technology, and employ SSL encryption to ensure that information passed between our site and your browser is secure. SSL-encryption is in place to guard all the transferred data between your browser and our website. Also, the website is adequately protected by the latest technology from DDoS attacks.' },
   ],
   investment: [
-    { q: 'How can I invest with Keystone Bit-Fx?', a: 'To start an investment, you must first become a registered member of Keystone Bit-Fx by signing up. After registration, investors can make their first deposit. All deposits must be made through the investor’s personal account at sign-in. To log in, use the member username and password you signed up with.' },
+    { q: 'How can I invest with Velnora Partners?', a: 'To start an investment, you must first become a registered member of Velnora Partners by signing up. After registration, investors can make their first deposit. All deposits must be made through the investor’s personal account at sign-in. To log in, use the member username and password you signed up with.' },
     { q: 'Can I open multiple investments?', a: 'Yes, you can open as many investments as possible on a single account. Multiple accounts are also accepted.' },
     { q: 'What are your investment plans?', a: 'To learn more about our investment offers, please go to the Investment Plans section of our website.', link: { text: 'Investment Plans', href: '/trade' } },
   ],
@@ -109,7 +109,7 @@ onUnmounted(() => {
             <span class="block mt-1 text-transparent bg-clip-text bg-gradient-to-r from-blue-400 to-teal-400">All You Need to Know</span>
           </h1>
           <p class="max-w-2xl mt-5 mx-auto text-xl text-gray-300">
-            Get answers to common questions about Keystone Bit-Fx and our services
+            Get answers to common questions about Velnora Partners and our services
           </p>
         </div>
       </div>

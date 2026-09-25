@@ -2,6 +2,19 @@ import { createRouter, createWebHistory } from 'vue-router'
 import { useAuthUserStore } from '@/stores/authUser'
 import { useAuthAdminStore } from '@/stores/authAdmin'
 
+// Features turned off platform-wide (nav entries removed too) — kept as routes rather than deleted
+// so the underlying pages/code stay intact and this is easy to reverse if re-enabled later.
+const DISABLED_ROUTES = new Set([
+  'user.loans', 'user.loans-history',
+  'user.signals', 'user.signals-premium', 'user.signals-external',
+  'user.membership', 'user.mt4',
+  'admin.loans',
+  'admin.signals', 'admin.signals-active', 'admin.signals-subscribers', 'admin.signals-settings',
+  'admin.trading-accounts', 'admin.trading-accounts-fees',
+  'admin.membership',
+  'admin.crm-new-task', 'admin.crm-tasks', 'admin.crm-my-tasks', 'admin.crm-leads', 'admin.crm-import',
+])
+
 const PublicLayout = () => import('@/layouts/PublicLayout.vue')
 const AuthLayout = () => import('@/layouts/AuthLayout.vue')
 const UserLayout = () => import('@/layouts/UserLayout.vue')
@@ -138,16 +151,19 @@ const router = createRouter({
 })
 
 router.beforeEach((to) => {
+  if (DISABLED_ROUTES.has(to.name)) {
+    return { name: to.name.startsWith('admin.') ? 'admin.dashboard' : 'user.dashboard' }
+  }
   if (to.meta.requiresUserAuth) {
     const authUser = useAuthUserStore()
     if (!authUser.isAuthenticated) {
-      return { name: 'home' }
+      return { name: 'login', query: { redirect: to.fullPath } }
     }
   }
   if (to.meta.requiresAdminAuth) {
     const authAdmin = useAuthAdminStore()
     if (!authAdmin.isAuthenticated) {
-      return { name: 'home' }
+      return { name: 'admin.login', query: { redirect: to.fullPath } }
     }
   }
   return true

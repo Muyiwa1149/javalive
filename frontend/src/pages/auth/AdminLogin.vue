@@ -1,12 +1,13 @@
 <script setup>
 import { ref, onMounted } from 'vue'
-import { useRouter } from 'vue-router'
+import { useRouter, useRoute } from 'vue-router'
 import { ShieldCheck, Mail, Lock, Eye, EyeOff, AlertCircle, Info } from 'lucide-vue-next'
 import { useAuthAdminStore } from '@/stores/authAdmin'
 import { usePublicSettingsStore } from '@/stores/publicSettings'
 import { storageUrl } from '@/lib/storage'
 
 const router = useRouter()
+const route = useRoute()
 const authAdmin = useAuthAdminStore()
 const settingsStore = usePublicSettingsStore()
 
@@ -28,10 +29,11 @@ async function submit() {
   submitting.value = true
   try {
     const data = await authAdmin.login({ email: email.value, password: password.value })
+    const redirect = typeof route.query.redirect === 'string' ? route.query.redirect : null
     if (data.twoFactorRequired) {
-      router.push({ name: 'admin.two-factor' })
+      router.push({ name: 'admin.two-factor', query: redirect ? { redirect } : {} })
     } else {
-      router.push({ name: 'admin.dashboard' })
+      router.push(redirect || { name: 'admin.dashboard' })
     }
   } catch (e) {
     error.value = e.response?.data?.message || 'Invalid email or password.'

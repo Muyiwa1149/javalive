@@ -7,7 +7,7 @@ import { storageUrl } from '@/lib/storage'
 
 const loading = ref(true)
 const applications = ref([])
-const filter = ref('Under review')
+const filter = ref('')
 const processingId = ref(null)
 
 async function load() {
@@ -69,9 +69,9 @@ async function decide(app, action) {
         <p class="text-sm text-slate-500 dark:text-slate-400">{{ applications.length }} total submissions</p>
       </div>
       <select v-model="filter" class="rounded-xl border border-slate-200 dark:border-white/10 bg-white dark:bg-[#0F1524] px-3 py-2.5 text-sm text-slate-900 dark:text-white">
+        <option value="">All</option>
         <option value="Under review">Under review</option>
         <option value="Verified">Verified</option>
-        <option value="">All</option>
       </select>
     </div>
 

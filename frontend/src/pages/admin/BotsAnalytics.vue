@@ -50,7 +50,7 @@ const chartOptions = {
 <template>
   <div class="p-4 sm:p-6 lg:p-8 space-y-6">
     <div>
-      <h1 class="text-2xl font-bold text-slate-900 dark:text-white flex items-center gap-2"><BarChart3 class="w-6 h-6 text-indigo-500" /> Bot Trading Analytics</h1>
+      <h1 class="text-xl sm:text-2xl font-bold text-slate-900 dark:text-white flex items-center gap-2"><BarChart3 class="w-5 h-5 sm:w-6 sm:h-6 text-indigo-500" /> Bot Trading Analytics</h1>
       <p class="text-sm text-slate-500 dark:text-slate-400">System-wide bot performance</p>
     </div>
 
@@ -81,7 +81,19 @@ const chartOptions = {
         <div class="h-64"><Line :data="chartData" :options="chartOptions" /></div>
       </div>
 
-      <div class="bg-white dark:bg-[#0F1524] border border-slate-200 dark:border-white/5 rounded-2xl overflow-x-auto">
+      <!-- Mobile: stacked cards -->
+      <div class="sm:hidden space-y-3">
+        <div v-for="b in dashboard.topBots" :key="b.id" class="bg-white dark:bg-[#0F1524] border border-slate-200 dark:border-white/5 rounded-2xl p-4">
+          <div class="flex items-center justify-between">
+            <span class="font-medium text-slate-900 dark:text-white">{{ b.name }}</span>
+            <span class="text-emerald-500 font-medium">{{ money(b.totalProfits) }}</span>
+          </div>
+          <div class="text-xs text-slate-500 dark:text-slate-400 mt-1">{{ b.investmentsCount }} investments · {{ b.activeInvestmentsCount }} active</div>
+        </div>
+      </div>
+
+      <!-- Desktop: table -->
+      <div class="hidden sm:block bg-white dark:bg-[#0F1524] border border-slate-200 dark:border-white/5 rounded-2xl overflow-x-auto">
         <table class="w-full text-sm">
           <thead>
             <tr class="text-left text-slate-500 dark:text-slate-400 border-b border-slate-200 dark:border-white/5">

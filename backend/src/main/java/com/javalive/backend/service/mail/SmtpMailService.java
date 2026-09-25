@@ -43,7 +43,7 @@ public class SmtpMailService implements MailService {
             Context context = new Context();
             context.setVariable("subject", subject);
             context.setVariable("body", body);
-            context.setVariable("siteName", settings.getSiteName() != null ? settings.getSiteName() : "Keystone Bit-Forex");
+            context.setVariable("siteName", settings.getSiteName() != null ? settings.getSiteName() : "Velnora Partners");
             context.setVariable("contactEmail", settings.getContactEmail() != null ? settings.getContactEmail() : fromAddress);
             String html = templateEngine.process("email/notification", context);
 

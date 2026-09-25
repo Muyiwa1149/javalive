@@ -1,6 +1,6 @@
 <script setup>
 import { ref, onMounted } from 'vue'
-import { useRouter } from 'vue-router'
+import { useRouter, useRoute } from 'vue-router'
 import { Smartphone, ShieldAlert, AlertCircle, KeyRound } from 'lucide-vue-next'
 import { useAuthAdminStore } from '@/stores/authAdmin'
 
@@ -10,6 +10,7 @@ import { useAuthAdminStore } from '@/stores/authAdmin'
 // no separate recovery-code mechanism — so that toggle is dropped here rather than built against a
 // backend feature that doesn't exist. The code-entry step itself is a faithful port of the design.
 const router = useRouter()
+const route = useRoute()
 const authAdmin = useAuthAdminStore()
 
 const code = ref('')
@@ -27,7 +28,8 @@ async function submit() {
   submitting.value = true
   try {
     await authAdmin.verifyTwoFactor(code.value)
-    router.push({ name: 'admin.dashboard' })
+    const redirect = typeof route.query.redirect === 'string' ? route.query.redirect : null
+    router.push(redirect || { name: 'admin.dashboard' })
   } catch (e) {
     error.value = e.response?.data?.message || 'Invalid or expired verification code.'
   } finally {

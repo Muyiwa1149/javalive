@@ -225,7 +225,7 @@ function renderChart() {
           <div class="space-y-6">
             <div>
               <span class="text-primary text-sm font-semibold uppercase tracking-wider">Investment Education</span>
-              <h2 class="mt-2 text-3xl font-bold text-white">Why Invest With Keystone Bit-FX</h2>
+              <h2 class="mt-2 text-3xl font-bold text-white">Why Invest With Velnora Partners</h2>
             </div>
             <p class="text-gray-300 text-lg">
               Discover the power of diversified investing with our AI-driven strategies and expert-managed portfolios, designed to maximize returns across global markets.
@@ -233,7 +233,7 @@ function renderChart() {
             <div class="bg-dark-300 rounded-lg p-6 border border-gray-800">
               <h3 class="text-xl font-semibold text-white mb-3">Why Choose Us</h3>
               <p class="text-gray-400">
-                At Keystone Bit-FX, we leverage cutting-edge AI technology and expert analysis to offer secure, transparent, and profitable investment opportunities. Our diversified portfolios span forex, cryptocurrencies, commodities, precious metals, and stocks, ensuring stability and growth. With a focus on user-friendly platforms, competitive conditions, and robust security, we empower investors to achieve their financial goals with confidence.
+                At Velnora Partners, we leverage cutting-edge AI technology and expert analysis to offer secure, transparent, and profitable investment opportunities. Our diversified portfolios span forex, cryptocurrencies, commodities, precious metals, and stocks, ensuring stability and growth. With a focus on user-friendly platforms, competitive conditions, and robust security, we empower investors to achieve their financial goals with confidence.
               </p>
             </div>
             <div class="flex flex-wrap gap-4 mt-4">
@@ -277,7 +277,7 @@ function renderChart() {
                   allow="autoplay; encrypted-media"
                   allowfullscreen
                   class="w-full h-[150px] object-cover"
-                  title="Importance of USD at Keystone Bit-FX">
+                  title="Importance of USD at Velnora Partners">
                 </iframe>
               </div>
             </div>

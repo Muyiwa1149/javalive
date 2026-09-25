@@ -6,7 +6,7 @@ import api from '@/lib/api'
 
 const loading = ref(true)
 const withdrawals = ref([])
-const filter = ref('Pending')
+const filter = ref('')
 const processingId = ref(null)
 
 async function load() {
@@ -70,19 +70,44 @@ const statusClass = (status) => ({
 <template>
   <div class="p-4 sm:p-6 lg:p-8 space-y-6">
     <div class="flex flex-col sm:flex-row sm:items-center justify-between gap-4">
-      <h1 class="text-2xl font-bold text-slate-900 dark:text-white flex items-center gap-2"><Send class="w-6 h-6 text-indigo-500" /> Manage Withdrawals</h1>
+      <h1 class="text-xl sm:text-2xl font-bold text-slate-900 dark:text-white flex items-center gap-2"><Send class="w-5 h-5 sm:w-6 sm:h-6 text-indigo-500" /> Manage Withdrawals</h1>
       <select v-model="filter" class="rounded-xl border border-slate-200 dark:border-white/10 bg-white dark:bg-[#0F1524] px-3 py-2.5 text-sm text-slate-900 dark:text-white" @change="load">
+        <option value="">All</option>
         <option value="Pending">Pending</option>
         <option value="Processed">Processed</option>
         <option value="Rejected">Rejected</option>
-        <option value="">All</option>
       </select>
     </div>
 
     <div v-if="loading" class="text-slate-500 dark:text-slate-400">Loading…</div>
     <div v-else-if="withdrawals.length === 0" class="text-slate-500 dark:text-slate-400">No withdrawals found.</div>
 
-    <div v-else class="bg-white dark:bg-[#0F1524] border border-slate-200 dark:border-white/5 rounded-2xl overflow-x-auto">
+    <!-- Mobile: stacked cards -->
+    <div v-else class="sm:hidden space-y-3">
+      <div v-for="w in withdrawals" :key="w.id" class="bg-white dark:bg-[#0F1524] border border-slate-200 dark:border-white/5 rounded-2xl p-4 space-y-2">
+        <div class="flex items-start justify-between gap-2">
+          <div class="min-w-0">
+            <div class="text-slate-900 dark:text-white font-medium truncate">{{ w.userName }}</div>
+            <div class="text-xs text-slate-500 dark:text-slate-400 truncate">{{ w.userEmail }}</div>
+          </div>
+          <span class="shrink-0 px-2 py-0.5 rounded-full text-[11px] font-medium" :class="statusClass(w.status)">{{ w.status }}</span>
+        </div>
+        <div class="grid grid-cols-2 gap-2 text-sm pt-1">
+          <div><div class="text-[11px] text-slate-500">Method</div><div class="text-slate-700 dark:text-slate-300">{{ w.paymentMode }}</div></div>
+          <div><div class="text-[11px] text-slate-500">Amount</div><div class="font-medium text-slate-900 dark:text-white">{{ Number(w.amount).toLocaleString(undefined, { minimumFractionDigits: 2 }) }}</div></div>
+          <div><div class="text-[11px] text-slate-500">Deducted</div><div class="text-slate-500 dark:text-slate-400">{{ Number(w.toDeduct).toLocaleString(undefined, { minimumFractionDigits: 2 }) }}</div></div>
+          <div class="col-span-2"><div class="text-[11px] text-slate-500">Details</div><div class="text-slate-500 dark:text-slate-400 truncate" :title="w.payDetails">{{ w.payDetails }}</div></div>
+        </div>
+        <div class="text-xs text-slate-500 dark:text-slate-400">{{ new Date(w.createdAt).toLocaleString() }}</div>
+        <div v-if="w.status === 'Pending'" class="flex items-center gap-1 pt-2 border-t border-slate-100 dark:border-white/5">
+          <button :disabled="processingId === w.id" class="flex-1 inline-flex items-center justify-center gap-1.5 py-2 text-xs font-medium text-emerald-600 hover:bg-emerald-50 dark:hover:bg-emerald-500/10 rounded-lg disabled:opacity-50" @click="approve(w)"><Check class="w-3.5 h-3.5" /> Approve</button>
+          <button :disabled="processingId === w.id" class="flex-1 inline-flex items-center justify-center gap-1.5 py-2 text-xs font-medium text-rose-500 hover:bg-rose-50 dark:hover:bg-rose-500/10 rounded-lg disabled:opacity-50" @click="reject(w)"><X class="w-3.5 h-3.5" /> Reject</button>
+        </div>
+      </div>
+    </div>
+
+    <!-- Desktop: table -->
+    <div v-if="!loading && withdrawals.length" class="hidden sm:block bg-white dark:bg-[#0F1524] border border-slate-200 dark:border-white/5 rounded-2xl overflow-x-auto">
       <table class="w-full text-sm">
         <thead>
           <tr class="text-left text-slate-500 dark:text-slate-400 border-b border-slate-200 dark:border-white/5">

@@ -43,7 +43,7 @@
             Our Company
           </div>
           <h1 class="text-3xl font-extrabold tracking-tight text-white sm:text-4xl md:text-5xl">
-            <span class="block">About Keystone Bit-Fx</span>
+            <span class="block">About Velnora Partners</span>
             <span class="block mt-1 text-transparent bg-clip-text bg-gradient-to-r from-blue-400 to-teal-400">Empowering Wealth Creation</span>
           </h1>
           <p class="max-w-2xl mt-5 mx-auto text-xl text-gray-300">
@@ -129,7 +129,7 @@
 
       <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 relative z-10">
         <div class="text-center mb-12">
-          <h2 class="text-3xl font-bold text-white">Why Choose Keystone Bit-Fx?</h2>
+          <h2 class="text-3xl font-bold text-white">Why Choose Velnora Partners?</h2>
           <div class="w-24 h-1 mx-auto mt-4 rounded-full bg-gradient-to-r from-blue-500 to-teal-400"></div>
         </div>
 
@@ -230,11 +230,11 @@
 
         <div class="bg-gray-800 bg-opacity-70 backdrop-blur-sm rounded-2xl border border-gray-700 shadow-xl overflow-hidden p-6 md:p-10">
           <div class="prose prose-lg prose-invert max-w-none">
-            <p>Since its founding in 2009, Keystone has been deeply involved with the trading industry. The same year, the company launched research on a trading bot called Trader's Partner (at the time) and has grown it to more than 20 million users over the course of a decade, rebranding it as Bit-Forex.</p>
-            <p>In 2017, following a successful Nonfarm Payroll (NFP) event that raised $18.9 million, Keystone established itself as a leading NFP trading company, building a suite of user-first trading services that enable anyone to easily create, manage, store, compound, and withdraw investments.</p>
-            <p>Built as a broker and trading service on a robust online infrastructure, Keystone Bit-Fx comprises the Keystone wallet, Bit-Forex bot, and 24/7 customer support from around the world. We empower individuals, investors, and traders with true passive trading of currencies, commodities, and digital assets to increase revenue, gain a competitive edge, and innovate in previously impossible ways.</p>
-            <p>Forged in trading, Keystone Bit-Fx tools and services can be used worldwide by individuals or groups of all sizes seeking to create long-term annuities or dabble in currency, commodities, and crypto trading as part of their acquisition, retention, engagement, and monetization strategies.</p>
-            <p>The Keystone ecosystem is fueled by revenues from trading for itself and commissions, a strategy to directly back the company's expenditures on services. As a startup that has evolved into a leader in the modern financial and investment industry, Keystone aims to change not only the financial market but also the lives of its partners and investors.</p>
+            <p>Since its founding in 2009, Velnora Partners has been deeply involved with the trading industry. The same year, the company launched research on a trading bot called Trader's Partner (at the time) and has grown it to more than 20 million users over the course of a decade, rebranding it as Bit-Forex.</p>
+            <p>In 2017, following a successful Nonfarm Payroll (NFP) event that raised $18.9 million, Velnora Partners established itself as a leading NFP trading company, building a suite of user-first trading services that enable anyone to easily create, manage, store, compound, and withdraw investments.</p>
+            <p>Built as a broker and trading service on a robust online infrastructure, Velnora Partners comprises the Velnora Partners wallet, Bit-Forex bot, and 24/7 customer support from around the world. We empower individuals, investors, and traders with true passive trading of currencies, commodities, and digital assets to increase revenue, gain a competitive edge, and innovate in previously impossible ways.</p>
+            <p>Forged in trading, Velnora Partners tools and services can be used worldwide by individuals or groups of all sizes seeking to create long-term annuities or dabble in currency, commodities, and crypto trading as part of their acquisition, retention, engagement, and monetization strategies.</p>
+            <p>The Velnora Partners ecosystem is fueled by revenues from trading for itself and commissions, a strategy to directly back the company's expenditures on services. As a startup that has evolved into a leader in the modern financial and investment industry, Velnora Partners aims to change not only the financial market but also the lives of its partners and investors.</p>
           </div>
         </div>
       </div>
@@ -247,17 +247,17 @@
 
       <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 relative z-10">
         <div class="text-center mb-12">
-          <h2 class="text-3xl font-bold text-white">About Keystone Bit-Fx</h2>
+          <h2 class="text-3xl font-bold text-white">About Velnora Partners</h2>
           <div class="w-24 h-1 mx-auto mt-4 rounded-full bg-gradient-to-r from-blue-500 to-teal-400"></div>
         </div>
 
         <div class="bg-gray-800 bg-opacity-70 backdrop-blur-sm rounded-2xl border border-gray-700 shadow-xl overflow-hidden p-6 md:p-10">
           <div class="prose prose-lg prose-invert max-w-none">
-            <p>Keystone Bit-Fx is an Artificial Intelligence Asset Management Company that uses advanced AI software to trade primarily in the Forex and cryptocurrency markets, generating income for our investors. Our software employs deep learning techniques to train large neural networks to recognize patterns in data, leveraging unstructured data from social media posts and news articles to develop trading strategies with profitable returns.</p>
+            <p>Velnora Partners is an Artificial Intelligence Asset Management Company that uses advanced AI software to trade primarily in the Forex and cryptocurrency markets, generating income for our investors. Our software employs deep learning techniques to train large neural networks to recognize patterns in data, leveraging unstructured data from social media posts and news articles to develop trading strategies with profitable returns.</p>
             <p>By analyzing large amounts of historical and real-time trading data, our AI provides better market insights, allowing us to shape strategies based on current market volatility. Our investment managers, supported by AI, analyze forex, cryptocurrency, and other markets to create profitable, adaptive trading portfolios and make safe decisions.</p>
             <p>Our business is risk-free from an investing perspective, thanks to advanced trading technologies, a powerful expert team, diversified investment areas, and an 80% cash-back policy in case of trade losses. Financial flow separation ensures stability, and our high-quality service, coupled with constant technical and legal support, guarantees the security of our partners' financial assets.</p>
-            <p>Keystone is an officially registered company with all necessary licenses to conduct trade and financial activities in international markets, compliant with international legal requirements. Our head office is located in Nicosia, Cyprus, where our professional team of traders, political experts, sociologists, financial analysts, and economic experts conducts daily market analysis, monitoring changes in stock and cryptocurrency markets, tracking promising companies, and studying exchange rates.</p>
-            <p>By becoming a Keystone partner, you gain a stable and secure source of income and join a team dedicated to providing high-quality support. We analyze your requests and provide professional advice promptly, ensuring stability, development, and reliability in all investment activities.</p>
+            <p>Velnora Partners is an officially registered company with all necessary licenses to conduct trade and financial activities in international markets, compliant with international legal requirements. Our head office is located in Nicosia, Cyprus, where our professional team of traders, political experts, sociologists, financial analysts, and economic experts conducts daily market analysis, monitoring changes in stock and cryptocurrency markets, tracking promising companies, and studying exchange rates.</p>
+            <p>By partnering with Velnora Partners, you gain a stable and secure source of income and join a team dedicated to providing high-quality support. We analyze your requests and provide professional advice promptly, ensuring stability, development, and reliability in all investment activities.</p>
           </div>
         </div>
       </div>
@@ -297,9 +297,9 @@
 
         <div class="bg-gray-800 bg-opacity-70 backdrop-blur-sm rounded-2xl border border-gray-700 shadow-xl overflow-hidden p-6 md:p-10">
           <div class="prose prose-lg prose-invert max-w-none">
-            <p>Unlike non-standard investment strategies, our approach globalizes the process of generating profit and creating benefits for all program participants. As a major player in the market, Keystone Bit-Fx manages total capital to earn significant returns on our clients' personal deposits.</p>
+            <p>Unlike non-standard investment strategies, our approach globalizes the process of generating profit and creating benefits for all program participants. As a major player in the market, Velnora Partners manages total capital to earn significant returns on our clients' personal deposits.</p>
             <p>Our traders are incentivized to increase their income on deposits, as their profit directly correlates with the profitability of our investors. This alignment ensures that our team works diligently to maximize returns while maintaining a secure and diversified investment strategy.</p>
-            <p>Learn more about our investment plans and how you can start building wealth with Keystone Bit-Fx by visiting our <RouterLink to="/trade" class="text-blue-400 hover:underline">Investment Plans</RouterLink> section.</p>
+            <p>Learn more about our investment plans and how you can start building wealth with Velnora Partners by visiting our <RouterLink to="/trade" class="text-blue-400 hover:underline">Investment Plans</RouterLink> section.</p>
           </div>
         </div>
       </div>
@@ -335,7 +335,7 @@
             <div>
               <h2 class="text-2xl font-bold text-white mb-4">Experience More Than Trading</h2>
               <p class="text-gray-300">
-                Our success is driven by core values: leveraging AI-driven trading, ensuring robust security, offering diversified investment options, and delivering exceptional customer service. Join Keystone Bit-Fx to access advanced trading platforms and tailored financial products.
+                Our success is driven by core values: leveraging AI-driven trading, ensuring robust security, offering diversified investment options, and delivering exceptional customer service. Join Velnora Partners to access advanced trading platforms and tailored financial products.
               </p>
             </div>
 

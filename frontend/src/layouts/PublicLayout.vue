@@ -179,7 +179,6 @@ function loadTickerWidget() {
                 {{ settingsStore.settings?.siteName }} offers CFD trading on stocks, forex, indices, commodities, and cryptocurrencies with competitive spreads and advanced trading tools.
               </p>
               <div class="flex space-x-4">
-                <a href="https://www.facebook.com/keystonebitforex/" class="text-gray-400 hover:text-white" aria-label="Facebook"><i class="fab fa-facebook"></i></a>
                 <a href="#" class="text-gray-400 hover:text-white" aria-label="LinkedIn"><i class="fab fa-linkedin"></i></a>
                 <a v-if="settingsStore.settings?.contactEmail" :href="`mailto:${settingsStore.settings.contactEmail}`" class="text-gray-400 hover:text-white" aria-label="Email"><i class="fas fa-envelope"></i></a>
                 <a v-if="settingsStore.settings?.whatsappNumber" :href="`https://wa.me/${settingsStore.settings.whatsappNumber.replace(/[^\d+]/g, '')}`" class="text-gray-400 hover:text-white" aria-label="WhatsApp"><i class="fab fa-whatsapp"></i></a>

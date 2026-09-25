@@ -73,10 +73,10 @@ async function createUser() {
   <div class="p-4 sm:p-6 lg:p-8 space-y-6">
     <div class="flex flex-col sm:flex-row sm:items-center justify-between gap-4">
       <div>
-        <h1 class="text-2xl font-bold text-slate-900 dark:text-white">Manage Users</h1>
+        <h1 class="text-xl sm:text-2xl font-bold text-slate-900 dark:text-white">Manage Users</h1>
         <p class="text-sm text-slate-500 dark:text-slate-400">{{ users.length }} registered accounts</p>
       </div>
-      <button class="inline-flex items-center gap-2 px-4 py-2.5 rounded-xl bg-gradient-to-r from-indigo-500 to-blue-600 text-white text-sm font-medium shadow-lg shadow-indigo-500/20 hover:opacity-90" @click="showAddModal = true">
+      <button class="inline-flex items-center justify-center gap-2 px-3.5 py-2 sm:px-4 sm:py-2.5 rounded-xl bg-gradient-to-r from-indigo-500 to-blue-600 text-white text-sm font-medium shadow-lg shadow-indigo-500/20 hover:opacity-90" @click="showAddModal = true">
         <UserPlus class="w-4 h-4" /> Add User
       </button>
     </div>
@@ -90,7 +90,46 @@ async function createUser() {
     <div v-if="loading" class="text-slate-500 dark:text-slate-400">Loading…</div>
     <div v-else-if="filtered.length === 0" class="text-slate-500 dark:text-slate-400">No users found.</div>
 
-    <div v-else class="bg-white dark:bg-[#0F1524] border border-slate-200 dark:border-white/5 rounded-2xl overflow-x-auto">
+    <!-- Mobile: stacked cards -->
+    <div v-else class="sm:hidden space-y-3">
+      <div v-for="u in filtered" :key="u.id" class="bg-white dark:bg-[#0F1524] border border-slate-200 dark:border-white/5 rounded-2xl p-4 space-y-2">
+        <div class="flex items-start justify-between gap-2">
+          <RouterLink :to="{ name: 'admin.user-detail', params: { id: u.id } }" class="flex items-center gap-3 min-w-0">
+            <div class="w-9 h-9 rounded-full bg-gradient-to-br from-indigo-500 to-blue-600 flex items-center justify-center text-white text-xs font-semibold shrink-0">
+              {{ (u.name || '?').charAt(0).toUpperCase() }}
+            </div>
+            <div class="min-w-0">
+              <div class="text-slate-900 dark:text-white font-medium truncate">{{ u.name }}</div>
+              <div class="text-xs text-slate-500 dark:text-slate-400 truncate">{{ u.email }}</div>
+            </div>
+          </RouterLink>
+          <span class="shrink-0 px-2 py-0.5 rounded-full text-[11px] font-medium capitalize" :class="statusClass(u.status)">{{ u.status || 'active' }}</span>
+        </div>
+        <div class="grid grid-cols-2 gap-2 text-sm pt-1">
+          <div><div class="text-[11px] text-slate-500">Balance</div><div class="font-medium text-slate-900 dark:text-white">{{ money(u) }}</div></div>
+          <div><div class="text-[11px] text-slate-500">Joined</div><div class="text-slate-500 dark:text-slate-400">{{ u.createdAt ? new Date(u.createdAt).toLocaleDateString() : '—' }}</div></div>
+          <div class="flex items-center gap-1.5">
+            <ShieldCheck v-if="u.accountVerifyStatus === 'Verified'" class="w-4 h-4" :class="verifyClass(u.accountVerifyStatus)" />
+            <ShieldOff v-else class="w-4 h-4 text-slate-300 dark:text-slate-600" />
+            <span class="text-[11px] text-slate-500">KYC {{ u.accountVerifyStatus === 'Verified' ? 'verified' : 'unverified' }}</span>
+          </div>
+        </div>
+        <div class="flex items-center gap-1 pt-2 border-t border-slate-100 dark:border-white/5">
+          <RouterLink :to="{ name: 'admin.user-detail', params: { id: u.id } }" class="flex-1 inline-flex items-center justify-center gap-1.5 py-2 text-xs font-medium text-slate-600 dark:text-slate-300 hover:bg-slate-100 dark:hover:bg-white/5 rounded-lg">
+            <Eye class="w-3.5 h-3.5" /> View
+          </RouterLink>
+          <button class="flex-1 inline-flex items-center justify-center gap-1.5 py-2 text-xs font-medium rounded-lg hover:bg-slate-100 dark:hover:bg-white/5"
+            :class="u.status === 'blocked' ? 'text-emerald-600' : 'text-rose-500'" @click="toggleBlock(u)">
+            <CheckCircle2 v-if="u.status === 'blocked'" class="w-3.5 h-3.5" />
+            <Ban v-else class="w-3.5 h-3.5" />
+            {{ u.status === 'blocked' ? 'Unblock' : 'Block' }}
+          </button>
+        </div>
+      </div>
+    </div>
+
+    <!-- Desktop: table -->
+    <div v-if="!loading && filtered.length" class="hidden sm:block bg-white dark:bg-[#0F1524] border border-slate-200 dark:border-white/5 rounded-2xl overflow-x-auto">
       <table class="w-full text-sm">
         <thead>
           <tr class="text-left text-slate-500 dark:text-slate-400 border-b border-slate-200 dark:border-white/5">

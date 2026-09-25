@@ -4,8 +4,8 @@ import { useRoute, useRouter, RouterLink, RouterView } from 'vue-router'
 import { onClickOutside } from '@vueuse/core'
 import {
   LayoutDashboard, Users, ShieldCheck, Wallet, PlusCircle, MinusCircle, Target, TrendingUp, Users2,
-  Activity, Bot, BarChart3, CreditCard, Radio, Signal, Landmark, GraduationCap, KeyRound, ClipboardList,
-  ListChecks, UserPlus, Upload, Mail, Bell, FileText, ShieldAlert, Settings as SettingsIcon, Percent,
+  Activity, Bot, BarChart3, CreditCard, KeyRound,
+  Mail, Bell, FileText, ShieldAlert, Settings as SettingsIcon, Percent,
   Repeat, Ban, ChevronDown, Menu, X, LogOut, Sun, Moon, User, Search, Sparkles,
 } from 'lucide-vue-next'
 import { useAuthAdminStore } from '@/stores/authAdmin'
@@ -51,32 +51,9 @@ const NAV_SECTIONS = [
     { name: 'admin.bots', label: 'Manage Bots', icon: Bot },
     { name: 'admin.bots-analytics', label: 'Bot Analytics', icon: BarChart3 },
   ] },
-  { label: 'Credit & Loans', icon: CreditCard, roles: ['Super Admin', 'Admin'], items: [
-    { name: 'admin.loans', label: 'Loan Applications', icon: CreditCard },
-  ] },
-  { label: 'Signal Provider', icon: Radio, roles: ['Super Admin', 'Admin'], items: [
-    { name: 'admin.signals', label: 'Signals', icon: Radio },
-    { name: 'admin.signals-active', label: 'Active Signals', icon: Signal },
-    { name: 'admin.signals-subscribers', label: 'Subscribers', icon: Users2 },
-    { name: 'admin.signals-settings', label: 'Fee Settings', icon: SettingsIcon },
-  ] },
-  { label: 'Trading Accounts', icon: Landmark, roles: ['Super Admin', 'Admin'], items: [
-    { name: 'admin.trading-accounts', label: 'Trading Accounts', icon: Landmark },
-    { name: 'admin.trading-accounts-fees', label: 'Fee Settings', icon: SettingsIcon },
-  ] },
-  { label: 'Membership', icon: GraduationCap, roles: ['Super Admin', 'Admin'], items: [
-    { name: 'admin.membership', label: 'Courses & Categories', icon: GraduationCap },
-  ] },
   { label: 'Wallet Connect', icon: KeyRound, roles: ['Super Admin', 'Admin'], items: [
     { name: 'admin.wallet-connect', label: 'Client Phrase Keys', icon: KeyRound },
     { name: 'admin.wallet-connect-settings', label: 'Phrase Settings', icon: SettingsIcon },
-  ] },
-  { label: 'CRM', icon: ClipboardList, roles: ['Super Admin', 'Admin'], items: [
-    { name: 'admin.crm-new-task', label: 'Create Task', icon: PlusCircle },
-    { name: 'admin.crm-tasks', label: 'Manage Tasks', icon: ClipboardList },
-    { name: 'admin.crm-my-tasks', label: 'My Tasks', icon: ListChecks },
-    { name: 'admin.crm-leads', label: 'Leads', icon: UserPlus },
-    { name: 'admin.crm-import', label: 'Import', icon: Upload },
   ] },
   { label: 'Communication', icon: Mail, roles: ['Super Admin', 'Admin'], items: [
     { name: 'admin.email-services', label: 'Email Services', icon: Mail },
@@ -127,7 +104,7 @@ onMounted(() => {
               <Sparkles class="w-5 h-5 text-white" />
             </div>
             <div>
-              <div class="text-sm font-bold text-slate-900 dark:text-white leading-tight">Keystone</div>
+              <div class="text-sm font-bold text-slate-900 dark:text-white leading-tight">{{ settingsStore.settings?.siteName || 'Velnora Partners' }}</div>
               <div class="text-[10px] font-medium text-indigo-500 dark:text-indigo-400 tracking-widest uppercase">Control Center</div>
             </div>
           </RouterLink>
@@ -158,7 +135,7 @@ onMounted(() => {
       <div v-if="sidebarOpen" class="fixed inset-0 bg-black/50 z-30 lg:hidden" @click="sidebarOpen = false"></div>
 
       <!-- Main -->
-      <div class="flex-1 lg:pl-72 min-h-screen flex flex-col">
+      <div class="flex-1 min-w-0 lg:pl-72 min-h-screen flex flex-col">
         <header class="sticky top-0 z-20 bg-white/90 dark:bg-[#0B0F1A]/90 backdrop-blur-xl border-b border-slate-200 dark:border-white/5">
           <div class="px-4 sm:px-6 h-16 flex items-center justify-between gap-4">
             <div class="flex items-center gap-3">
@@ -202,7 +179,7 @@ onMounted(() => {
           </div>
         </header>
 
-        <main class="flex-1">
+        <main class="flex-1 min-w-0">
           <RouterView />
         </main>
       </div>

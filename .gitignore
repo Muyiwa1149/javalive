@@ -11,3 +11,4 @@ qa-testing/node_modules/
 qa-testing/screenshots/
 qa-testing/*.json
 qa-testing/*token*.txt
+qa-testing/*.png

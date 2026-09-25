@@ -1,6 +1,7 @@
 package com.javalive.backend.web.admin;
 
 import com.javalive.backend.dto.admin.AdminInvestmentSummary;
+import com.javalive.backend.dto.admin.AdminInvestmentUpdateRequest;
 import com.javalive.backend.dto.admin.AdminPlanRequest;
 import com.javalive.backend.dto.admin.AdminPlanSummary;
 import com.javalive.backend.service.admin.AdminPlanService;
@@ -47,5 +48,10 @@ public class AdminPlanController {
     @GetMapping("/investments")
     public List<AdminInvestmentSummary> activeInvestments() {
         return adminPlanService.activeInvestments();
+    }
+
+    @PutMapping("/investments/{id}")
+    public AdminInvestmentSummary updateInvestment(@PathVariable Long id, @Valid @RequestBody AdminInvestmentUpdateRequest request) {
+        return adminPlanService.updateInvestment(id, request);
     }
 }
