@@ -46,8 +46,8 @@ public class AdminPlanController {
     }
 
     @GetMapping("/investments")
-    public List<AdminInvestmentSummary> activeInvestments() {
-        return adminPlanService.activeInvestments();
+    public List<AdminInvestmentSummary> investments(@RequestParam(required = false) String status) {
+        return adminPlanService.investments(status);
     }
 
     @PutMapping("/investments/{id}")

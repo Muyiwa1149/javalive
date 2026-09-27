@@ -14,7 +14,9 @@ const editingId = ref(null)
 const photoFile = ref(null)
 
 const emptyForm = () => ({
-  name: '', tag: '', rating: 5, equity: 0, totalProfit: 0, winRate: 70, totalTrades: 0, price: 0,
+  name: '', tag: '', rating: 5, equity: 0, totalProfit: 0, winRate: 70,
+  profitMin: 0.5, profitMax: 4, lossMin: 0.2, lossMax: 2,
+  totalTrades: 0, price: 0,
   description: '', status: 'active',
 })
 const form = ref(emptyForm())
@@ -137,6 +139,7 @@ async function remove(expert) {
         <div class="grid grid-cols-2 gap-2 text-xs text-slate-500 dark:text-slate-400">
           <p class="flex items-center gap-1"><Star class="w-3.5 h-3.5" /> {{ e.rating }}/5</p>
           <p class="flex items-center gap-1"><Percent class="w-3.5 h-3.5" /> {{ e.winRate }}% win</p>
+          <p class="col-span-2 text-[11px]">+{{ e.profitMin }}–{{ e.profitMax }}% / -{{ e.lossMin }}–{{ e.lossMax }}% per trade</p>
           <p class="flex items-center gap-1"><TrendingUp class="w-3.5 h-3.5" /> {{ e.totalTrades }} trades</p>
           <p class="flex items-center gap-1"><Wallet class="w-3.5 h-3.5" /> {{ Number(e.equity).toLocaleString() }} equity</p>
         </div>
@@ -167,6 +170,14 @@ async function remove(expert) {
           <div class="grid grid-cols-2 gap-3">
             <div><label class="text-xs text-slate-500">Equity</label><input v-model.number="form.equity" type="number" step="0.01" required class="w-full px-3 py-2 rounded-xl border border-slate-200 dark:border-white/10 bg-white dark:bg-[#0B0F1A] text-sm text-slate-900 dark:text-white" /></div>
             <div><label class="text-xs text-slate-500">Total profit</label><input v-model.number="form.totalProfit" type="number" step="0.01" required class="w-full px-3 py-2 rounded-xl border border-slate-200 dark:border-white/10 bg-white dark:bg-[#0B0F1A] text-sm text-slate-900 dark:text-white" /></div>
+          </div>
+          <div class="grid grid-cols-2 gap-3">
+            <div><label class="text-xs text-slate-500">Profit min % <span class="text-slate-400">(per win)</span></label><input v-model.number="form.profitMin" type="number" step="0.1" required class="w-full px-3 py-2 rounded-xl border border-slate-200 dark:border-white/10 bg-white dark:bg-[#0B0F1A] text-sm text-slate-900 dark:text-white" /></div>
+            <div><label class="text-xs text-slate-500">Profit max %</label><input v-model.number="form.profitMax" type="number" step="0.1" required class="w-full px-3 py-2 rounded-xl border border-slate-200 dark:border-white/10 bg-white dark:bg-[#0B0F1A] text-sm text-slate-900 dark:text-white" /></div>
+          </div>
+          <div class="grid grid-cols-2 gap-3">
+            <div><label class="text-xs text-slate-500">Loss min % <span class="text-slate-400">(per loss)</span></label><input v-model.number="form.lossMin" type="number" step="0.1" required class="w-full px-3 py-2 rounded-xl border border-slate-200 dark:border-white/10 bg-white dark:bg-[#0B0F1A] text-sm text-slate-900 dark:text-white" /></div>
+            <div><label class="text-xs text-slate-500">Loss max %</label><input v-model.number="form.lossMax" type="number" step="0.1" required class="w-full px-3 py-2 rounded-xl border border-slate-200 dark:border-white/10 bg-white dark:bg-[#0B0F1A] text-sm text-slate-900 dark:text-white" /></div>
           </div>
           <div class="grid grid-cols-2 gap-3">
             <div><label class="text-xs text-slate-500">Total trades</label><input v-model.number="form.totalTrades" type="number" min="0" required class="w-full px-3 py-2 rounded-xl border border-slate-200 dark:border-white/10 bg-white dark:bg-[#0B0F1A] text-sm text-slate-900 dark:text-white" /></div>

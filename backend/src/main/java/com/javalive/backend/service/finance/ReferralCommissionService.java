@@ -5,6 +5,9 @@ import com.javalive.backend.entity.LedgerTransaction;
 import com.javalive.backend.entity.User;
 import com.javalive.backend.repository.LedgerTransactionRepository;
 import com.javalive.backend.repository.UserRepository;
+import com.javalive.backend.service.mail.MailService;
+import com.javalive.backend.service.notification.NotificationService;
+import com.javalive.backend.util.MoneyFormat;
 import org.springframework.stereotype.Service;
 
 import java.math.BigDecimal;
@@ -24,10 +27,15 @@ public class ReferralCommissionService {
 
     private final UserRepository userRepository;
     private final LedgerTransactionRepository ledgerTransactionRepository;
+    private final NotificationService notificationService;
+    private final MailService mailService;
 
-    public ReferralCommissionService(UserRepository userRepository, LedgerTransactionRepository ledgerTransactionRepository) {
+    public ReferralCommissionService(UserRepository userRepository, LedgerTransactionRepository ledgerTransactionRepository,
+                                      NotificationService notificationService, MailService mailService) {
         this.userRepository = userRepository;
         this.ledgerTransactionRepository = ledgerTransactionRepository;
+        this.notificationService = notificationService;
+        this.mailService = mailService;
     }
 
     public void creditChain(User depositor, BigDecimal depositAmount, AppSetting settings) {
@@ -83,5 +91,10 @@ public class ReferralCommissionService {
                 .user(recipient).planLabel("Credit").amount(earnings).type("Ref_bonus")
                 .createdAt(LocalDateTime.now()).updatedAt(LocalDateTime.now())
                 .build());
+
+        String currency = recipient.getCurrencySymbol() != null ? recipient.getCurrencySymbol() : "";
+        String message = "You earned a referral commission of " + currency + MoneyFormat.of(earnings) + " from your downline's deposit.";
+        notificationService.notifyUser(recipient, "Referral Commission Earned", message, "success");
+        mailService.send(recipient.getEmail(), "Referral Commission Earned", message);
     }
 }

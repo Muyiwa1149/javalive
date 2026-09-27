@@ -9,6 +9,7 @@ import com.javalive.backend.repository.LedgerTransactionRepository;
 import com.javalive.backend.repository.Mt4DetailRepository;
 import com.javalive.backend.repository.UserRepository;
 import com.javalive.backend.service.mail.MailService;
+import com.javalive.backend.service.notification.NotificationService;
 import com.javalive.backend.service.settings.SettingsService;
 import com.javalive.backend.service.wallet.AesEncryptionService;
 import com.javalive.backend.web.exception.ApiException;
@@ -35,16 +36,19 @@ public class Mt4SubscriptionService {
     private final MailService mailService;
     private final SettingsService settingsService;
     private final AesEncryptionService encryptionService;
+    private final NotificationService notificationService;
 
     public Mt4SubscriptionService(Mt4DetailRepository mt4DetailRepository, UserRepository userRepository,
                                    LedgerTransactionRepository ledgerTransactionRepository, MailService mailService,
-                                   SettingsService settingsService, AesEncryptionService encryptionService) {
+                                   SettingsService settingsService, AesEncryptionService encryptionService,
+                                   NotificationService notificationService) {
         this.mt4DetailRepository = mt4DetailRepository;
         this.userRepository = userRepository;
         this.ledgerTransactionRepository = ledgerTransactionRepository;
         this.mailService = mailService;
         this.settingsService = settingsService;
         this.encryptionService = encryptionService;
+        this.notificationService = notificationService;
     }
 
     @Transactional(readOnly = true)
@@ -79,11 +83,8 @@ public class Mt4SubscriptionService {
                 .user(user).planLabel("Subscribed MT4 Trading").amount(request.amount()).type("MT4 Trading")
                 .createdAt(now).updatedAt(now).build());
 
-        String contactEmail = settingsService.get().getContactEmail();
-        if (contactEmail != null) {
-            mailService.send(contactEmail, "MT4 Details submitted",
-                    "This is to notify you that " + user.getName() + " submitted MT4 details for trading, please login to take necessary action.");
-        }
+        notificationService.emailAllAdmins("MT4 Details submitted",
+                "This is to notify you that " + user.getName() + " submitted MT4 details for trading, please login to take necessary action.");
 
         return Mt4DetailSummary.from(mt4);
     }
@@ -130,11 +131,8 @@ public class Mt4SubscriptionService {
 
         mailService.send(user.getEmail(), "Your subscription have been renewed",
                 "Your subscription with MT4-ID: " + mt4.getMt4Id() + " is renewed successfully.");
-        String contactEmail = settingsService.get().getContactEmail();
-        if (contactEmail != null) {
-            mailService.send(contactEmail, "Subscription have been renewed",
-                    "Subscription with MT4-ID: " + mt4.getMt4Id() + " has been renewed successfully.");
-        }
+        notificationService.emailAllAdmins("Subscription have been renewed",
+                "Subscription with MT4-ID: " + mt4.getMt4Id() + " has been renewed successfully.");
 
         return Mt4DetailSummary.from(mt4);
     }

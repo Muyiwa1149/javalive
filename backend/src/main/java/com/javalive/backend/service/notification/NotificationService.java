@@ -3,8 +3,12 @@ package com.javalive.backend.service.notification;
 import com.javalive.backend.entity.Admin;
 import com.javalive.backend.entity.Notification;
 import com.javalive.backend.entity.User;
+import com.javalive.backend.repository.AdminRepository;
 import com.javalive.backend.repository.NotificationRepository;
+import com.javalive.backend.service.mail.MailService;
 import com.javalive.backend.web.exception.ApiException;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.http.HttpStatus;
 import org.springframework.stereotype.Service;
 
@@ -15,10 +19,16 @@ import java.util.List;
 @Service
 public class NotificationService {
 
-    private final NotificationRepository notificationRepository;
+    private static final Logger log = LoggerFactory.getLogger(NotificationService.class);
 
-    public NotificationService(NotificationRepository notificationRepository) {
+    private final NotificationRepository notificationRepository;
+    private final AdminRepository adminRepository;
+    private final MailService mailService;
+
+    public NotificationService(NotificationRepository notificationRepository, AdminRepository adminRepository, MailService mailService) {
         this.notificationRepository = notificationRepository;
+        this.adminRepository = adminRepository;
+        this.mailService = mailService;
     }
 
     public Notification notifyUser(User user, String title, String message, String type) {
@@ -41,6 +51,31 @@ public class NotificationService {
                 .createdAt(LocalDateTime.now()).updatedAt(LocalDateTime.now())
                 .build();
         return notificationRepository.save(notification);
+    }
+
+    /** Fans out to every active admin — the in-app bell counterpart to the existing "notify admin by email" calls. */
+    public void notifyAllAdmins(String title, String message, String type) {
+        for (Admin admin : adminRepository.findByStatus("active")) {
+            notifyAdmin(admin, title, message, type);
+        }
+    }
+
+    /**
+     * Emails every active admin's real address on file — replaces the old pattern of a single
+     * hardcoded/settings-driven notification address. Each admin is sent independently so one
+     * bad address or SMTP failure never blocks the rest.
+     */
+    public void emailAllAdmins(String subject, String body) {
+        for (Admin admin : adminRepository.findByStatus("active")) {
+            try {
+                String email = admin.getEmail();
+                if (email != null && !email.isBlank()) {
+                    mailService.send(email, subject, body);
+                }
+            } catch (Exception e) {
+                log.error("Failed to email admin #{} ({}): {}", admin.getId(), admin.getEmail(), e.getMessage());
+            }
+        }
     }
 
     public List<Notification> forUser(Long userId) {

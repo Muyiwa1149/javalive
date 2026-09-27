@@ -1,8 +1,8 @@
 <script setup>
 import { ref, computed, onMounted } from 'vue'
-import { Bar } from 'vue-chartjs'
+import { Line } from 'vue-chartjs'
 import {
-  Chart as ChartJS, CategoryScale, LinearScale, BarElement, Tooltip, Legend,
+  Chart as ChartJS, CategoryScale, LinearScale, PointElement, LineElement, Tooltip, Legend, Filler,
 } from 'chart.js'
 import {
   Wallet, Hourglass, CreditCard, PauseCircle, Users, UserCheck, UserX, LineChart, ArrowUp, Clock, Ban,
@@ -12,18 +12,23 @@ import { useAuthAdminStore } from '@/stores/authAdmin'
 import { usePublicSettingsStore } from '@/stores/publicSettings'
 import api from '@/lib/api'
 
-ChartJS.register(CategoryScale, LinearScale, BarElement, Tooltip, Legend)
+ChartJS.register(CategoryScale, LinearScale, PointElement, LineElement, Tooltip, Legend, Filler)
 
 const authAdmin = useAuthAdminStore()
 const settingsStore = usePublicSettingsStore()
 const loading = ref(true)
 const summary = ref(null)
+const series = ref(null)
 
 onMounted(async () => {
   settingsStore.ensureLoaded()
   try {
-    const { data } = await api.get('/admin/dashboard/summary')
-    summary.value = data
+    const [summaryRes, seriesRes] = await Promise.all([
+      api.get('/admin/dashboard/summary'),
+      api.get('/admin/dashboard/series'),
+    ])
+    summary.value = summaryRes.data
+    series.value = seriesRes.data
   } finally {
     loading.value = false
   }
@@ -54,26 +59,32 @@ const toneClasses = {
 }
 
 const chartData = computed(() => ({
-  labels: ['Deposits', 'Pending Deposits', 'Withdrawals', 'Pending Withdrawals', 'Total Transactions'],
-  datasets: [{
-    label: `Amount in ${settingsStore.settings?.defaultCurrencySymbol || '$'}`,
-    data: summary.value ? [
-      summary.value.chartDeposits, summary.value.chartPendingDeposits, summary.value.chartWithdrawals,
-      summary.value.chartPendingWithdrawals, summary.value.chartTransactions,
-    ] : [],
-    backgroundColor: ['#10b981', '#f59e0b', '#f43f5e', '#0ea5e9', '#6366f1'],
-    borderRadius: 8,
-    borderSkipped: false,
-  }],
+  labels: series.value?.deposits.map((d) => d.date.slice(5)) ?? [],
+  datasets: [
+    {
+      label: 'Deposits',
+      data: series.value?.deposits.map((d) => d.total) ?? [],
+      borderColor: '#10b981',
+      backgroundColor: 'rgba(16,185,129,0.12)',
+      fill: true, tension: 0.3, pointRadius: 0,
+    },
+    {
+      label: 'Withdrawals',
+      data: series.value?.withdrawals.map((d) => d.total) ?? [],
+      borderColor: '#f43f5e',
+      backgroundColor: 'rgba(244,63,94,0.12)',
+      fill: true, tension: 0.3, pointRadius: 0,
+    },
+  ],
 }))
 
 const chartOptions = {
   responsive: true,
   maintainAspectRatio: false,
-  plugins: { legend: { display: false } },
+  plugins: { legend: { display: true, labels: { color: '#94a3b8' } } },
   scales: {
     y: { beginAtZero: true, grid: { color: 'rgba(148,163,184,0.15)' }, ticks: { color: '#94a3b8' } },
-    x: { grid: { display: false }, ticks: { color: '#94a3b8' } },
+    x: { grid: { display: false }, ticks: { color: '#94a3b8', maxTicksLimit: 10 } },
   },
 }
 </script>
@@ -115,10 +126,10 @@ const chartOptions = {
 
       <!-- Chart -->
       <div class="bg-white dark:bg-[#0F1524] border border-slate-200 dark:border-white/5 rounded-2xl p-5 sm:p-6">
-        <h2 class="text-base font-semibold text-slate-900 dark:text-white">System Statistics</h2>
-        <p class="text-sm text-slate-500 dark:text-slate-400">Financial overview and transaction analytics</p>
+        <h2 class="text-base font-semibold text-slate-900 dark:text-white">System Analytics</h2>
+        <p class="text-sm text-slate-500 dark:text-slate-400">Deposits vs withdrawals, last 30 days</p>
         <div class="mt-4 h-80">
-          <Bar :data="chartData" :options="chartOptions" />
+          <Line :data="chartData" :options="chartOptions" />
         </div>
       </div>
     </template>

@@ -16,6 +16,7 @@ import com.javalive.backend.repository.TradingBotRepository;
 import com.javalive.backend.repository.UserBotInvestmentRepository;
 import com.javalive.backend.repository.UserRepository;
 import com.javalive.backend.service.mail.MailService;
+import com.javalive.backend.service.notification.NotificationService;
 import com.javalive.backend.util.MoneyFormat;
 import com.javalive.backend.web.exception.ApiException;
 import org.springframework.http.HttpStatus;
@@ -37,16 +38,19 @@ public class BotService {
     private final UserRepository userRepository;
     private final LedgerTransactionRepository ledgerTransactionRepository;
     private final MailService mailService;
+    private final NotificationService notificationService;
 
     public BotService(TradingBotRepository botRepository, UserBotInvestmentRepository investmentRepository,
                        BotTradingHistoryRepository tradingHistoryRepository, UserRepository userRepository,
-                       LedgerTransactionRepository ledgerTransactionRepository, MailService mailService) {
+                       LedgerTransactionRepository ledgerTransactionRepository, MailService mailService,
+                       NotificationService notificationService) {
         this.botRepository = botRepository;
         this.investmentRepository = investmentRepository;
         this.tradingHistoryRepository = tradingHistoryRepository;
         this.userRepository = userRepository;
         this.ledgerTransactionRepository = ledgerTransactionRepository;
         this.mailService = mailService;
+        this.notificationService = notificationService;
     }
 
     @Transactional(readOnly = true)
@@ -118,11 +122,16 @@ public class BotService {
         bot.setTotalUsers(bot.getTotalUsers() + 1);
         botRepository.save(bot);
 
+        notificationService.notifyUser(user, "Bot Investment Started",
+                "You have successfully invested " + user.getCurrencySymbol() + MoneyFormat.of(request.amount()) + " in the " + bot.getName() + " trading bot.",
+                "success", investment.getId(), "bot_investment");
         if (Boolean.TRUE.equals(user.getSendRoiEmail())) {
             mailService.send(user.getEmail(), "Bot Investment Confirmed - " + bot.getName(),
                     "You have successfully invested " + user.getCurrencySymbol() + MoneyFormat.of(request.amount()) + " in the " + bot.getName()
                             + " trading bot. Your investment will be active for " + bot.getDurationDays() + " days.");
         }
+        notificationService.notifyAllAdmins("Bot investment started",
+                user.getName() + " invested " + user.getCurrencySymbol() + MoneyFormat.of(request.amount()) + " in " + bot.getName() + ".", "info");
 
         return BotInvestmentSummary.from(investment);
     }
@@ -153,11 +162,17 @@ public class BotService {
                 .user(user).planLabel("Bot Investment Cancelled - " + investment.getBot().getName()).amount(refund)
                 .type("Bot Investment Refund").createdAt(LocalDateTime.now()).updatedAt(LocalDateTime.now()).build());
 
+        notificationService.notifyUser(user, "Bot Investment Cancelled",
+                "Your investment in " + investment.getBot().getName() + " has been cancelled and "
+                        + user.getCurrencySymbol() + MoneyFormat.of(refund) + " has been refunded to your account.",
+                "warning", investment.getId(), "bot_investment");
         if (Boolean.TRUE.equals(user.getSendRoiEmail())) {
             mailService.send(user.getEmail(), "Bot Investment Cancelled",
                     "Your investment in " + investment.getBot().getName() + " has been cancelled and "
                             + refund + " has been refunded to your account.");
         }
+        notificationService.notifyAllAdmins("Bot investment cancelled",
+                user.getName() + " cancelled their investment in " + investment.getBot().getName() + ".", "warning");
     }
 
     @Transactional(readOnly = true)

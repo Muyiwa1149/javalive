@@ -6,8 +6,7 @@ import com.javalive.backend.entity.Loan;
 import com.javalive.backend.entity.User;
 import com.javalive.backend.repository.LoanRepository;
 import com.javalive.backend.repository.UserRepository;
-import com.javalive.backend.service.mail.MailService;
-import com.javalive.backend.service.settings.SettingsService;
+import com.javalive.backend.service.notification.NotificationService;
 import com.javalive.backend.web.exception.ApiException;
 import org.springframework.http.HttpStatus;
 import org.springframework.stereotype.Service;
@@ -22,15 +21,13 @@ public class LoanService {
 
     private final LoanRepository loanRepository;
     private final UserRepository userRepository;
-    private final MailService mailService;
-    private final SettingsService settingsService;
+    private final NotificationService notificationService;
 
     public LoanService(LoanRepository loanRepository, UserRepository userRepository,
-                        MailService mailService, SettingsService settingsService) {
+                        NotificationService notificationService) {
         this.loanRepository = loanRepository;
         this.userRepository = userRepository;
-        this.mailService = mailService;
-        this.settingsService = settingsService;
+        this.notificationService = notificationService;
     }
 
     @Transactional
@@ -47,11 +44,8 @@ public class LoanService {
                 .build();
         loan = loanRepository.save(loan);
 
-        String contactEmail = settingsService.get().getContactEmail();
-        if (contactEmail != null) {
-            mailService.send(contactEmail, "Loan Application by " + user.getName(),
-                    "This is to inform you that " + user.getName() + " just applied for a loan plan for " + request.purpose());
-        }
+        notificationService.emailAllAdmins("Loan Application by " + user.getName(),
+                "This is to inform you that " + user.getName() + " just applied for a loan plan for " + request.purpose());
 
         return LoanSummary.from(loan);
     }

@@ -6,6 +6,7 @@ import com.javalive.backend.entity.User;
 import com.javalive.backend.repository.KycRepository;
 import com.javalive.backend.repository.UserRepository;
 import com.javalive.backend.service.mail.MailService;
+import com.javalive.backend.service.notification.NotificationService;
 import com.javalive.backend.service.storage.FileStorageService;
 import com.javalive.backend.web.exception.ApiException;
 import org.springframework.http.HttpStatus;
@@ -23,13 +24,16 @@ public class AdminKycService {
     private final UserRepository userRepository;
     private final FileStorageService fileStorageService;
     private final MailService mailService;
+    private final NotificationService notificationService;
 
     public AdminKycService(KycRepository kycRepository, UserRepository userRepository,
-                            FileStorageService fileStorageService, MailService mailService) {
+                            FileStorageService fileStorageService, MailService mailService,
+                            NotificationService notificationService) {
         this.kycRepository = kycRepository;
         this.userRepository = userRepository;
         this.fileStorageService = fileStorageService;
         this.mailService = mailService;
+        this.notificationService = notificationService;
     }
 
     @Transactional(readOnly = true)
@@ -41,8 +45,9 @@ public class AdminKycService {
     public void decide(Long id, String action, String subject, String message) {
         Kyc kyc = kycRepository.findById(id).orElseThrow(() -> new ApiException(HttpStatus.NOT_FOUND, "KYC application not found."));
         User user = kyc.getUser();
+        boolean accepted = "Accept".equals(action);
 
-        if ("Accept".equals(action)) {
+        if (accepted) {
             user.setAccountVerifyStatus("Verified");
             user.setUpdatedAt(LocalDateTime.now());
             userRepository.save(user);
@@ -58,8 +63,16 @@ public class AdminKycService {
             kycRepository.delete(kyc);
         }
 
-        if (subject != null && !subject.isBlank() && message != null && !message.isBlank()) {
-            mailService.send(user.getEmail(), subject, message);
-        }
+        // Always notify+email with a sensible default, regardless of whether the admin supplied a
+        // custom subject/message — previously this silently sent nothing if either was left blank.
+        String finalSubject = (subject != null && !subject.isBlank()) ? subject
+                : (accepted ? "Identity Verified" : "Identity Verification Rejected");
+        String finalMessage = (message != null && !message.isBlank()) ? message
+                : (accepted
+                    ? "Your identity verification has been approved. You now have full access to all trading features."
+                    : "Your identity verification could not be approved. Please resubmit clear, valid documents.");
+
+        notificationService.notifyUser(user, finalSubject, finalMessage, accepted ? "success" : "danger", kyc.getId(), "kyc");
+        mailService.send(user.getEmail(), finalSubject, finalMessage);
     }
 }

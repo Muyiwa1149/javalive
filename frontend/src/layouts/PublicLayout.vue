@@ -14,7 +14,6 @@ const companyMenuOpen = ref(false)
 const companyMenuRef = ref(null)
 onClickOutside(companyMenuRef, () => { companyMenuOpen.value = false })
 
-const tickerContainer = ref(null)
 const year = new Date().getFullYear()
 
 onMounted(async () => {
@@ -22,32 +21,11 @@ onMounted(async () => {
   if (settingsStore.settings?.siteTitle) {
     document.title = `${settingsStore.settings.siteTitle}`
   }
-  loadTickerWidget()
 })
 
 watch(() => settingsStore.settings, (s) => {
   if (s?.siteTitle) document.title = s.siteTitle
 })
-
-function loadTickerWidget() {
-  if (!tickerContainer.value) return
-  const script = document.createElement('script')
-  script.type = 'text/javascript'
-  script.async = true
-  script.src = 'https://s3.tradingview.com/external-embedding/embed-widget-ticker-tape.js'
-  script.innerHTML = JSON.stringify({
-    symbols: [
-      { proName: 'FX_IDC:EURUSD', title: 'EUR/USD' },
-      { proName: 'BITSTAMP:BTCUSD', title: 'BTC/USD' },
-      { proName: 'BITSTAMP:ETHUSD', title: 'ETH/USD' },
-    ],
-    colorTheme: 'dark',
-    isTransparent: false,
-    displayMode: 'adaptive',
-    locale: 'en',
-  })
-  tickerContainer.value.appendChild(script)
-}
 </script>
 
 <template>
@@ -61,7 +39,7 @@ function loadTickerWidget() {
       <div class="max-w-7xl w-full mx-auto px-4 sm:px-6 lg:px-8">
         <div class="flex items-center justify-between h-16">
           <RouterLink to="/" class="flex-shrink-0 flex items-center">
-            <img v-if="settingsStore.settings?.logo" class="h-8 w-auto" :src="storageUrl(settingsStore.settings.logo)" :alt="settingsStore.settings?.siteName">
+            <img v-if="settingsStore.settings?.logo" class="h-14 w-auto" :src="storageUrl(settingsStore.settings.logo)" :alt="settingsStore.settings?.siteName">
             <span v-else class="text-white font-bold text-lg">{{ settingsStore.settings?.siteName }}</span>
           </RouterLink>
 
@@ -224,10 +202,5 @@ function loadTickerWidget() {
         </div>
       </div>
     </footer>
-
-    <!-- Sticky bottom ticker -->
-    <div class="sticky bottom-0 z-30 bg-dark-400 border-t border-gray-800" ref="tickerContainer">
-      <div class="tradingview-widget-container__widget"></div>
-    </div>
   </div>
 </template>

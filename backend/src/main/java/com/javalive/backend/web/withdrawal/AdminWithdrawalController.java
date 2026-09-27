@@ -1,8 +1,10 @@
 package com.javalive.backend.web.withdrawal;
 
 import com.javalive.backend.dto.withdrawal.AdminWithdrawalSummary;
+import com.javalive.backend.dto.withdrawal.AdminWithdrawalUpdateRequest;
 import com.javalive.backend.dto.withdrawal.RejectWithdrawalRequest;
 import com.javalive.backend.service.withdrawal.WithdrawalService;
+import jakarta.validation.Valid;
 import org.springframework.web.bind.annotation.*;
 
 import java.util.List;
@@ -30,5 +32,10 @@ public class AdminWithdrawalController {
     @PostMapping("/{id}/reject")
     public AdminWithdrawalSummary reject(@PathVariable Long id, @RequestBody RejectWithdrawalRequest request) {
         return withdrawalService.reject(id, request);
+    }
+
+    @PutMapping("/{id}")
+    public AdminWithdrawalSummary update(@PathVariable Long id, @Valid @RequestBody AdminWithdrawalUpdateRequest request) {
+        return withdrawalService.update(id, request);
     }
 }

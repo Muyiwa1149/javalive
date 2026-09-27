@@ -2,6 +2,7 @@ package com.javalive.backend.web.admin;
 
 import com.javalive.backend.dto.admin.AdminBotAnalytics;
 import com.javalive.backend.dto.admin.AdminBotDetail;
+import com.javalive.backend.dto.admin.AdminBotInvestmentSummary;
 import com.javalive.backend.dto.admin.AdminBotRequest;
 import com.javalive.backend.dto.admin.AdminBotSummary;
 import com.javalive.backend.dto.admin.AdminBotsDashboard;
@@ -32,6 +33,11 @@ public class AdminBotController {
         return adminBotService.dashboard();
     }
 
+    @GetMapping("/investments")
+    public List<AdminBotInvestmentSummary> history(@RequestParam(required = false) String status) {
+        return adminBotService.history(status);
+    }
+
     @GetMapping("/{id}")
     public AdminBotDetail detail(@PathVariable Long id) {
         return adminBotService.detail(id);
@@ -47,11 +53,12 @@ public class AdminBotController {
             @RequestParam String name, @RequestParam String botType, @RequestParam String description,
             @RequestParam BigDecimal minInvestment, @RequestParam BigDecimal maxInvestment,
             @RequestParam BigDecimal dailyProfitMin, @RequestParam BigDecimal dailyProfitMax,
+            @RequestParam BigDecimal lossMin, @RequestParam BigDecimal lossMax,
             @RequestParam Integer successRate, @RequestParam Integer durationDays,
             @RequestParam List<String> tradingPairs, @RequestParam String status,
             @RequestParam(required = false) MultipartFile image) {
         return adminBotService.create(new AdminBotRequest(name, botType, description, minInvestment, maxInvestment,
-                dailyProfitMin, dailyProfitMax, successRate, durationDays, tradingPairs, status), image);
+                dailyProfitMin, dailyProfitMax, lossMin, lossMax, successRate, durationDays, tradingPairs, status), image);
     }
 
     @PutMapping(value = "/{id}", consumes = "multipart/form-data")
@@ -60,11 +67,12 @@ public class AdminBotController {
             @RequestParam String name, @RequestParam String botType, @RequestParam String description,
             @RequestParam BigDecimal minInvestment, @RequestParam BigDecimal maxInvestment,
             @RequestParam BigDecimal dailyProfitMin, @RequestParam BigDecimal dailyProfitMax,
+            @RequestParam BigDecimal lossMin, @RequestParam BigDecimal lossMax,
             @RequestParam Integer successRate, @RequestParam Integer durationDays,
             @RequestParam List<String> tradingPairs, @RequestParam String status,
             @RequestParam(required = false) MultipartFile image) {
         return adminBotService.update(id, new AdminBotRequest(name, botType, description, minInvestment, maxInvestment,
-                dailyProfitMin, dailyProfitMax, successRate, durationDays, tradingPairs, status), image);
+                dailyProfitMin, dailyProfitMax, lossMin, lossMax, successRate, durationDays, tradingPairs, status), image);
     }
 
     @PostMapping("/{id}/toggle")

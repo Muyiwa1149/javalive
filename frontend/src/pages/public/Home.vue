@@ -148,22 +148,6 @@ async function initHeroChart() {
       'mainSeriesProperties.candleStyle.wickDownColor': '#f6465d',
     },
   })
-
-  // Forex heat map widget (Trusted Brand section) reuses the same tv.js instance,
-  // mirroring the source's x-init="setTimeout(() => new TradingView.widget({...}), 100)".
-  setTimeout(() => {
-    if (!document.getElementById('forex_heat_map')) return
-    // eslint-disable-next-line no-new
-    new window.TradingView.widget({
-      container_id: 'forex_heat_map',
-      width: '100%',
-      height: 400,
-      currencies: ['EUR', 'USD', 'JPY', 'GBP', 'CHF', 'AUD', 'CAD', 'NZD', 'CNY'],
-      isTransparent: true,
-      colorTheme: 'dark',
-      locale: 'en',
-    })
-  }, 100)
 }
 
 /* Market ticker tape widget (below hero) -- same pattern as PublicLayout's sticky ticker,
@@ -260,14 +244,14 @@ onBeforeUnmount(() => {
             :class="heroVisible ? 'opacity-100 translate-y-0' : 'opacity-0 translate-y-8'"
           >
             <div class="inline-block px-3 py-1 mb-2 text-xs font-semibold tracking-wider text-primary uppercase bg-blue-900 bg-opacity-30 rounded-full">
-              Innovative Trading Platform
+              Investment Platform
             </div>
             <h1 class="text-3xl font-extrabold tracking-tight text-white sm:text-4xl md:text-5xl">
-              <span class="block">Velnora Partners</span>
+              <span class="block text-4xl sm:text-5xl md:text-6xl">Velnora Partners</span>
               <span class="block mt-1 text-transparent bg-clip-text bg-gradient-to-r from-primary to-secondary">Trade Global Markets With Confidence</span>
             </h1>
             <p class="max-w-lg mt-5 text-xl text-gray-300">
-              Access advanced trading tools for Forex, Cryptocurrencies, Commodities, Indices, and more with competitive spreads and lightning-fast execution.
+              Access advanced investment tools across Forex, Cryptocurrencies, Commodities, Indices, and more with competitive returns and secure, transparent portfolio growth.
             </p>
             <div class="flex flex-wrap gap-4 mt-8">
               <RouterLink to="/register" class="px-8 py-3 text-lg font-medium text-white transition-all duration-200 bg-blue-600 rounded-lg hover:bg-blue-700 focus:outline-none focus:ring-2 focus:ring-blue-600 focus:ring-offset-2 focus:ring-offset-gray-900">
@@ -924,20 +908,7 @@ onBeforeUnmount(() => {
         <p class="mt-3 text-gray-300 max-w-2xl mx-auto">Experience the reliability and security that our global clients have come to trust</p>
       </div>
 
-      <div class="grid grid-cols-1 lg:grid-cols-2 gap-10 items-center">
-        <!-- Investment Insights Widget Container -->
-        <div class="bg-gray-800 rounded-xl overflow-hidden border border-gray-700 shadow-xl transform transition duration-500 hover:shadow-blue-900/20">
-          <div class="p-4 bg-gray-800 border-b border-gray-700">
-            <h3 class="text-xl font-semibold text-white">Real-Time Investment Insights</h3>
-          </div>
-          <!-- TradingView Widget BEGIN -->
-          <div id="forex_heat_map" class="w-full h-0 bg-gray-800"></div>
-          <div class="py-2 px-4 text-right text-xs text-blue-400 bg-gray-800">
-            <a href="https://www.tradingview.com/markets/currencies/forex-heat-map/" rel="noopener" target="_blank" class="hover:underline">Market Insights by TradingView</a>
-          </div>
-          <!-- TradingView Widget END -->
-        </div>
-
+      <div class="grid grid-cols-1 gap-10 items-center max-w-3xl mx-auto">
         <!-- Trust Features -->
         <div class="bg-gray-800 rounded-xl overflow-hidden border border-gray-700 shadow-xl transition duration-300 transform hover:-translate-y-1 hover:shadow-blue-900/20">
           <div class="p-6">

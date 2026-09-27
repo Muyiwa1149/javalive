@@ -7,6 +7,7 @@ import api from '@/lib/api'
 const loading = ref(true)
 const investments = ref([])
 const plans = ref([])
+const filter = ref('')
 
 const editing = ref(null)
 const saving = ref(false)
@@ -16,7 +17,7 @@ async function load() {
   loading.value = true
   try {
     const [invRes, planRes] = await Promise.all([
-      api.get('/admin/investments'),
+      api.get('/admin/investments', { params: filter.value ? { status: filter.value } : {} }),
       api.get('/admin/plans'),
     ])
     investments.value = invRes.data
@@ -97,9 +98,17 @@ function statusLabel(active) {
 
 <template>
   <div class="p-4 sm:p-6 lg:p-8 space-y-6">
-    <div>
-      <h1 class="text-xl sm:text-2xl font-bold text-slate-900 dark:text-white flex items-center gap-2"><TrendingUp class="w-5 h-5 sm:w-6 sm:h-6 text-indigo-500" /> Active Investments</h1>
-      <p class="text-sm text-slate-500 dark:text-slate-400">{{ investments.length }} active investments across all users — edit any field to correct amounts, dates, or ROI plan</p>
+    <div class="flex flex-col sm:flex-row sm:items-center justify-between gap-4">
+      <div>
+        <h1 class="text-xl sm:text-2xl font-bold text-slate-900 dark:text-white flex items-center gap-2"><TrendingUp class="w-5 h-5 sm:w-6 sm:h-6 text-indigo-500" /> Investments</h1>
+        <p class="text-sm text-slate-500 dark:text-slate-400">{{ investments.length }} investments — edit any field to correct amounts, dates, or ROI plan</p>
+      </div>
+      <select v-model="filter" class="rounded-xl border border-slate-200 dark:border-white/10 bg-white dark:bg-[#0F1524] px-3 py-2.5 text-sm text-slate-900 dark:text-white" @change="load">
+        <option value="">All</option>
+        <option value="yes">Active</option>
+        <option value="expired">Expired</option>
+        <option value="cancelled">Cancelled</option>
+      </select>
     </div>
 
     <div v-if="loading" class="text-slate-500 dark:text-slate-400">Loading…</div>

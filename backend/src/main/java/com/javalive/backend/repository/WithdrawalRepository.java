@@ -6,6 +6,7 @@ import org.springframework.data.jpa.repository.Query;
 import org.springframework.data.repository.query.Param;
 
 import java.math.BigDecimal;
+import java.time.LocalDateTime;
 import java.util.List;
 
 public interface WithdrawalRepository extends JpaRepository<Withdrawal, Long> {
@@ -29,4 +30,10 @@ public interface WithdrawalRepository extends JpaRepository<Withdrawal, Long> {
 
     @Query("select w from Withdrawal w join fetch w.user where w.status = :status order by w.id desc")
     List<Withdrawal> findByStatusWithUserOrderByIdDesc(@Param("status") String status);
+
+    /** Day-bucketed processed-withdrawal sum, for the admin dashboard's 30-day trend chart. */
+    @Query(value = "select date(w.created_at) as d, coalesce(sum(w.amount), 0) as total "
+            + "from withdrawals w inner join users u on u.id = w.user_id "
+            + "where w.status = 'Processed' and w.created_at >= :since group by date(w.created_at)", nativeQuery = true)
+    List<Object[]> dailyProcessedTotals(@Param("since") LocalDateTime since);
 }

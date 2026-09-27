@@ -123,6 +123,26 @@ baseline doesn't conflict), restore a `mysqldump` of your `javalive_db` into it,
 backend normally — Flyway will see the schema already at its current version and skip migrations.
 See `data-migration/` for how that dataset was originally produced from the source app's dump.
 
+**The database dump alone is not enough.** `logo`/`favicon`/KYC-document/deposit-proof/avatar
+columns only store a *path* (e.g. `photos/abc123.png`) — the actual files live on disk under
+`backend/storage/public/` (the `photos/`, `traders/`, `uploads/` subfolders), which Flyway/MySQL
+knows nothing about. Skipping this step is why a freshly-migrated deployment shows broken
+logo/favicon images and broken KYC/deposit-proof links even though the database looks complete.
+Copy that whole directory to the same path the VPS's `STORAGE_PUBLIC_PATH` points at. Note the
+archive below has `public/` as its top-level entry (from `-C backend/storage`), so it must be
+extracted one level *above* the target `.../storage/public` — extracting it straight into
+`/opt/javalive/` would land the files at `/opt/javalive/public/...` instead of
+`/opt/javalive/storage/public/...`, which looks identical to a successful copy but silently serves
+nothing:
+```
+tar -czf storage-public.tar.gz -C backend/storage public
+scp storage-public.tar.gz you@your-vps:/opt/javalive/
+ssh you@your-vps 'cd /opt/javalive && mkdir -p storage && tar -xzf storage-public.tar.gz -C storage && rm storage-public.tar.gz'
+```
+(matching the systemd unit's `STORAGE_PUBLIC_PATH=/opt/javalive/storage/public` from Option C above)
+— and make sure the service's `User=` owns/can read it (`chown -R javalive:javalive storage/public`
+if it was extracted as a different user, e.g. root via `scp`/`sudo`).
+
 ## Verifying the deployment
 
 - `curl http://localhost:8080/actuator/health` → `{"status":"UP"}`.

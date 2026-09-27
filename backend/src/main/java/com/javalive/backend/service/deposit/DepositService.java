@@ -1,8 +1,10 @@
 package com.javalive.backend.service.deposit;
 
 import com.javalive.backend.dto.deposit.AdminDepositSummary;
+import com.javalive.backend.dto.deposit.AdminDepositUpdateRequest;
 import com.javalive.backend.dto.deposit.DepositMethodSummary;
 import com.javalive.backend.dto.deposit.DepositSummary;
+import com.javalive.backend.dto.deposit.RejectDepositRequest;
 import com.javalive.backend.entity.AppSetting;
 import com.javalive.backend.entity.Deposit;
 import com.javalive.backend.entity.LedgerTransaction;
@@ -101,11 +103,8 @@ public class DepositService {
                 .build();
         deposit = depositRepository.save(deposit);
 
-        AppSetting settings = settingsService.get();
-        if (settings.getContactEmail() != null) {
-            mailService.send(settings.getContactEmail(), "New deposit request from " + user.getName(),
-                    user.getName() + " submitted a " + method.getName() + " deposit of " + user.getCurrencySymbol() + MoneyFormat.of(amount) + ". Please review and approve.");
-        }
+        notificationService.emailAllAdmins("New deposit request from " + user.getName(),
+                user.getName() + " submitted a " + method.getName() + " deposit of " + user.getCurrencySymbol() + MoneyFormat.of(amount) + ". Please review and approve.");
         mailService.send(user.getEmail(), "Deposit request received",
                 "We've received your " + method.getName() + " deposit request for " + user.getCurrencySymbol() + MoneyFormat.of(amount) + ". Please wait while we validate this transaction.");
 
@@ -163,6 +162,71 @@ public class DepositService {
                 "success", deposit.getId(), "deposit");
         mailService.send(user.getEmail(), "Deposit approved",
                 "Your deposit of " + user.getCurrencySymbol() + MoneyFormat.of(amount) + " has been approved and credited to your account.");
+        notificationService.notifyAllAdmins("Deposit approved",
+                user.getName() + "'s deposit of " + user.getCurrencySymbol() + MoneyFormat.of(amount) + " was approved.", "success");
+
+        return AdminDepositSummary.from(deposit);
+    }
+
+    /** Mirrors {@link com.javalive.backend.service.withdrawal.WithdrawalService#reject} — deposits had no reject flow at all before this. */
+    @Transactional
+    public AdminDepositSummary reject(Long depositId, RejectDepositRequest request) {
+        Deposit deposit = depositRepository.findById(depositId)
+                .orElseThrow(() -> new ApiException(HttpStatus.NOT_FOUND, "Deposit not found."));
+        if (!"Pending".equals(deposit.getStatus())) {
+            throw new ApiException(HttpStatus.BAD_REQUEST, "This deposit has already been processed.");
+        }
+
+        User user = deposit.getUser();
+        deposit.setStatus("Rejected");
+        deposit.setUpdatedAt(LocalDateTime.now());
+        depositRepository.save(deposit);
+
+        String reason = (request.reason() == null || request.reason().isBlank())
+                ? "Your deposit of " + user.getCurrencySymbol() + MoneyFormat.of(deposit.getAmount()) + " has been rejected."
+                : request.reason();
+        String subject = request.subject() == null || request.subject().isBlank() ? "Deposit Rejected" : request.subject();
+
+        notificationService.notifyUser(user, "Deposit Rejected", reason, "danger", deposit.getId(), "deposit");
+        mailService.send(user.getEmail(), subject, reason);
+        notificationService.notifyAllAdmins("Deposit rejected",
+                user.getName() + "'s deposit of " + user.getCurrencySymbol() + MoneyFormat.of(deposit.getAmount()) + " was rejected.", "warning");
+
+        return AdminDepositSummary.from(deposit);
+    }
+
+    /**
+     * Raw admin correction of a deposit record's own fields — amount, date/time, status, method,
+     * reference id. Mirrors {@code AdminPlanService.updateInvestment}: a direct field-level fix for
+     * data-entry errors, not a re-run of the approval side effects (balance credit, bonus, referral
+     * commission, notifications) that {@link #approve} already applied when this was first processed.
+     */
+    @Transactional
+    public AdminDepositSummary update(Long depositId, AdminDepositUpdateRequest request) {
+        Deposit deposit = depositRepository.findById(depositId)
+                .orElseThrow(() -> new ApiException(HttpStatus.NOT_FOUND, "Deposit not found."));
+
+        BigDecimal oldAmount = deposit.getAmount();
+
+        deposit.setAmount(request.amount());
+        deposit.setPaymentMode(request.paymentMode());
+        deposit.setStatus(request.status());
+        deposit.setTxnId(request.txnId());
+        if (request.createdAt() != null) {
+            deposit.setCreatedAt(request.createdAt());
+        }
+        deposit.setUpdatedAt(LocalDateTime.now());
+        deposit = depositRepository.save(deposit);
+
+        if (request.adjustBalance()) {
+            BigDecimal delta = request.amount().subtract(oldAmount);
+            if (delta.signum() != 0) {
+                User user = deposit.getUser();
+                user.setAccountBalance(user.getAccountBalance().add(delta));
+                user.setUpdatedAt(LocalDateTime.now());
+                userRepository.save(user);
+            }
+        }
 
         return AdminDepositSummary.from(deposit);
     }

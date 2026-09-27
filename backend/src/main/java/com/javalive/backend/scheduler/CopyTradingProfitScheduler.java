@@ -8,6 +8,7 @@ import com.javalive.backend.entity.UserCopyTrade;
 import com.javalive.backend.repository.LedgerTransactionRepository;
 import com.javalive.backend.repository.UserCopyTradeRepository;
 import com.javalive.backend.service.mail.MailService;
+import com.javalive.backend.service.notification.NotificationService;
 import com.javalive.backend.service.settings.SettingsService;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -38,15 +39,18 @@ public class CopyTradingProfitScheduler {
     private final LedgerTransactionRepository ledgerTransactionRepository;
     private final SettingsService settingsService;
     private final MailService mailService;
+    private final NotificationService notificationService;
 
     public CopyTradingProfitScheduler(UserCopyTradeRepository userCopyTradeRepository,
                                        LedgerTransactionRepository ledgerTransactionRepository,
                                        SettingsService settingsService,
-                                       MailService mailService) {
+                                       MailService mailService,
+                                       NotificationService notificationService) {
         this.userCopyTradeRepository = userCopyTradeRepository;
         this.ledgerTransactionRepository = ledgerTransactionRepository;
         this.settingsService = settingsService;
         this.mailService = mailService;
+        this.notificationService = notificationService;
     }
 
     /** {@code ->everyThirtyMinutes()} in Kernel.php. */
@@ -100,13 +104,21 @@ public class CopyTradingProfitScheduler {
         int winningTrades = copyTrade.getWinningTrades();
 
         if (isProfit) {
-            BigDecimal profitPct = BigDecimal.valueOf(random.nextInt(50, 401)).divide(BigDecimal.valueOf(100), 4, RoundingMode.HALF_UP);
+            BigDecimal min = expert.getProfitMin() != null ? expert.getProfitMin() : BigDecimal.valueOf(0.5);
+            BigDecimal max = expert.getProfitMax() != null ? expert.getProfitMax() : BigDecimal.valueOf(4);
+            int minCents = min.multiply(BigDecimal.valueOf(100)).intValue();
+            int maxCents = Math.max(minCents + 1, max.multiply(BigDecimal.valueOf(100)).intValue() + 1);
+            BigDecimal profitPct = BigDecimal.valueOf(random.nextInt(minCents, maxCents)).divide(BigDecimal.valueOf(100), 4, RoundingMode.HALF_UP);
             amount = currentBalance.multiply(profitPct).divide(BigDecimal.valueOf(100), 2, RoundingMode.HALF_UP);
             newBalance = currentBalance.add(amount);
             totalProfit = totalProfit.add(amount);
             winningTrades++;
         } else {
-            BigDecimal lossPct = BigDecimal.valueOf(random.nextInt(20, 201)).divide(BigDecimal.valueOf(100), 4, RoundingMode.HALF_UP);
+            BigDecimal min = expert.getLossMin() != null ? expert.getLossMin() : BigDecimal.valueOf(0.2);
+            BigDecimal max = expert.getLossMax() != null ? expert.getLossMax() : BigDecimal.valueOf(2);
+            int minCents = min.multiply(BigDecimal.valueOf(100)).intValue();
+            int maxCents = Math.max(minCents + 1, max.multiply(BigDecimal.valueOf(100)).intValue() + 1);
+            BigDecimal lossPct = BigDecimal.valueOf(random.nextInt(minCents, maxCents)).divide(BigDecimal.valueOf(100), 4, RoundingMode.HALF_UP);
             amount = currentBalance.multiply(lossPct).divide(BigDecimal.valueOf(100), 2, RoundingMode.HALF_UP);
             newBalance = currentBalance.subtract(amount).max(BigDecimal.ZERO);
             totalProfit = totalProfit.subtract(amount);
@@ -135,12 +147,23 @@ public class CopyTradingProfitScheduler {
                 .updatedAt(now)
                 .build());
 
-        if (Boolean.TRUE.equals(user.getSendRoiEmail()) && isProfit
-                && amount.compareTo(copyTrade.getPrice().multiply(BigDecimal.valueOf(0.05))) > 0) {
-            String message = String.format("Great news! Your copy trading with %s generated a profit of %s%s. Current balance: %s%s",
-                    expert.getName(), nullToEmpty(user.getCurrencySymbol()), amount.toPlainString(),
-                    nullToEmpty(user.getCurrencySymbol()), newBalance.setScale(2, RoundingMode.HALF_UP).toPlainString());
-            mailService.send(user.getEmail(), "Copy Trading Profit - " + expert.getName(), message);
+        if (isProfit) {
+            notificationService.notifyUser(user, "Copy Trading Profit",
+                    "Your copy trading with " + expert.getName() + " generated a profit of "
+                            + nullToEmpty(user.getCurrencySymbol()) + amount.toPlainString() + ".",
+                    "success", copyTrade.getId(), "copy_trade");
+            if (Boolean.TRUE.equals(user.getSendRoiEmail())
+                    && amount.compareTo(copyTrade.getPrice().multiply(BigDecimal.valueOf(0.05))) > 0) {
+                String message = String.format("Great news! Your copy trading with %s generated a profit of %s%s. Current balance: %s%s",
+                        expert.getName(), nullToEmpty(user.getCurrencySymbol()), amount.toPlainString(),
+                        nullToEmpty(user.getCurrencySymbol()), newBalance.setScale(2, RoundingMode.HALF_UP).toPlainString());
+                mailService.send(user.getEmail(), "Copy Trading Profit - " + expert.getName(), message);
+            }
+        } else if (amount.compareTo(copyTrade.getPrice().multiply(BigDecimal.valueOf(0.01))) > 0) {
+            notificationService.notifyUser(user, "Copy Trading Alert",
+                    "Your copy trading with " + expert.getName() + " had a loss of "
+                            + nullToEmpty(user.getCurrencySymbol()) + amount.toPlainString() + ".",
+                    "warning", copyTrade.getId(), "copy_trade");
         }
 
         return true;

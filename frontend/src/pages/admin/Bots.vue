@@ -20,7 +20,7 @@ const BOT_TYPES = ['forex', 'crypto', 'stocks', 'commodities', 'indices']
 
 const emptyForm = () => ({
   name: '', botType: 'crypto', description: '', minInvestment: 100, maxInvestment: 5000,
-  dailyProfitMin: 1, dailyProfitMax: 3, successRate: 80, durationDays: 30,
+  dailyProfitMin: 1, dailyProfitMax: 3, lossMin: 0.5, lossMax: 2, successRate: 80, durationDays: 30,
   tradingPairsText: 'BTC/USD, ETH/USD', status: 'active',
 })
 const form = ref(emptyForm())
@@ -67,6 +67,8 @@ async function save() {
     fd.append('maxInvestment', form.value.maxInvestment)
     fd.append('dailyProfitMin', form.value.dailyProfitMin)
     fd.append('dailyProfitMax', form.value.dailyProfitMax)
+    fd.append('lossMin', form.value.lossMin)
+    fd.append('lossMax', form.value.lossMax)
     fd.append('successRate', form.value.successRate)
     fd.append('durationDays', form.value.durationDays)
     fd.append('status', form.value.status)
@@ -153,6 +155,7 @@ function money(v) {
         <div class="grid grid-cols-2 gap-2 text-xs text-slate-500 dark:text-slate-400">
           <p>Range: {{ money(b.minInvestment) }} – {{ money(b.maxInvestment) }}</p>
           <p>{{ b.dailyProfitMin }}% – {{ b.dailyProfitMax }}% daily</p>
+          <p>{{ b.lossMin }}% – {{ b.lossMax }}% loss</p>
           <p>{{ b.successRate }}% success rate</p>
           <p>{{ b.durationDays }} days</p>
         </div>
@@ -191,6 +194,10 @@ function money(v) {
           <div class="grid grid-cols-2 gap-3">
             <div><label class="text-xs text-slate-500">Daily profit min %</label><input v-model.number="form.dailyProfitMin" type="number" step="0.1" required class="w-full px-3 py-2 rounded-xl border border-slate-200 dark:border-white/10 bg-white dark:bg-[#0B0F1A] text-sm text-slate-900 dark:text-white" /></div>
             <div><label class="text-xs text-slate-500">Daily profit max %</label><input v-model.number="form.dailyProfitMax" type="number" step="0.1" required class="w-full px-3 py-2 rounded-xl border border-slate-200 dark:border-white/10 bg-white dark:bg-[#0B0F1A] text-sm text-slate-900 dark:text-white" /></div>
+          </div>
+          <div class="grid grid-cols-2 gap-3">
+            <div><label class="text-xs text-slate-500">Loss min % <span class="text-slate-400">(per losing trade)</span></label><input v-model.number="form.lossMin" type="number" step="0.1" required class="w-full px-3 py-2 rounded-xl border border-slate-200 dark:border-white/10 bg-white dark:bg-[#0B0F1A] text-sm text-slate-900 dark:text-white" /></div>
+            <div><label class="text-xs text-slate-500">Loss max %</label><input v-model.number="form.lossMax" type="number" step="0.1" required class="w-full px-3 py-2 rounded-xl border border-slate-200 dark:border-white/10 bg-white dark:bg-[#0B0F1A] text-sm text-slate-900 dark:text-white" /></div>
           </div>
           <div class="grid grid-cols-2 gap-3">
             <div><label class="text-xs text-slate-500">Success rate %</label><input v-model.number="form.successRate" type="number" min="50" max="99" required class="w-full px-3 py-2 rounded-xl border border-slate-200 dark:border-white/10 bg-white dark:bg-[#0B0F1A] text-sm text-slate-900 dark:text-white" /></div>

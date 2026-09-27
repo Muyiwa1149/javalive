@@ -54,6 +54,13 @@ public class TradingBot {
     @Column(name = "daily_profit_max", nullable = false)
     private BigDecimal dailyProfitMax;
 
+    /** Admin-configurable loss magnitude — previously hardcoded (0.50-2.00%) in BotProfitScheduler. */
+    @Column(name = "loss_min", nullable = false)
+    private BigDecimal lossMin;
+
+    @Column(name = "loss_max", nullable = false)
+    private BigDecimal lossMax;
+
     @Column(name = "success_rate", nullable = false)
     private Integer successRate;
 

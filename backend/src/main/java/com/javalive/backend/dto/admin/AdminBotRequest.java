@@ -15,6 +15,8 @@ public record AdminBotRequest(
         @NotNull BigDecimal maxInvestment,
         @NotNull BigDecimal dailyProfitMin,
         @NotNull BigDecimal dailyProfitMax,
+        @NotNull BigDecimal lossMin,
+        @NotNull BigDecimal lossMax,
         @NotNull Integer successRate,
         @NotNull Integer durationDays,
         @NotNull List<String> tradingPairs,

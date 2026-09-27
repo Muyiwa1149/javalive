@@ -1,6 +1,7 @@
 package com.javalive.backend.service.withdrawal;
 
 import com.javalive.backend.dto.withdrawal.AdminWithdrawalSummary;
+import com.javalive.backend.dto.withdrawal.AdminWithdrawalUpdateRequest;
 import com.javalive.backend.dto.withdrawal.RejectWithdrawalRequest;
 import com.javalive.backend.dto.withdrawal.SubmitWithdrawalRequest;
 import com.javalive.backend.dto.withdrawal.WithdrawalMethodSummary;
@@ -130,10 +131,8 @@ public class WithdrawalService {
                 .build();
         withdrawal = withdrawalRepository.save(withdrawal);
 
-        if (settings.getContactEmail() != null) {
-            mailService.send(settings.getContactEmail(), "Withdrawal request from " + user.getName(),
-                    user.getName() + " requested a " + method.getName() + " withdrawal of " + user.getCurrencySymbol() + MoneyFormat.of(request.amount()) + ". Please review.");
-        }
+        notificationService.emailAllAdmins("Withdrawal request from " + user.getName(),
+                user.getName() + " requested a " + method.getName() + " withdrawal of " + user.getCurrencySymbol() + MoneyFormat.of(request.amount()) + ". Please review.");
         mailService.send(user.getEmail(), "Withdrawal request received",
                 "Your withdrawal request of " + user.getCurrencySymbol() + MoneyFormat.of(request.amount()) + " has been received. Please wait while we process it.");
 
@@ -173,6 +172,8 @@ public class WithdrawalService {
         mailService.send(user.getEmail(), "Successful Withdrawal",
                 "This is to inform you that your withdrawal request of " + user.getCurrencySymbol() + MoneyFormat.of(withdrawal.getAmount())
                         + " has been approved and funds have been sent to your selected account.");
+        notificationService.notifyAllAdmins("Withdrawal approved",
+                user.getName() + "'s withdrawal of " + user.getCurrencySymbol() + MoneyFormat.of(withdrawal.getAmount()) + " was approved.", "success");
 
         return AdminWithdrawalSummary.from(withdrawal);
     }
@@ -198,11 +199,48 @@ public class WithdrawalService {
         String reason = (request.reason() == null || request.reason().isBlank())
                 ? "Your withdrawal request of " + user.getCurrencySymbol() + MoneyFormat.of(withdrawal.getAmount()) + " has been rejected."
                 : request.reason();
-        notificationService.notifyUser(user, "Withdrawal Rejected", reason, "danger", withdrawal.getId(), "withdrawal");
+        String subject = request.subject() == null || request.subject().isBlank() ? "Withdrawal Rejected" : request.subject();
 
-        if (request.sendEmail()) {
-            String subject = request.subject() == null || request.subject().isBlank() ? "Withdrawal Rejected" : request.subject();
-            mailService.send(user.getEmail(), subject, reason);
+        notificationService.notifyUser(user, "Withdrawal Rejected", reason, "danger", withdrawal.getId(), "withdrawal");
+        mailService.send(user.getEmail(), subject, reason);
+        notificationService.notifyAllAdmins("Withdrawal rejected",
+                user.getName() + "'s withdrawal of " + user.getCurrencySymbol() + MoneyFormat.of(withdrawal.getAmount()) + " was rejected.", "warning");
+
+        return AdminWithdrawalSummary.from(withdrawal);
+    }
+
+    /**
+     * Raw admin correction of a withdrawal record's own fields — amount, deduction, date/time,
+     * status, method, payout details. Mirrors {@code AdminPlanService.updateInvestment}: a direct
+     * field-level fix for data-entry errors, not a re-run of the approve/reject side effects (balance
+     * deduction, notifications) already applied when this was first processed.
+     */
+    @Transactional
+    public AdminWithdrawalSummary update(Long withdrawalId, AdminWithdrawalUpdateRequest request) {
+        Withdrawal withdrawal = withdrawalRepository.findById(withdrawalId)
+                .orElseThrow(() -> new ApiException(HttpStatus.NOT_FOUND, "Withdrawal not found."));
+
+        BigDecimal oldToDeduct = withdrawal.getToDeduct();
+
+        withdrawal.setAmount(request.amount());
+        withdrawal.setToDeduct(request.toDeduct());
+        withdrawal.setPaymentMode(request.paymentMode());
+        withdrawal.setStatus(request.status());
+        withdrawal.setPayDetails(request.payDetails());
+        if (request.createdAt() != null) {
+            withdrawal.setCreatedAt(request.createdAt());
+        }
+        withdrawal.setUpdatedAt(LocalDateTime.now());
+        withdrawal = withdrawalRepository.save(withdrawal);
+
+        if (request.adjustBalance() && request.toDeduct() != null && oldToDeduct != null) {
+            BigDecimal delta = request.toDeduct().subtract(oldToDeduct);
+            if (delta.signum() != 0) {
+                User user = withdrawal.getUser();
+                user.setAccountBalance(user.getAccountBalance().subtract(delta));
+                user.setUpdatedAt(LocalDateTime.now());
+                userRepository.save(user);
+            }
         }
 
         return AdminWithdrawalSummary.from(withdrawal);

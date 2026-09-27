@@ -1,5 +1,6 @@
 package com.javalive.backend.web.admin;
 
+import com.javalive.backend.dto.admin.AdminDashboardSeries;
 import com.javalive.backend.dto.admin.AdminDashboardSummary;
 import com.javalive.backend.service.admin.AdminDashboardService;
 import org.springframework.web.bind.annotation.GetMapping;
@@ -19,5 +20,10 @@ public class AdminDashboardController {
     @GetMapping("/summary")
     public AdminDashboardSummary summary() {
         return adminDashboardService.summary();
+    }
+
+    @GetMapping("/series")
+    public AdminDashboardSeries series() {
+        return adminDashboardService.series();
     }
 }

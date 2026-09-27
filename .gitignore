@@ -12,3 +12,7 @@ qa-testing/screenshots/
 qa-testing/*.json
 qa-testing/*token*.txt
 qa-testing/*.png
+
+# Real production data dumps — contain PII, password hashes, financial records. Never commit these,
+# even to a private repo; transfer to the VPS directly (scp/rsync) and delete the local copy after.
+data-migration/dumps/

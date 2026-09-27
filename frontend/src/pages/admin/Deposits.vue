@@ -1,13 +1,20 @@
 <script setup>
-import { ref, onMounted } from 'vue'
+import { ref, computed, onMounted } from 'vue'
 import Swal from 'sweetalert2'
-import { Banknote, Check, Trash2, ExternalLink } from 'lucide-vue-next'
+import { Banknote, Check, Trash2, ExternalLink, Pencil, X } from 'lucide-vue-next'
 import api from '@/lib/api'
 
 const loading = ref(true)
 const deposits = ref([])
 const filter = ref('')
 const processingId = ref(null)
+
+const showEdit = ref(false)
+const editId = ref(null)
+const editOriginalAmount = ref(0)
+const editForm = ref({ amount: 0, paymentMode: '', status: 'Pending', txnId: '', createdAt: '', adjustBalance: false })
+const saving = ref(false)
+const balanceDelta = computed(() => Number(editForm.value.amount || 0) - editOriginalAmount.value)
 
 async function load() {
   loading.value = true
@@ -40,6 +47,26 @@ async function approve(deposit) {
   }
 }
 
+async function reject(deposit) {
+  const { value: reason, isConfirmed } = await Swal.fire({
+    icon: 'warning', title: 'Reject this deposit?',
+    input: 'textarea',
+    inputLabel: 'Reason (sent to the user)',
+    inputPlaceholder: 'e.g. Proof of payment could not be verified',
+    showCancelButton: true, confirmButtonText: 'Reject', confirmButtonColor: '#e11d48',
+  })
+  if (!isConfirmed) return
+  processingId.value = deposit.id
+  try {
+    await api.post(`/admin/deposits/${deposit.id}/reject`, { reason, subject: 'Deposit Rejected' })
+    await load()
+  } catch (e) {
+    Swal.fire({ icon: 'error', title: 'Failed', text: e.response?.data?.message })
+  } finally {
+    processingId.value = null
+  }
+}
+
 async function remove(deposit) {
   const confirm = await Swal.fire({
     icon: 'warning', title: 'Delete this deposit request?', text: 'This cannot be undone.',
@@ -57,9 +84,38 @@ async function remove(deposit) {
   }
 }
 
+function openEdit(deposit) {
+  editId.value = deposit.id
+  editOriginalAmount.value = Number(deposit.amount)
+  editForm.value = {
+    amount: deposit.amount,
+    paymentMode: deposit.paymentMode || '',
+    status: deposit.status,
+    txnId: deposit.txnId || '',
+    createdAt: deposit.createdAt ? deposit.createdAt.slice(0, 16) : '',
+    adjustBalance: false,
+  }
+  showEdit.value = true
+}
+
+async function saveEdit() {
+  saving.value = true
+  try {
+    await api.put(`/admin/deposits/${editId.value}`, editForm.value)
+    showEdit.value = false
+    await load()
+    Swal.fire({ icon: 'success', title: 'Saved', timer: 1200, showConfirmButton: false })
+  } catch (e) {
+    Swal.fire({ icon: 'error', title: 'Failed', text: e.response?.data?.message })
+  } finally {
+    saving.value = false
+  }
+}
+
 const statusClass = (status) => ({
   Processed: 'bg-emerald-100 text-emerald-700 dark:bg-emerald-500/10 dark:text-emerald-400',
   Pending: 'bg-amber-100 text-amber-700 dark:bg-amber-500/10 dark:text-amber-400',
+  Rejected: 'bg-rose-100 text-rose-700 dark:bg-rose-500/10 dark:text-rose-400',
 }[status] || 'bg-slate-100 text-slate-600 dark:bg-white/10 dark:text-slate-300')
 </script>
 
@@ -71,6 +127,7 @@ const statusClass = (status) => ({
         <option value="">All</option>
         <option value="Pending">Pending</option>
         <option value="Processed">Processed</option>
+        <option value="Rejected">Rejected</option>
       </select>
     </div>
 
@@ -98,9 +155,11 @@ const statusClass = (status) => ({
           </div>
         </div>
         <div class="text-xs text-slate-500 dark:text-slate-400">{{ new Date(d.createdAt).toLocaleString() }}</div>
-        <div v-if="d.status === 'Pending'" class="flex items-center gap-1 pt-2 border-t border-slate-100 dark:border-white/5">
-          <button :disabled="processingId === d.id" class="flex-1 inline-flex items-center justify-center gap-1.5 py-2 text-xs font-medium text-emerald-600 hover:bg-emerald-50 dark:hover:bg-emerald-500/10 rounded-lg disabled:opacity-50" @click="approve(d)"><Check class="w-3.5 h-3.5" /> Approve</button>
-          <button :disabled="processingId === d.id" class="flex-1 inline-flex items-center justify-center gap-1.5 py-2 text-xs font-medium text-rose-500 hover:bg-rose-50 dark:hover:bg-rose-500/10 rounded-lg disabled:opacity-50" @click="remove(d)"><Trash2 class="w-3.5 h-3.5" /> Delete</button>
+        <div class="flex items-center gap-1 pt-2 border-t border-slate-100 dark:border-white/5">
+          <button :disabled="processingId === d.id" class="flex-1 inline-flex items-center justify-center gap-1.5 py-2 text-xs font-medium text-indigo-500 hover:bg-indigo-50 dark:hover:bg-indigo-500/10 rounded-lg disabled:opacity-50" @click="openEdit(d)"><Pencil class="w-3.5 h-3.5" /> Edit</button>
+          <button v-if="d.status === 'Pending'" :disabled="processingId === d.id" class="flex-1 inline-flex items-center justify-center gap-1.5 py-2 text-xs font-medium text-emerald-600 hover:bg-emerald-50 dark:hover:bg-emerald-500/10 rounded-lg disabled:opacity-50" @click="approve(d)"><Check class="w-3.5 h-3.5" /> Approve</button>
+          <button v-if="d.status === 'Pending'" :disabled="processingId === d.id" class="flex-1 inline-flex items-center justify-center gap-1.5 py-2 text-xs font-medium text-rose-500 hover:bg-rose-50 dark:hover:bg-rose-500/10 rounded-lg disabled:opacity-50" @click="reject(d)"><X class="w-3.5 h-3.5" /> Reject</button>
+          <button v-if="d.status === 'Pending'" :disabled="processingId === d.id" class="flex-1 inline-flex items-center justify-center gap-1.5 py-2 text-xs font-medium text-slate-500 hover:bg-slate-50 dark:hover:bg-white/5 rounded-lg disabled:opacity-50" @click="remove(d)"><Trash2 class="w-3.5 h-3.5" /> Delete</button>
         </div>
       </div>
     </div>
@@ -138,18 +197,74 @@ const statusClass = (status) => ({
             <td class="py-3 px-4"><span class="px-2 py-1 rounded-full text-xs font-medium" :class="statusClass(d.status)">{{ d.status }}</span></td>
             <td class="py-3 px-4 text-slate-500 dark:text-slate-400">{{ new Date(d.createdAt).toLocaleString() }}</td>
             <td class="py-3 px-4">
-              <div v-if="d.status === 'Pending'" class="flex items-center justify-end gap-1">
-                <button :disabled="processingId === d.id" class="p-2 text-emerald-500 hover:bg-emerald-50 dark:hover:bg-emerald-500/10 rounded-lg disabled:opacity-50" title="Approve" @click="approve(d)">
-                  <Check class="w-4 h-4" />
+              <div class="flex items-center justify-end gap-1">
+                <button class="p-2 text-indigo-500 hover:bg-indigo-50 dark:hover:bg-indigo-500/10 rounded-lg" title="Edit" @click="openEdit(d)">
+                  <Pencil class="w-4 h-4" />
                 </button>
-                <button :disabled="processingId === d.id" class="p-2 text-rose-500 hover:bg-rose-50 dark:hover:bg-rose-500/10 rounded-lg disabled:opacity-50" title="Delete" @click="remove(d)">
-                  <Trash2 class="w-4 h-4" />
-                </button>
+                <template v-if="d.status === 'Pending'">
+                  <button :disabled="processingId === d.id" class="p-2 text-emerald-500 hover:bg-emerald-50 dark:hover:bg-emerald-500/10 rounded-lg disabled:opacity-50" title="Approve" @click="approve(d)">
+                    <Check class="w-4 h-4" />
+                  </button>
+                  <button :disabled="processingId === d.id" class="p-2 text-rose-500 hover:bg-rose-50 dark:hover:bg-rose-500/10 rounded-lg disabled:opacity-50" title="Reject" @click="reject(d)">
+                    <X class="w-4 h-4" />
+                  </button>
+                  <button :disabled="processingId === d.id" class="p-2 text-slate-400 hover:bg-slate-100 dark:hover:bg-white/5 rounded-lg disabled:opacity-50" title="Delete" @click="remove(d)">
+                    <Trash2 class="w-4 h-4" />
+                  </button>
+                </template>
               </div>
             </td>
           </tr>
         </tbody>
       </table>
+    </div>
+
+    <!-- Edit modal -->
+    <div v-if="showEdit" class="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/50" @click.self="showEdit = false">
+      <div class="bg-white dark:bg-[#0F1524] rounded-2xl border border-slate-200 dark:border-white/10 w-full max-w-md p-6">
+        <h2 class="text-lg font-semibold text-slate-900 dark:text-white mb-4">Edit Deposit</h2>
+        <form class="space-y-3" @submit.prevent="saveEdit">
+          <div>
+            <label class="text-xs text-slate-500 dark:text-slate-400 block mb-1">Amount</label>
+            <input v-model.number="editForm.amount" type="number" step="0.00000001" required class="w-full px-3 py-2.5 rounded-xl border border-slate-200 dark:border-white/10 bg-white dark:bg-[#0B0F1A] text-sm text-slate-900 dark:text-white" />
+          </div>
+          <div>
+            <label class="text-xs text-slate-500 dark:text-slate-400 block mb-1">Payment method</label>
+            <input v-model="editForm.paymentMode" class="w-full px-3 py-2.5 rounded-xl border border-slate-200 dark:border-white/10 bg-white dark:bg-[#0B0F1A] text-sm text-slate-900 dark:text-white" />
+          </div>
+          <div>
+            <label class="text-xs text-slate-500 dark:text-slate-400 block mb-1">Reference / Txn ID</label>
+            <input v-model="editForm.txnId" class="w-full px-3 py-2.5 rounded-xl border border-slate-200 dark:border-white/10 bg-white dark:bg-[#0B0F1A] text-sm text-slate-900 dark:text-white" />
+          </div>
+          <div>
+            <label class="text-xs text-slate-500 dark:text-slate-400 block mb-1">Status</label>
+            <select v-model="editForm.status" class="w-full px-3 py-2.5 rounded-xl border border-slate-200 dark:border-white/10 bg-white dark:bg-[#0B0F1A] text-sm text-slate-900 dark:text-white">
+              <option value="Pending">Pending</option>
+              <option value="Processed">Processed</option>
+              <option value="Rejected">Rejected</option>
+            </select>
+          </div>
+          <div>
+            <label class="text-xs text-slate-500 dark:text-slate-400 block mb-1">Date &amp; time</label>
+            <input v-model="editForm.createdAt" type="datetime-local" required class="w-full px-3 py-2.5 rounded-xl border border-slate-200 dark:border-white/10 bg-white dark:bg-[#0B0F1A] text-sm text-slate-900 dark:text-white" />
+          </div>
+          <div class="p-3 rounded-xl bg-slate-50 dark:bg-white/5 space-y-2">
+            <label class="flex items-start gap-2.5 text-sm text-slate-700 dark:text-slate-300 cursor-pointer">
+              <input v-model="editForm.adjustBalance" type="checkbox" class="mt-0.5 rounded" />
+              <span>Also adjust the user's account balance by the difference</span>
+            </label>
+            <p v-if="editForm.adjustBalance && balanceDelta !== 0" class="text-xs" :class="balanceDelta > 0 ? 'text-emerald-600 dark:text-emerald-400' : 'text-rose-500'">
+              Balance will {{ balanceDelta > 0 ? 'increase' : 'decrease' }} by {{ Math.abs(balanceDelta).toLocaleString(undefined, { minimumFractionDigits: 2 }) }}
+            </p>
+            <p v-else-if="editForm.adjustBalance" class="text-xs text-slate-400">No change in amount — balance won't be affected.</p>
+          </div>
+          <p class="text-xs text-amber-600 dark:text-amber-400">Leaving the box unchecked edits the record only — the balance stays untouched.</p>
+          <div class="flex justify-end gap-2 pt-2">
+            <button type="button" class="px-4 py-2 rounded-xl text-sm font-medium text-slate-600 dark:text-slate-300 hover:bg-slate-100 dark:hover:bg-white/5" @click="showEdit = false">Cancel</button>
+            <button type="submit" :disabled="saving" class="px-4 py-2 rounded-xl text-sm font-medium bg-gradient-to-r from-indigo-500 to-blue-600 text-white disabled:opacity-50">{{ saving ? 'Saving…' : 'Save' }}</button>
+          </div>
+        </form>
+      </div>
     </div>
   </div>
 </template>

@@ -196,7 +196,11 @@ public class BotProfitScheduler {
                                 + profit.toPlainString() + ". Keep investing and earning!");
             }
         } else {
-            BigDecimal lossPct = BigDecimal.valueOf(random.nextInt(50, 201)).divide(BigDecimal.valueOf(100), 4, RoundingMode.HALF_UP);
+            BigDecimal lossMin = bot.getLossMin() != null ? bot.getLossMin() : BigDecimal.valueOf(0.5);
+            BigDecimal lossMax = bot.getLossMax() != null ? bot.getLossMax() : BigDecimal.valueOf(2);
+            int lossMinCents = lossMin.multiply(BigDecimal.valueOf(100)).intValue();
+            int lossMaxCents = Math.max(lossMinCents + 1, lossMax.multiply(BigDecimal.valueOf(100)).intValue() + 1);
+            BigDecimal lossPct = BigDecimal.valueOf(random.nextInt(lossMinCents, lossMaxCents)).divide(BigDecimal.valueOf(100), 4, RoundingMode.HALF_UP);
             BigDecimal loss = currentBalance.multiply(lossPct).divide(BigDecimal.valueOf(100), 2, RoundingMode.HALF_UP);
             BigDecimal exitPrice = "BUY".equals(tradeType)
                     ? entryPrice.multiply(BigDecimal.ONE.subtract(lossPct.divide(BigDecimal.valueOf(100), 8, RoundingMode.HALF_UP)))
@@ -266,6 +270,8 @@ public class BotProfitScheduler {
                             + nullToEmpty(user.getCurrencySymbol()) + totalReturn.toPlainString() + ", Net profit: "
                             + nullToEmpty(user.getCurrencySymbol()) + netProfit.toPlainString());
         }
+        notificationService.notifyAllAdmins("Bot investment completed",
+                user.getName() + "'s " + bot.getName() + " bot investment has completed.", "info");
     }
 
     private String nullToEmpty(String value) {

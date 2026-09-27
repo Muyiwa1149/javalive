@@ -4,7 +4,7 @@ import { useRoute, useRouter, RouterLink, RouterView } from 'vue-router'
 import { onClickOutside } from '@vueuse/core'
 import {
   LayoutDashboard, Receipt, Briefcase, Target, PieChart, TrendingUp, CandlestickChart, Users2, Bot,
-  Wallet, PlusCircle, MinusCircle, ArrowLeftRight, Repeat,
+  Wallet, PlusCircle, MinusCircle,
   UserCircle, User, ShieldAlert, ShieldCheck, Clock, KeyRound,
   TrendingUp as TrendingUpIcon, Headphones, HelpCircle, Bell, ChevronDown, Menu, X, LogOut, Sun, Moon,
   BellOff, AlertTriangle, CheckCircle, AlertOctagon, Info, Home, Banknote,
@@ -68,8 +68,6 @@ const NAV_SECTIONS = [
     items: [
       { name: 'user.deposits', label: 'Deposit Funds', icon: PlusCircle },
       { name: 'user.withdrawals', label: 'Withdraw Funds', icon: MinusCircle },
-      { name: 'user.transfer', label: 'Internal Transfer', icon: ArrowLeftRight },
-      { name: 'user.exchange', label: 'Currency Exchange', icon: Repeat },
     ],
   },
   {

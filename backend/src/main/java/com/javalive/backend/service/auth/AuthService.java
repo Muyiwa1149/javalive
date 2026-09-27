@@ -11,6 +11,7 @@ import com.javalive.backend.repository.CryptoAccountRepository;
 import com.javalive.backend.repository.UserRepository;
 import com.javalive.backend.security.JwtService;
 import com.javalive.backend.service.mail.MailService;
+import com.javalive.backend.service.notification.NotificationService;
 import com.javalive.backend.service.twofactor.TwoFactorService;
 import com.javalive.backend.web.exception.ApiException;
 import io.jsonwebtoken.JwtException;
@@ -34,16 +35,18 @@ public class AuthService {
     private final JwtService jwtService;
     private final MailService mailService;
     private final TwoFactorService twoFactorService;
+    private final NotificationService notificationService;
 
     public AuthService(UserRepository userRepository, CryptoAccountRepository cryptoAccountRepository,
                         PasswordEncoder passwordEncoder, JwtService jwtService, MailService mailService,
-                        TwoFactorService twoFactorService) {
+                        TwoFactorService twoFactorService, NotificationService notificationService) {
         this.userRepository = userRepository;
         this.cryptoAccountRepository = cryptoAccountRepository;
         this.passwordEncoder = passwordEncoder;
         this.jwtService = jwtService;
         this.mailService = mailService;
         this.twoFactorService = twoFactorService;
+        this.notificationService = notificationService;
     }
 
     @Transactional
@@ -136,6 +139,7 @@ public class AuthService {
             return new UserLoginResponse(true, pendingToken, null);
         }
 
+        notifyLogin(user);
         String token = jwtService.generateToken(user.getId(), "USER", user.getEmail());
         return new UserLoginResponse(false, token, UserSummary.from(user));
     }
@@ -158,6 +162,7 @@ public class AuthService {
             throw new ApiException(HttpStatus.BAD_REQUEST, "Invalid verification code.");
         }
 
+        notifyLogin(user);
         String token = jwtService.generateToken(user.getId(), "USER", user.getEmail());
         return new UserLoginResponse(false, token, UserSummary.from(user));
     }
@@ -166,5 +171,16 @@ public class AuthService {
         User user = userRepository.findById(userId)
                 .orElseThrow(() -> new ApiException(HttpStatus.NOT_FOUND, "User not found."));
         return UserSummary.from(user);
+    }
+
+    /** Fires on every successful login (both the direct and post-2FA paths) — notifies the user and every admin. */
+    private void notifyLogin(User user) {
+        String userMessage = "Your account was just accessed. If this wasn't you, please contact support immediately.";
+        notificationService.notifyUser(user, "New Login", userMessage, "info");
+        mailService.send(user.getEmail(), "New Login Detected", userMessage);
+
+        String adminMessage = user.getName() + " (" + user.getEmail() + ") just logged in.";
+        notificationService.notifyAllAdmins("User login", adminMessage, "info");
+        notificationService.emailAllAdmins("User login: " + user.getName(), adminMessage);
     }
 }

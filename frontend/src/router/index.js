@@ -114,6 +114,7 @@ const routes = [
       { path: 'copy-trading/active', name: 'admin.copy-trading-active', component: () => import('@/pages/admin/CopyTradingActive.vue') },
       { path: 'bots', name: 'admin.bots', component: () => import('@/pages/admin/Bots.vue') },
       { path: 'bots/analytics', name: 'admin.bots-analytics', component: () => import('@/pages/admin/BotsAnalytics.vue') },
+      { path: 'bots/investments', name: 'admin.bots-investments', component: () => import('@/pages/admin/BotInvestmentHistory.vue') },
       { path: 'loans', name: 'admin.loans', component: () => import('@/pages/admin/Loans.vue') },
       { path: 'signals', name: 'admin.signals', component: () => import('@/pages/admin/Signals.vue') },
       { path: 'signals/active', name: 'admin.signals-active', component: () => import('@/pages/admin/SignalsActive.vue') },

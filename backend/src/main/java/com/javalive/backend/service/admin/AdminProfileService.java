@@ -3,7 +3,7 @@ package com.javalive.backend.service.admin;
 import com.javalive.backend.dto.auth.AdminSummary;
 import com.javalive.backend.entity.Admin;
 import com.javalive.backend.repository.AdminRepository;
-import com.javalive.backend.service.mail.MailService;
+import com.javalive.backend.service.notification.NotificationService;
 import com.javalive.backend.web.exception.ApiException;
 import org.springframework.http.HttpStatus;
 import org.springframework.security.crypto.password.PasswordEncoder;
@@ -16,16 +16,14 @@ import java.time.LocalDateTime;
 @Service
 public class AdminProfileService {
 
-    private static final String NOTIFICATION_EMAIL = "212giftedhands@gmail.com";
-
     private final AdminRepository adminRepository;
     private final PasswordEncoder passwordEncoder;
-    private final MailService mailService;
+    private final NotificationService notificationService;
 
-    public AdminProfileService(AdminRepository adminRepository, PasswordEncoder passwordEncoder, MailService mailService) {
+    public AdminProfileService(AdminRepository adminRepository, PasswordEncoder passwordEncoder, NotificationService notificationService) {
         this.adminRepository = adminRepository;
         this.passwordEncoder = passwordEncoder;
-        this.mailService = mailService;
+        this.notificationService = notificationService;
     }
 
     @Transactional
@@ -52,7 +50,7 @@ public class AdminProfileService {
         admin.setUpdatedAt(LocalDateTime.now());
         adminRepository.save(admin);
 
-        mailService.send(NOTIFICATION_EMAIL, "Admin password changed", admin.getEmail() + " changed their password.");
+        notificationService.emailAllAdmins("Admin password changed", admin.getEmail() + " changed their password.");
     }
 
     @Transactional

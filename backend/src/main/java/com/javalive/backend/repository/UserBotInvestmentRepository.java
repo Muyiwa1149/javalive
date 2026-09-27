@@ -14,6 +14,13 @@ public interface UserBotInvestmentRepository extends JpaRepository<UserBotInvest
 
     List<UserBotInvestment> findByUserIdOrderByCreatedAtDesc(Long userId);
 
+    @Query("select i from UserBotInvestment i join fetch i.user join fetch i.bot order by i.createdAt desc")
+    List<UserBotInvestment> findAllWithUserAndBotOrderByCreatedAtDesc();
+
+    @Query("select i from UserBotInvestment i join fetch i.user join fetch i.bot "
+            + "where i.status = :status order by i.createdAt desc")
+    List<UserBotInvestment> findByStatusWithUserAndBotOrderByCreatedAtDesc(@Param("status") String status);
+
     @Query("select i from UserBotInvestment i join fetch i.user join fetch i.bot "
             + "where i.status = :status and i.expiresAt > :now")
     List<UserBotInvestment> findActiveNotExpired(@Param("status") String status, @Param("now") LocalDateTime now);

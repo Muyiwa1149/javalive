@@ -9,6 +9,7 @@ import com.javalive.backend.repository.InvestmentRepository;
 import com.javalive.backend.repository.LedgerTransactionRepository;
 import com.javalive.backend.repository.UserRepository;
 import com.javalive.backend.service.mail.MailService;
+import com.javalive.backend.service.notification.NotificationService;
 import com.javalive.backend.service.settings.SettingsService;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -47,27 +48,39 @@ public class InvestmentRoiScheduler {
     private final LedgerTransactionRepository ledgerTransactionRepository;
     private final SettingsService settingsService;
     private final MailService mailService;
+    private final NotificationService notificationService;
 
     public InvestmentRoiScheduler(InvestmentRepository investmentRepository,
                                    UserRepository userRepository,
                                    LedgerTransactionRepository ledgerTransactionRepository,
                                    SettingsService settingsService,
-                                   MailService mailService) {
+                                   MailService mailService,
+                                   NotificationService notificationService) {
         this.investmentRepository = investmentRepository;
         this.userRepository = userRepository;
         this.ledgerTransactionRepository = ledgerTransactionRepository;
         this.settingsService = settingsService;
         this.mailService = mailService;
+        this.notificationService = notificationService;
     }
 
-    /** {@code ->everyFiveMinutes()->withoutOverlapping()} — fixedDelay naturally serializes runs. */
+    /**
+     * {@code ->everyFiveMinutes()->withoutOverlapping()} — fixedDelay naturally serializes runs.
+     *
+     * <p><b>Expiry completion always runs, even with trade mode off.</b> Originally the whole method
+     * short-circuited when {@code tradeMode != "on"}, which meant an investment past its expiry date
+     * would sit indefinitely in {@code active="yes"} (still shown as "Active" everywhere) for as long
+     * as trade mode stayed off — e.g. during a maintenance window. Trade mode should only pause new
+     * ROI *accrual*, never freeze an investment that has already matured.
+     */
     @Scheduled(initialDelay = 30_000, fixedDelay = 300_000)
     @Transactional
     public void processRoi() {
         AppSetting settings = settingsService.get();
-        if (settings == null || !"on".equals(settings.getTradeMode())) {
+        if (settings == null) {
             return;
         }
+        boolean tradeModeOn = "on".equals(settings.getTradeMode());
 
         LocalDateTime now = LocalDateTime.now();
         boolean isWeekend = now.getDayOfWeek() == DayOfWeek.SATURDAY || now.getDayOfWeek() == DayOfWeek.SUNDAY;
@@ -88,6 +101,10 @@ public class InvestmentRoiScheduler {
                 if (investment.getExpireDate() != null && !now.isBefore(investment.getExpireDate())) {
                     completeInvestment(investment, user, plan, settings, now);
                     completed++;
+                    continue;
+                }
+
+                if (!tradeModeOn) {
                     continue;
                 }
 
@@ -206,11 +223,14 @@ public class InvestmentRoiScheduler {
         investment.setActive("expired");
         investmentRepository.save(investment);
 
+        String message = String.format("Your %s investment plan of %s%s has matured and is now complete.",
+                plan.getName(), nullToEmpty(user.getCurrencySymbol()), formatAmount(investment.getAmount()));
+        notificationService.notifyUser(user, "Investment Plan Completed", message, "success", investment.getId(), "investment");
         if (Boolean.TRUE.equals(user.getSendInvPlanEmail())) {
-            String message = String.format("Your %s investment plan of %s%s has matured and is now complete.",
-                    plan.getName(), nullToEmpty(user.getCurrencySymbol()), formatAmount(investment.getAmount()));
             mailService.send(user.getEmail(), "Investment Plan Completed", message);
         }
+        notificationService.notifyAllAdmins("Investment plan completed",
+                user.getName() + "'s " + plan.getName() + " investment plan has matured.", "info");
     }
 
     private String formatAmount(BigDecimal amount) {

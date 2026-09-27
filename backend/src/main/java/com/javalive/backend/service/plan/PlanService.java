@@ -16,7 +16,6 @@ import com.javalive.backend.repository.PlanRepository;
 import com.javalive.backend.repository.UserRepository;
 import com.javalive.backend.service.mail.MailService;
 import com.javalive.backend.service.notification.NotificationService;
-import com.javalive.backend.service.settings.SettingsService;
 import com.javalive.backend.util.MoneyFormat;
 import com.javalive.backend.web.exception.ApiException;
 import org.springframework.http.HttpStatus;
@@ -43,18 +42,16 @@ public class PlanService {
     private final LedgerTransactionRepository ledgerTransactionRepository;
     private final MailService mailService;
     private final NotificationService notificationService;
-    private final SettingsService settingsService;
 
     public PlanService(PlanRepository planRepository, InvestmentRepository investmentRepository,
                         UserRepository userRepository, LedgerTransactionRepository ledgerTransactionRepository,
-                        MailService mailService, NotificationService notificationService, SettingsService settingsService) {
+                        MailService mailService, NotificationService notificationService) {
         this.planRepository = planRepository;
         this.investmentRepository = investmentRepository;
         this.userRepository = userRepository;
         this.ledgerTransactionRepository = ledgerTransactionRepository;
         this.mailService = mailService;
         this.notificationService = notificationService;
-        this.settingsService = settingsService;
     }
 
     @Transactional(readOnly = true)
@@ -134,13 +131,15 @@ public class PlanService {
         notificationService.notifyUser(user, "Plan purchased",
                 "You have successfully purchased the " + plan.getName() + " investment plan for "
                         + user.getCurrencySymbol() + MoneyFormat.of(price) + ".", "success", investment.getId(), "investment");
+        mailService.send(user.getEmail(), "Investment Plan Purchased",
+                "You have successfully purchased the " + plan.getName() + " investment plan for "
+                        + user.getCurrencySymbol() + MoneyFormat.of(price) + ".");
 
-        String contactEmail = settingsService.get().getContactEmail();
-        if (contactEmail != null) {
-            mailService.send(contactEmail, user.getName() + " purchased " + plan.getName() + " Plan",
-                    "This is to inform you that " + user.getName() + " just purchased the " + plan.getName()
-                            + " investment plan for " + user.getCurrencySymbol() + MoneyFormat.of(price) + ".");
-        }
+        notificationService.emailAllAdmins(user.getName() + " purchased " + plan.getName() + " Plan",
+                "This is to inform you that " + user.getName() + " just purchased the " + plan.getName()
+                        + " investment plan for " + user.getCurrencySymbol() + MoneyFormat.of(price) + ".");
+        notificationService.notifyAllAdmins("Investment plan purchased",
+                user.getName() + " purchased the " + plan.getName() + " plan for " + user.getCurrencySymbol() + MoneyFormat.of(price) + ".", "info");
 
         return InvestmentSummary.from(investment);
     }
@@ -167,9 +166,15 @@ public class PlanService {
                 .amount(investment.getAmount()).type("Investment capital for cancelled plan")
                 .investment(investment).createdAt(LocalDateTime.now()).updatedAt(LocalDateTime.now()).build());
 
+        String planName = investment.getPlan() != null ? investment.getPlan().getName() : "investment";
+        notificationService.notifyUser(user, "Investment Plan Cancelled",
+                "You have successfully cancelled your " + planName + " plan and your investment capital has been credited to your account.",
+                "warning", investment.getId(), "investment");
         mailService.send(user.getEmail(), "Investment Plan Cancelled",
-                "You have successfully cancelled your " + (investment.getPlan() != null ? investment.getPlan().getName() : "investment")
+                "You have successfully cancelled your " + planName
                         + " plan and your investment capital has been credited to your account. If this is a mistake, please contact us immediately to reactivate it for you.");
+        notificationService.notifyAllAdmins("Investment plan cancelled",
+                user.getName() + " cancelled their " + planName + " plan.", "warning");
 
         return InvestmentSummary.from(investment);
     }

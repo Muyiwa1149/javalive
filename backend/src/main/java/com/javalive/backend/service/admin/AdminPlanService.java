@@ -83,10 +83,13 @@ public class AdminPlanService {
         planRepository.delete(plan);
     }
 
+    /** {@code status} null/blank/"All" returns every investment regardless of status; otherwise filters to that status. */
     @Transactional(readOnly = true)
-    public List<AdminInvestmentSummary> activeInvestments() {
-        return investmentRepository.findByActiveWithUserAndPlanOrderByIdDesc("yes")
-                .stream().map(AdminInvestmentSummary::from).toList();
+    public List<AdminInvestmentSummary> investments(String status) {
+        List<Investment> investments = (status == null || status.isBlank() || "All".equalsIgnoreCase(status))
+                ? investmentRepository.findAllWithUserAndPlanOrderByIdDesc()
+                : investmentRepository.findByActiveWithUserAndPlanOrderByIdDesc(status);
+        return investments.stream().map(AdminInvestmentSummary::from).toList();
     }
 
     /** Full admin correction of an investment — amount, plan (which carries the ROI rate/interval), every date, and the accumulated profit figures. */

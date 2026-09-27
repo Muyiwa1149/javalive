@@ -15,9 +15,7 @@ import com.javalive.backend.repository.InstrumentRepository;
 import com.javalive.backend.repository.LedgerTransactionRepository;
 import com.javalive.backend.repository.UserPlanRepository;
 import com.javalive.backend.repository.UserRepository;
-import com.javalive.backend.service.mail.MailService;
 import com.javalive.backend.service.notification.NotificationService;
-import com.javalive.backend.service.settings.SettingsService;
 import com.javalive.backend.util.MoneyFormat;
 import com.javalive.backend.web.exception.ApiException;
 import org.springframework.http.HttpStatus;
@@ -60,19 +58,15 @@ public class TradeService {
     private final UserRepository userRepository;
     private final LedgerTransactionRepository ledgerTransactionRepository;
     private final NotificationService notificationService;
-    private final MailService mailService;
-    private final SettingsService settingsService;
 
     public TradeService(InstrumentRepository instrumentRepository, UserPlanRepository userPlanRepository,
                          UserRepository userRepository, LedgerTransactionRepository ledgerTransactionRepository,
-                         NotificationService notificationService, MailService mailService, SettingsService settingsService) {
+                         NotificationService notificationService) {
         this.instrumentRepository = instrumentRepository;
         this.userPlanRepository = userPlanRepository;
         this.userRepository = userRepository;
         this.ledgerTransactionRepository = ledgerTransactionRepository;
         this.notificationService = notificationService;
-        this.mailService = mailService;
-        this.settingsService = settingsService;
     }
 
     @Transactional(readOnly = true)
@@ -143,13 +137,10 @@ public class TradeService {
                         + user.getCurrencySymbol() + MoneyFormat.of(request.amount()) + " with " + request.leverage() + "x leverage is now active.",
                 "success", trade.getId(), "trade");
 
-        String contactEmail = settingsService.get().getContactEmail();
-        if (contactEmail != null) {
-            mailService.send(contactEmail, user.getName() + " just traded " + request.assetSymbol() + " asset",
-                    user.getName() + " just placed a trade on " + request.assetSymbol() + " asset for "
-                            + user.getCurrencySymbol() + MoneyFormat.of(request.amount()) + " with " + request.leverage()
-                            + "x leverage. Order type: " + request.orderType());
-        }
+        notificationService.emailAllAdmins(user.getName() + " just traded " + request.assetSymbol() + " asset",
+                user.getName() + " just placed a trade on " + request.assetSymbol() + " asset for "
+                        + user.getCurrencySymbol() + MoneyFormat.of(request.amount()) + " with " + request.leverage()
+                        + "x leverage. Order type: " + request.orderType());
 
         return UserTradeSummary.from(trade);
     }

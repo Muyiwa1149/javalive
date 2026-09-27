@@ -12,6 +12,11 @@ spring:
     properties:
       hibernate:
         format_sql: false
+        # Explicit override — Hibernate's JDBC-metadata auto-detection fails against this VPS's
+        # MariaDB (it reports itself as legacy "5.5.5-MariaDB" for MySQL-client compatibility,
+        # which trips up auto-detection), producing "Unable to determine Dialect without JDBC
+        # metadata" and a crash-loop on every restart. Set explicitly to skip auto-detection entirely.
+        dialect: org.hibernate.dialect.MariaDBDialect
 
   mail:
     host: ${MAIL_HOST}

@@ -6,6 +6,7 @@ import org.springframework.data.jpa.repository.Query;
 import org.springframework.data.repository.query.Param;
 
 import java.math.BigDecimal;
+import java.time.LocalDateTime;
 import java.util.List;
 
 public interface DepositRepository extends JpaRepository<Deposit, Long> {
@@ -39,4 +40,10 @@ public interface DepositRepository extends JpaRepository<Deposit, Long> {
 
     @Query("select distinct d.user.id from Deposit d")
     List<Long> findDistinctUserIds();
+
+    /** Day-bucketed processed-deposit sum, for the admin dashboard's 30-day trend chart. */
+    @Query(value = "select date(d.created_at) as d, coalesce(sum(d.amount), 0) as total "
+            + "from deposits d inner join users u on u.id = d.user_id "
+            + "where d.status = 'Processed' and d.created_at >= :since group by date(d.created_at)", nativeQuery = true)
+    List<Object[]> dailyProcessedTotals(@Param("since") LocalDateTime since);
 }

@@ -52,4 +52,17 @@ public interface UserCopyTradeRepository extends JpaRepository<UserCopyTrade, Lo
 
     @Query("select t from UserCopyTrade t join fetch t.user join fetch t.expert where t.active = :active order by t.createdAt desc")
     List<UserCopyTrade> findByActiveWithUserAndExpertOrderByCreatedAtDesc(@Param("active") String active);
+
+    /** Full history regardless of status — stopped copy trades were previously invisible admin-side. */
+    @Query("select t from UserCopyTrade t join fetch t.user join fetch t.expert order by t.createdAt desc")
+    List<UserCopyTrade> findAllWithUserAndExpertOrderByCreatedAtDesc();
+
+    /**
+     * "Stopped" as "not active" rather than one specific terminal string: {@link
+     * com.javalive.backend.service.copytrading.CopyTradingService#stop} writes {@code "no"} for
+     * newly-stopped trades, but migrated legacy rows use {@code "cancelled"} — matching only
+     * {@code "no"} would silently hide every pre-existing stopped copy trade from this history view.
+     */
+    @Query("select t from UserCopyTrade t join fetch t.user join fetch t.expert where t.active <> 'yes' order by t.createdAt desc")
+    List<UserCopyTrade> findByNotActiveWithUserAndExpertOrderByCreatedAtDesc();
 }

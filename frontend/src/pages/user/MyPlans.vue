@@ -1,5 +1,5 @@
 <script setup>
-import { ref, computed, onMounted } from 'vue'
+import { ref, computed, onMounted, onBeforeUnmount } from 'vue'
 import Swal from 'sweetalert2'
 import { RouterLink } from 'vue-router'
 import { Wallet, Briefcase, TrendingUp, TrendingDown, Clock, PieChart, ArrowRight, ChevronDown, XCircle, PlusCircle } from 'lucide-vue-next'
@@ -20,6 +20,11 @@ const detail = ref(null)
 const detailLoading = ref(false)
 const busyId = ref(null)
 
+// Ticks every 30s so the progress bar and estimated-profit figure advance live instead of only
+// updating when the investment list is refetched (e.g. after an action).
+const nowTick = ref(Date.now())
+let tickInterval = null
+
 async function load() {
   loading.value = true
   try {
@@ -30,7 +35,11 @@ async function load() {
   }
 }
 
-onMounted(load)
+onMounted(() => {
+  load()
+  tickInterval = setInterval(() => { nowTick.value = Date.now() }, 30000)
+})
+onBeforeUnmount(() => { if (tickInterval) clearInterval(tickInterval) })
 
 async function toggleExpand(inv) {
   if (expandedId.value === inv.id) {
@@ -124,12 +133,58 @@ function progressOf(inv) {
   if (!inv.activatedAt || !inv.expireDate) return { pct: 0, totalDays: 0, remainingDays: 0 }
   const start = new Date(inv.activatedAt).getTime()
   const end = new Date(inv.expireDate).getTime()
-  const now = Date.now()
+  const now = nowTick.value
   const totalDays = Math.max(0, Math.round((end - start) / 86400000))
   const elapsedDays = Math.max(0, Math.round((now - start) / 86400000))
   const pct = totalDays > 0 ? Math.min((elapsedDays / totalDays) * 100, 100) : 0
   const remainingDays = now < end ? Math.round((end - now) / 86400000) : 0
   return { pct, totalDays, remainingDays }
+}
+
+/**
+ * Cosmetic-only estimate of profit accrued since the last real ROI payout, interpolated linearly
+ * toward the next expected payout. Ports the same interval-parsing/profit-calculation logic
+ * InvestmentRoiScheduler.java uses server-side (calculateNextPayoutDate/calculateProfit) — but this
+ * never credits anything; the real profitEarned figure only ever changes via that backend job.
+ * Clearly labeled with a "≈" prefix in the template so it's never mistaken for already-credited funds.
+ */
+function nextPayoutDate(lastGrowth, interval) {
+  const value = (interval || '').trim()
+  const base = lastGrowth.getTime()
+  const match = (re) => value.match(re)
+  let m
+  if ((m = match(/(\d+)\s*Minutes?/i))) return base + Number(m[1]) * 60000
+  if ((m = match(/(\d+)\s*Hours?/i))) return base + Number(m[1]) * 3600000
+  if ((m = match(/(\d+)\s*Days?/i))) return base + Number(m[1]) * 86400000
+  if ((m = match(/(\d+)\s*Weeks?/i))) return base + Number(m[1]) * 604800000
+  if ((m = match(/(\d+)\s*Months?/i))) return addMonths(lastGrowth, Number(m[1])).getTime()
+  switch (value.toLowerCase()) {
+    case 'hourly': return base + 3600000
+    case 'daily': return base + 86400000
+    case 'weekly': return base + 604800000
+    case 'bi-weekly': case 'biweekly': case 'bi weekly': return base + 2 * 604800000
+    case 'monthly': return addMonths(lastGrowth, 1).getTime()
+    case 'quarterly': return addMonths(lastGrowth, 3).getTime()
+    case 'yearly': case 'annually': return addMonths(lastGrowth, 12).getTime()
+    default: return base + 86400000
+  }
+}
+function addMonths(date, n) {
+  const d = new Date(date)
+  d.setMonth(d.getMonth() + n)
+  return d
+}
+function estimatedProfitSince(inv) {
+  if (inv.active !== 'yes' || !inv.lastGrowth || !inv.planIncrementInterval) return 0
+  const lastGrowth = new Date(inv.lastGrowth)
+  const nextDue = nextPayoutDate(lastGrowth, inv.planIncrementInterval)
+  const now = nowTick.value
+  if (now <= lastGrowth.getTime() || now >= nextDue) return 0
+  const nextProfit = inv.planIncrementType === 'Percentage'
+    ? Number(inv.amount) * Number(inv.planIncrementAmount || 0) / 100
+    : Number(inv.planIncrementAmount || 0)
+  const fraction = (now - lastGrowth.getTime()) / (nextDue - lastGrowth.getTime())
+  return nextProfit * Math.min(Math.max(fraction, 0), 1)
 }
 </script>
 
@@ -183,41 +238,41 @@ function progressOf(inv) {
 
           <!-- Desktop: spacious icon cards -->
           <div class="hidden sm:block p-6">
-            <div class="grid grid-cols-5 gap-6 mb-6">
-              <div class="text-center">
+            <div class="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-5 gap-4 lg:gap-6 mb-6">
+              <div class="text-center min-w-0">
                 <div class="w-12 h-12 bg-blue-100 dark:bg-blue-900/30 rounded-xl flex items-center justify-center mx-auto mb-3">
                   <Briefcase class="w-6 h-6 text-blue-600 dark:text-blue-400" />
                 </div>
-                <div class="text-2xl font-bold text-gray-900 dark:text-white">{{ stats.total }}</div>
-                <div class="text-sm text-gray-600 dark:text-gray-400">Total Plans</div>
+                <div class="text-xl lg:text-2xl font-bold text-gray-900 dark:text-white truncate">{{ stats.total }}</div>
+                <div class="text-sm text-gray-600 dark:text-gray-400 truncate">Total Plans</div>
               </div>
-              <div class="text-center">
+              <div class="text-center min-w-0">
                 <div class="w-12 h-12 bg-green-100 dark:bg-green-900/30 rounded-xl flex items-center justify-center mx-auto mb-3">
                   <TrendingUp class="w-6 h-6 text-green-600 dark:text-green-400" />
                 </div>
-                <div class="text-2xl font-bold text-green-600">{{ stats.active }}</div>
-                <div class="text-sm text-gray-600 dark:text-gray-400">Active</div>
+                <div class="text-xl lg:text-2xl font-bold text-green-600 truncate">{{ stats.active }}</div>
+                <div class="text-sm text-gray-600 dark:text-gray-400 truncate">Active</div>
               </div>
-              <div class="text-center">
+              <div class="text-center min-w-0">
                 <div class="w-12 h-12 bg-red-100 dark:bg-red-900/30 rounded-xl flex items-center justify-center mx-auto mb-3">
                   <TrendingDown class="w-6 h-6 text-red-600 dark:text-red-400" />
                 </div>
-                <div class="text-2xl font-bold text-red-600">{{ stats.expired }}</div>
-                <div class="text-sm text-gray-600 dark:text-gray-400">Expired</div>
+                <div class="text-xl lg:text-2xl font-bold text-red-600 truncate">{{ stats.expired }}</div>
+                <div class="text-sm text-gray-600 dark:text-gray-400 truncate">Expired</div>
               </div>
-              <div class="text-center">
+              <div class="text-center min-w-0">
                 <div class="w-12 h-12 bg-yellow-100 dark:bg-yellow-900/30 rounded-xl flex items-center justify-center mx-auto mb-3">
                   <Clock class="w-6 h-6 text-yellow-600 dark:text-yellow-400" />
                 </div>
-                <div class="text-2xl font-bold text-gray-900 dark:text-white">{{ money(stats.totalInvested) }}</div>
-                <div class="text-sm text-gray-600 dark:text-gray-400">Total Invested</div>
+                <div class="text-xl lg:text-2xl font-bold text-gray-900 dark:text-white truncate">{{ money(stats.totalInvested) }}</div>
+                <div class="text-sm text-gray-600 dark:text-gray-400 truncate">Total Invested</div>
               </div>
-              <div class="text-center">
+              <div class="text-center min-w-0">
                 <div class="w-12 h-12 bg-purple-100 dark:bg-purple-900/30 rounded-xl flex items-center justify-center mx-auto mb-3">
                   <PieChart class="w-6 h-6 text-purple-600 dark:text-purple-400" />
                 </div>
-                <div class="text-2xl font-bold text-gray-900 dark:text-white">{{ money(stats.totalProfit) }}</div>
-                <div class="text-sm text-gray-600 dark:text-gray-400">Total Profit</div>
+                <div class="text-xl lg:text-2xl font-bold text-gray-900 dark:text-white truncate">{{ money(stats.totalProfit) }}</div>
+                <div class="text-sm text-gray-600 dark:text-gray-400 truncate">Total Profit</div>
               </div>
             </div>
           </div>
@@ -325,6 +380,9 @@ function progressOf(inv) {
                     <div>
                       <div class="text-gray-500 dark:text-gray-400">Profit Earned</div>
                       <div class="font-semibold text-gray-900 dark:text-white">{{ money(inv.profitEarned) }}</div>
+                      <div v-if="estimatedProfitSince(inv) > 0" class="text-xs italic text-gray-400 dark:text-gray-500 mt-0.5" title="Estimated profit accruing toward the next payout — not yet credited">
+                        ≈ +{{ money(estimatedProfitSince(inv)) }} accruing
+                      </div>
                     </div>
                     <div>
                       <div class="text-gray-500 dark:text-gray-400">Withdrawn</div>

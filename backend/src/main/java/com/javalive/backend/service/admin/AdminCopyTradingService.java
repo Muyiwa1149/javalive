@@ -5,6 +5,7 @@ import com.javalive.backend.dto.admin.AdminCopyTradingStats;
 import com.javalive.backend.dto.admin.AdminExpertRequest;
 import com.javalive.backend.dto.admin.AdminExpertSummary;
 import com.javalive.backend.entity.CopyTradingExpert;
+import com.javalive.backend.entity.UserCopyTrade;
 import com.javalive.backend.repository.CopyTradingExpertRepository;
 import com.javalive.backend.repository.UserCopyTradeRepository;
 import com.javalive.backend.service.storage.FileStorageService;
@@ -44,10 +45,13 @@ public class AdminCopyTradingService {
 
     @Transactional
     public AdminExpertSummary create(AdminExpertRequest request, MultipartFile photo) {
+        validateRanges(request);
         CopyTradingExpert expert = CopyTradingExpert.builder()
                 .name(request.name()).tag(request.tag()).rating(request.rating()).followers(0)
                 .equity(request.equity()).totalProfit(request.totalProfit()).status(request.status())
                 .description(request.description()).winRate(request.winRate()).totalTrades(request.totalTrades())
+                .profitMin(request.profitMin()).profitMax(request.profitMax())
+                .lossMin(request.lossMin()).lossMax(request.lossMax())
                 .price(request.price()).type("Main")
                 .createdAt(LocalDateTime.now()).updatedAt(LocalDateTime.now())
                 .build();
@@ -60,6 +64,7 @@ public class AdminCopyTradingService {
 
     @Transactional
     public AdminExpertSummary update(Long id, AdminExpertRequest request, MultipartFile photo) {
+        validateRanges(request);
         CopyTradingExpert expert = getExpert(id);
         expert.setName(request.name());
         expert.setTag(request.tag());
@@ -69,6 +74,10 @@ public class AdminCopyTradingService {
         expert.setStatus(request.status());
         expert.setDescription(request.description());
         expert.setWinRate(request.winRate());
+        expert.setProfitMin(request.profitMin());
+        expert.setProfitMax(request.profitMax());
+        expert.setLossMin(request.lossMin());
+        expert.setLossMax(request.lossMax());
         expert.setTotalTrades(request.totalTrades());
         expert.setPrice(request.price());
         expert.setUpdatedAt(LocalDateTime.now());
@@ -97,10 +106,23 @@ public class AdminCopyTradingService {
         expertRepository.delete(expert);
     }
 
+    /**
+     * Full history — {@code active} null/blank/"All" returns every copy trade regardless of status.
+     * Previously only "yes" (active) copy trades were ever visible admin-side; once a user stopped
+     * copying, the record vanished from every admin view.
+     */
     @Transactional(readOnly = true)
-    public List<AdminCopyTradeSummary> activeTrades() {
-        return copyTradeRepository.findByActiveWithUserAndExpertOrderByCreatedAtDesc("yes")
-                .stream().map(AdminCopyTradeSummary::from).toList();
+    public List<AdminCopyTradeSummary> history(String active) {
+        List<UserCopyTrade> trades;
+        if (active == null || active.isBlank() || "All".equalsIgnoreCase(active)) {
+            trades = copyTradeRepository.findAllWithUserAndExpertOrderByCreatedAtDesc();
+        } else if ("yes".equalsIgnoreCase(active)) {
+            trades = copyTradeRepository.findByActiveWithUserAndExpertOrderByCreatedAtDesc("yes");
+        } else {
+            // "Stopped" means anything not active — see findByNotActiveWithUserAndExpertOrderByCreatedAtDesc's javadoc.
+            trades = copyTradeRepository.findByNotActiveWithUserAndExpertOrderByCreatedAtDesc();
+        }
+        return trades.stream().map(AdminCopyTradeSummary::from).toList();
     }
 
     @Transactional(readOnly = true)
@@ -115,5 +137,14 @@ public class AdminCopyTradingService {
 
     private CopyTradingExpert getExpert(Long id) {
         return expertRepository.findById(id).orElseThrow(() -> new ApiException(HttpStatus.NOT_FOUND, "Expert trader not found."));
+    }
+
+    private void validateRanges(AdminExpertRequest request) {
+        if (request.profitMin().compareTo(request.profitMax()) >= 0) {
+            throw new ApiException(HttpStatus.BAD_REQUEST, "Maximum profit must be greater than minimum profit.");
+        }
+        if (request.lossMin().compareTo(request.lossMax()) >= 0) {
+            throw new ApiException(HttpStatus.BAD_REQUEST, "Maximum loss must be greater than minimum loss.");
+        }
     }
 }

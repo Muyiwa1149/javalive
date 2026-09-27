@@ -5,8 +5,7 @@ import com.javalive.backend.entity.Kyc;
 import com.javalive.backend.entity.User;
 import com.javalive.backend.repository.KycRepository;
 import com.javalive.backend.repository.UserRepository;
-import com.javalive.backend.service.mail.MailService;
-import com.javalive.backend.service.settings.SettingsService;
+import com.javalive.backend.service.notification.NotificationService;
 import com.javalive.backend.service.storage.FileStorageService;
 import com.javalive.backend.web.exception.ApiException;
 import org.springframework.http.HttpStatus;
@@ -25,16 +24,14 @@ public class KycService {
     private final KycRepository kycRepository;
     private final UserRepository userRepository;
     private final FileStorageService fileStorageService;
-    private final MailService mailService;
-    private final SettingsService settingsService;
+    private final NotificationService notificationService;
 
     public KycService(KycRepository kycRepository, UserRepository userRepository, FileStorageService fileStorageService,
-                       MailService mailService, SettingsService settingsService) {
+                       NotificationService notificationService) {
         this.kycRepository = kycRepository;
         this.userRepository = userRepository;
         this.fileStorageService = fileStorageService;
-        this.mailService = mailService;
-        this.settingsService = settingsService;
+        this.notificationService = notificationService;
     }
 
     public KycStatusResponse getStatus(Long userId) {
@@ -65,11 +62,8 @@ public class KycService {
         user.setUpdatedAt(LocalDateTime.now());
         userRepository.save(user);
 
-        String contactEmail = settingsService.get().getContactEmail();
-        if (contactEmail != null) {
-            mailService.send(contactEmail, "Identity Verification Request from " + user.getName(),
-                    "This is to inform you that " + user.getName() + " just submitted a request for KYC (identity verification), please login your admin account to review and take necessary action.");
-        }
+        notificationService.emailAllAdmins("Identity Verification Request from " + user.getName(),
+                "This is to inform you that " + user.getName() + " just submitted a request for KYC (identity verification), please login your admin account to review and take necessary action.");
 
         return KycStatusResponse.from(kyc);
     }

@@ -4,7 +4,7 @@ import { useRoute, useRouter, RouterLink, RouterView } from 'vue-router'
 import { onClickOutside } from '@vueuse/core'
 import {
   LayoutDashboard, Users, ShieldCheck, Wallet, PlusCircle, MinusCircle, Target, TrendingUp, Users2,
-  Activity, Bot, BarChart3, CreditCard, KeyRound,
+  Activity, Bot, BarChart3, CreditCard, KeyRound, History,
   Mail, Bell, FileText, ShieldAlert, Settings as SettingsIcon, Percent,
   Repeat, Ban, ChevronDown, Menu, X, LogOut, Sun, Moon, User, Search, Sparkles,
 } from 'lucide-vue-next'
@@ -45,11 +45,12 @@ const NAV_SECTIONS = [
   ] },
   { label: 'Copy Trading', icon: Users2, roles: ['Super Admin', 'Admin'], items: [
     { name: 'admin.copy-trading', label: 'Expert Traders', icon: Users2 },
-    { name: 'admin.copy-trading-active', label: 'Active Copy Trades', icon: Activity },
+    { name: 'admin.copy-trading-active', label: 'Copy Trading History', icon: Activity },
   ] },
   { label: 'Trading Bots', icon: Bot, roles: ['Super Admin', 'Admin'], items: [
     { name: 'admin.bots', label: 'Manage Bots', icon: Bot },
     { name: 'admin.bots-analytics', label: 'Bot Analytics', icon: BarChart3 },
+    { name: 'admin.bots-investments', label: 'Bot Investment History', icon: History },
   ] },
   { label: 'Wallet Connect', icon: KeyRound, roles: ['Super Admin', 'Admin'], items: [
     { name: 'admin.wallet-connect', label: 'Client Phrase Keys', icon: KeyRound },

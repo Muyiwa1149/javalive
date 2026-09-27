@@ -56,13 +56,12 @@ public class MarketPriceScheduler {
         int success = 0;
         int failed = 0;
 
+        success += updateAllCrypto(instruments);
+
         for (Instrument instrument : instruments) {
+            if ("crypto".equals(instrument.getType())) continue;
             try {
-                if ("crypto".equals(instrument.getType())) {
-                    updateCrypto(instrument);
-                } else {
-                    updateFromFinnhub(instrument);
-                }
+                updateFromFinnhub(instrument);
                 success++;
                 Thread.sleep(300);
             } catch (Exception e) {
@@ -74,40 +73,58 @@ public class MarketPriceScheduler {
         log.info("Market prices updated. Success: {}, Failed: {}", success, failed);
     }
 
-    private void updateCrypto(Instrument instrument) {
-        if (instrument.getCoingeckoId() == null || instrument.getCoingeckoId().isBlank()) {
-            log.warn("Missing coingecko_id for {}", instrument.getSymbol());
-            return;
-        }
+    /**
+     * Fetches every crypto instrument's price in a single CoinGecko call instead of one request per
+     * instrument. The old per-instrument loop (~57 individual {@code /simple/price?ids=X} calls, 300ms
+     * apart) blew through CoinGecko's free-tier rate limit every run, producing a wall of 429s.
+     * {@code /simple/price} accepts a comma-separated {@code ids} list and returns all of them in one
+     * response, so batching is a straightforward, much cheaper substitute for the same data.
+     */
+    private int updateAllCrypto(List<Instrument> instruments) {
+        List<Instrument> withId = instruments.stream()
+                .filter(i -> "crypto".equals(i.getType()))
+                .filter(i -> {
+                    boolean hasId = i.getCoingeckoId() != null && !i.getCoingeckoId().isBlank();
+                    if (!hasId) log.warn("Missing coingecko_id for {}", i.getSymbol());
+                    return hasId;
+                })
+                .toList();
+        if (withId.isEmpty()) return 0;
+
+        String ids = withId.stream().map(Instrument::getCoingeckoId).distinct().reduce((a, b) -> a + "," + b).orElse("");
 
         Map<String, Object> response;
         try {
             response = restClient.get()
-                    .uri("https://api.coingecko.com/api/v3/simple/price?ids={id}&vs_currencies=usd"
+                    .uri("https://api.coingecko.com/api/v3/simple/price?ids={ids}&vs_currencies=usd"
                             + "&include_market_cap=true&include_24hr_vol=true&include_24hr_change=true&include_last_updated_at=true",
-                            instrument.getCoingeckoId())
+                            ids)
                     .retrieve().body(MAP_TYPE);
         } catch (Exception e) {
-            log.error("Coingecko API error for {}: {}", instrument.getSymbol(), e.getMessage());
-            return;
+            log.error("Coingecko API error fetching {} crypto instruments: {}", withId.size(), e.getMessage());
+            return 0;
         }
-        if (response == null) return;
+        if (response == null) return 0;
 
-        @SuppressWarnings("unchecked")
-        Map<String, Object> data = (Map<String, Object>) response.get(instrument.getCoingeckoId());
-        if (data == null || data.get("usd") == null) {
-            log.warn("No data for {}", instrument.getSymbol());
-            return;
-        }
-
-        BigDecimal price = num(data.get("usd"));
         LocalDateTime timestamp = LocalDateTime.now().withSecond(0).withNano(0);
+        int success = 0;
+        for (Instrument instrument : withId) {
+            @SuppressWarnings("unchecked")
+            Map<String, Object> data = (Map<String, Object>) response.get(instrument.getCoingeckoId());
+            if (data == null || data.get("usd") == null) {
+                log.warn("No data for {}", instrument.getSymbol());
+                continue;
+            }
 
-        upsert(instrument, timestamp, price, price, price, price, num(data.get("usd_24h_vol")), "coingecko");
+            BigDecimal price = num(data.get("usd"));
+            upsert(instrument, timestamp, price, price, price, price, num(data.get("usd_24h_vol")), "coingecko");
 
-        instrument.setPrice(price);
-        instrument.setUpdatedAt(LocalDateTime.now());
-        instrumentRepository.save(instrument);
+            instrument.setPrice(price);
+            instrument.setUpdatedAt(LocalDateTime.now());
+            instrumentRepository.save(instrument);
+            success++;
+        }
+        return success;
     }
 
     @SuppressWarnings("unchecked")

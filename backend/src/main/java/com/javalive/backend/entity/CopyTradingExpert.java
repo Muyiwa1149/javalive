@@ -60,6 +60,19 @@ public class CopyTradingExpert {
     @Column(name = "win_rate", nullable = false)
     private Integer winRate;
 
+    /** Admin-configurable profit/loss magnitude — previously hardcoded in CopyTradingProfitScheduler. */
+    @Column(name = "profit_min", nullable = false)
+    private BigDecimal profitMin;
+
+    @Column(name = "profit_max", nullable = false)
+    private BigDecimal profitMax;
+
+    @Column(name = "loss_min", nullable = false)
+    private BigDecimal lossMin;
+
+    @Column(name = "loss_max", nullable = false)
+    private BigDecimal lossMax;
+
     @Column(name = "total_trades", nullable = false)
     private Integer totalTrades;
 

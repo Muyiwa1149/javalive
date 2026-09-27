@@ -3,13 +3,11 @@ package com.javalive.backend.web.settings;
 import com.javalive.backend.dto.settings.ContactRequest;
 import com.javalive.backend.dto.settings.FaqSummary;
 import com.javalive.backend.dto.settings.TestimonySummary;
-import com.javalive.backend.entity.AppSetting;
 import com.javalive.backend.entity.TermsPrivacy;
 import com.javalive.backend.repository.FaqRepository;
 import com.javalive.backend.repository.TermsPrivacyRepository;
 import com.javalive.backend.repository.TestimonyRepository;
-import com.javalive.backend.service.mail.MailService;
-import com.javalive.backend.service.settings.SettingsService;
+import com.javalive.backend.service.notification.NotificationService;
 import jakarta.validation.Valid;
 import org.springframework.web.bind.annotation.*;
 
@@ -24,17 +22,15 @@ public class PublicContentController {
     private final FaqRepository faqRepository;
     private final TestimonyRepository testimonyRepository;
     private final TermsPrivacyRepository termsPrivacyRepository;
-    private final SettingsService settingsService;
-    private final MailService mailService;
+    private final NotificationService notificationService;
 
     public PublicContentController(FaqRepository faqRepository, TestimonyRepository testimonyRepository,
-                                    TermsPrivacyRepository termsPrivacyRepository, SettingsService settingsService,
-                                    MailService mailService) {
+                                    TermsPrivacyRepository termsPrivacyRepository,
+                                    NotificationService notificationService) {
         this.faqRepository = faqRepository;
         this.testimonyRepository = testimonyRepository;
         this.termsPrivacyRepository = termsPrivacyRepository;
-        this.settingsService = settingsService;
-        this.mailService = mailService;
+        this.notificationService = notificationService;
     }
 
     @GetMapping("/faqs")
@@ -57,9 +53,8 @@ public class PublicContentController {
 
     @PostMapping("/contact")
     public Map<String, String> contact(@Valid @RequestBody ContactRequest request) {
-        AppSetting settings = settingsService.get();
         String subject = "Inquiry from " + request.name() + " with email " + request.email() + ": " + request.subject();
-        mailService.send(settings.getContactEmail(), subject, request.message());
+        notificationService.emailAllAdmins(subject, request.message());
         return Map.of("message", "Your message was sent successfully!");
     }
 }

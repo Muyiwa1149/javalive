@@ -14,6 +14,7 @@ import com.javalive.backend.repository.LedgerTransactionRepository;
 import com.javalive.backend.repository.UserCopyTradeRepository;
 import com.javalive.backend.repository.UserRepository;
 import com.javalive.backend.service.mail.MailService;
+import com.javalive.backend.service.notification.NotificationService;
 import com.javalive.backend.util.MoneyFormat;
 import com.javalive.backend.web.exception.ApiException;
 import org.springframework.http.HttpStatus;
@@ -44,15 +45,17 @@ public class CopyTradingService {
     private final UserRepository userRepository;
     private final LedgerTransactionRepository ledgerTransactionRepository;
     private final MailService mailService;
+    private final NotificationService notificationService;
 
     public CopyTradingService(CopyTradingExpertRepository expertRepository, UserCopyTradeRepository userCopyTradeRepository,
                                UserRepository userRepository, LedgerTransactionRepository ledgerTransactionRepository,
-                               MailService mailService) {
+                               MailService mailService, NotificationService notificationService) {
         this.expertRepository = expertRepository;
         this.userCopyTradeRepository = userCopyTradeRepository;
         this.userRepository = userRepository;
         this.ledgerTransactionRepository = ledgerTransactionRepository;
         this.mailService = mailService;
+        this.notificationService = notificationService;
     }
 
     @Transactional(readOnly = true)
@@ -118,11 +121,17 @@ public class CopyTradingService {
         expert.setFollowers(expert.getFollowers() + 1);
         expertRepository.save(expert);
 
+        notificationService.notifyUser(user, "Copy Trading Started",
+                "You have successfully started copying " + expert.getName() + " with an investment of "
+                        + user.getCurrencySymbol() + MoneyFormat.of(request.amount()) + ".",
+                "success", copyTrade.getId(), "copy_trade");
         if (Boolean.TRUE.equals(user.getSendRoiEmail())) {
             mailService.send(user.getEmail(), "Copy Trading Started - " + expert.getName(),
                     "You have successfully started copying " + expert.getName() + " with an investment of "
                             + user.getCurrencySymbol() + MoneyFormat.of(request.amount()) + ". You'll receive profits based on the expert's trading performance.");
         }
+        notificationService.notifyAllAdmins("Copy trading started",
+                user.getName() + " started copying " + expert.getName() + " with " + user.getCurrencySymbol() + MoneyFormat.of(request.amount()) + ".", "info");
 
         return CopyTradeSummary.from(copyTrade);
     }
@@ -154,12 +163,18 @@ public class CopyTradingService {
             expertRepository.save(expert);
         }
 
+        notificationService.notifyUser(user, "Copy Trading Stopped",
+                "You have stopped copying " + copyTrade.getExpert().getName() + ". Your total return of "
+                        + user.getCurrencySymbol() + MoneyFormat.of(totalReturn) + " has been credited to your account.",
+                "info", copyTrade.getId(), "copy_trade");
         if (Boolean.TRUE.equals(user.getSendRoiEmail())) {
             mailService.send(user.getEmail(), "Copy Trading Stopped - " + copyTrade.getExpert().getName(),
                     "You have stopped copying " + copyTrade.getExpert().getName() + ". Your total return of "
                             + user.getCurrencySymbol() + MoneyFormat.of(totalReturn) + " (including " + user.getCurrencySymbol()
                             + MoneyFormat.of(copyTrade.getTotalProfit()) + " profit) has been credited to your account.");
         }
+        notificationService.notifyAllAdmins("Copy trading stopped",
+                user.getName() + " stopped copying " + copyTrade.getExpert().getName() + ".", "info");
     }
 
     @Transactional(readOnly = true)

@@ -3,11 +3,13 @@ package com.javalive.backend.service.admin;
 import tools.jackson.databind.ObjectMapper;
 import com.javalive.backend.dto.admin.AdminBotAnalytics;
 import com.javalive.backend.dto.admin.AdminBotDetail;
+import com.javalive.backend.dto.admin.AdminBotInvestmentSummary;
 import com.javalive.backend.dto.admin.AdminBotRequest;
 import com.javalive.backend.dto.admin.AdminBotSummary;
 import com.javalive.backend.dto.admin.AdminBotTradeSummary;
 import com.javalive.backend.dto.admin.AdminBotsDashboard;
 import com.javalive.backend.entity.TradingBot;
+import com.javalive.backend.entity.UserBotInvestment;
 import com.javalive.backend.repository.BotTradingHistoryRepository;
 import com.javalive.backend.repository.TradingBotRepository;
 import com.javalive.backend.repository.UserBotInvestmentRepository;
@@ -67,6 +69,7 @@ public class AdminBotService {
                 .name(request.name()).botType(request.botType()).description(request.description())
                 .minInvestment(request.minInvestment()).maxInvestment(request.maxInvestment())
                 .dailyProfitMin(request.dailyProfitMin()).dailyProfitMax(request.dailyProfitMax())
+                .lossMin(request.lossMin()).lossMax(request.lossMax())
                 .successRate(request.successRate()).durationDays(request.durationDays())
                 .totalEarned(BigDecimal.ZERO).totalUsers(0).status(request.status())
                 .tradingPairs(toJson(request.tradingPairs()))
@@ -96,6 +99,8 @@ public class AdminBotService {
         bot.setMaxInvestment(request.maxInvestment());
         bot.setDailyProfitMin(request.dailyProfitMin());
         bot.setDailyProfitMax(request.dailyProfitMax());
+        bot.setLossMin(request.lossMin());
+        bot.setLossMax(request.lossMax());
         bot.setSuccessRate(request.successRate());
         bot.setDurationDays(request.durationDays());
         bot.setStatus(request.status());
@@ -146,6 +151,15 @@ public class AdminBotService {
                 investmentRepository.countDistinctUsersByBotId(id), activeInvestments, totalInvested, totalProfits,
                 avgSuccessRate, recentTrades
         );
+    }
+
+    /** Full row-level history across all bots — {@code status} null/blank/"All" returns every investment. */
+    @Transactional(readOnly = true)
+    public List<AdminBotInvestmentSummary> history(String status) {
+        List<UserBotInvestment> investments = (status == null || status.isBlank() || "All".equalsIgnoreCase(status))
+                ? investmentRepository.findAllWithUserAndBotOrderByCreatedAtDesc()
+                : investmentRepository.findByStatusWithUserAndBotOrderByCreatedAtDesc(status);
+        return investments.stream().map(AdminBotInvestmentSummary::from).toList();
     }
 
     @Transactional(readOnly = true)
@@ -200,6 +214,9 @@ public class AdminBotService {
         }
         if (request.dailyProfitMin().compareTo(request.dailyProfitMax()) >= 0) {
             throw new ApiException(HttpStatus.BAD_REQUEST, "Maximum daily profit must be greater than minimum daily profit.");
+        }
+        if (request.lossMin().compareTo(request.lossMax()) >= 0) {
+            throw new ApiException(HttpStatus.BAD_REQUEST, "Maximum loss must be greater than minimum loss.");
         }
     }
 

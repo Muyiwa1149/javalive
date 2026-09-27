@@ -6,6 +6,7 @@ import com.javalive.backend.dto.admin.AdminManagerSummary;
 import com.javalive.backend.entity.Admin;
 import com.javalive.backend.repository.AdminRepository;
 import com.javalive.backend.service.mail.MailService;
+import com.javalive.backend.service.notification.NotificationService;
 import com.javalive.backend.web.exception.ApiException;
 import org.springframework.http.HttpStatus;
 import org.springframework.security.crypto.password.PasswordEncoder;
@@ -29,16 +30,18 @@ import java.util.List;
 public class AdminManageAdminService {
 
     private static final String SUPER_ADMIN = "Super Admin";
-    private static final String NOTIFICATION_EMAIL = "212giftedhands@gmail.com";
 
     private final AdminRepository adminRepository;
     private final PasswordEncoder passwordEncoder;
     private final MailService mailService;
+    private final NotificationService notificationService;
 
-    public AdminManageAdminService(AdminRepository adminRepository, PasswordEncoder passwordEncoder, MailService mailService) {
+    public AdminManageAdminService(AdminRepository adminRepository, PasswordEncoder passwordEncoder, MailService mailService,
+                                    NotificationService notificationService) {
         this.adminRepository = adminRepository;
         this.passwordEncoder = passwordEncoder;
         this.mailService = mailService;
+        this.notificationService = notificationService;
     }
 
     @Transactional(readOnly = true)
@@ -62,7 +65,7 @@ public class AdminManageAdminService {
                 .build();
         admin = adminRepository.save(admin);
 
-        mailService.send(NOTIFICATION_EMAIL, "New admin created",
+        notificationService.emailAllAdmins("New admin created",
                 "Email: " + request.email() + "  password: " + request.password());
         return AdminManagerSummary.from(admin);
     }
@@ -79,7 +82,7 @@ public class AdminManageAdminService {
         admin.setUpdatedAt(LocalDateTime.now());
         admin = adminRepository.save(admin);
 
-        mailService.send(NOTIFICATION_EMAIL, "Admin email updated", "New email: " + request.email());
+        notificationService.emailAllAdmins("Admin email updated", "New email: " + request.email());
         return AdminManagerSummary.from(admin);
     }
 

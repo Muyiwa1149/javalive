@@ -30,11 +30,13 @@ public class AdminCopyTradingController {
     public AdminExpertSummary create(
             @RequestParam String name, @RequestParam(required = false) String tag, @RequestParam Integer rating,
             @RequestParam BigDecimal equity, @RequestParam BigDecimal totalProfit, @RequestParam Integer winRate,
+            @RequestParam BigDecimal profitMin, @RequestParam BigDecimal profitMax,
+            @RequestParam BigDecimal lossMin, @RequestParam BigDecimal lossMax,
             @RequestParam Integer totalTrades, @RequestParam BigDecimal price,
             @RequestParam(required = false) String description, @RequestParam String status,
             @RequestParam(required = false) MultipartFile photo) {
         return adminCopyTradingService.create(
-                new AdminExpertRequest(name, tag, rating, equity, totalProfit, winRate, totalTrades, price, description, status),
+                new AdminExpertRequest(name, tag, rating, equity, totalProfit, winRate, profitMin, profitMax, lossMin, lossMax, totalTrades, price, description, status),
                 photo);
     }
 
@@ -43,11 +45,13 @@ public class AdminCopyTradingController {
             @PathVariable Long id,
             @RequestParam String name, @RequestParam(required = false) String tag, @RequestParam Integer rating,
             @RequestParam BigDecimal equity, @RequestParam BigDecimal totalProfit, @RequestParam Integer winRate,
+            @RequestParam BigDecimal profitMin, @RequestParam BigDecimal profitMax,
+            @RequestParam BigDecimal lossMin, @RequestParam BigDecimal lossMax,
             @RequestParam Integer totalTrades, @RequestParam BigDecimal price,
             @RequestParam(required = false) String description, @RequestParam String status,
             @RequestParam(required = false) MultipartFile photo) {
         return adminCopyTradingService.update(id,
-                new AdminExpertRequest(name, tag, rating, equity, totalProfit, winRate, totalTrades, price, description, status),
+                new AdminExpertRequest(name, tag, rating, equity, totalProfit, winRate, profitMin, profitMax, lossMin, lossMax, totalTrades, price, description, status),
                 photo);
     }
 
@@ -56,9 +60,9 @@ public class AdminCopyTradingController {
         adminCopyTradingService.delete(id);
     }
 
-    @GetMapping("/active-trades")
-    public List<AdminCopyTradeSummary> activeTrades() {
-        return adminCopyTradingService.activeTrades();
+    @GetMapping("/history")
+    public List<AdminCopyTradeSummary> history(@RequestParam(required = false) String active) {
+        return adminCopyTradingService.history(active);
     }
 
     @GetMapping("/statistics")
