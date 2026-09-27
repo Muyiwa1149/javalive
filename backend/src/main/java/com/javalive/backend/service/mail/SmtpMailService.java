@@ -7,6 +7,7 @@ import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.mail.javamail.JavaMailSender;
 import org.springframework.mail.javamail.MimeMessageHelper;
+import org.springframework.scheduling.annotation.Async;
 import org.springframework.stereotype.Service;
 import org.thymeleaf.TemplateEngine;
 import org.thymeleaf.context.Context;
@@ -36,6 +37,7 @@ public class SmtpMailService implements MailService {
         this.settingsService = settingsService;
     }
 
+    @Async("mailExecutor")
     @Override
     public void send(String to, String subject, String body) {
         try {
