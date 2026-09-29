@@ -66,6 +66,8 @@ public class AdminSettingsService {
             s.setContactEmail(r.contactEmail());
             s.setDefaultCurrencySymbol(r.defaultCurrencySymbol());
             s.setWeekendTradeEnabled(r.weekendTradeEnabled());
+            s.setCopyTradingEnabled(r.copyTradingEnabled());
+            s.setAiTradingEnabled(r.aiTradingEnabled());
             s.setEnableEmailVerification(r.enableEmailVerification());
             s.setEnableKyc(r.enableKyc());
             s.setEnableKycRegistration(r.enableKycRegistration());

@@ -58,7 +58,7 @@ public class CopyTradingProfitScheduler {
     @Transactional
     public void generateProfits() {
         AppSetting settings = settingsService.get();
-        if (settings == null || !"on".equals(settings.getTradeMode())) {
+        if (settings == null || !"on".equals(settings.getTradeMode()) || !Boolean.TRUE.equals(settings.getCopyTradingEnabled())) {
             return;
         }
 

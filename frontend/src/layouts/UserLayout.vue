@@ -59,8 +59,8 @@ const NAV_SECTIONS = [
     label: 'Trading & Markets', icon: TrendingUp,
     items: [
       { name: 'user.trade', label: 'Live Markets', icon: CandlestickChart },
-      { name: 'user.copy-trading', label: 'Copy Trading', icon: Users2 },
-      { name: 'user.bots', label: 'AI Trading Bots', icon: Bot },
+      { name: 'user.copy-trading', label: 'Copy Trading', icon: Users2, featureFlag: 'copyTradingEnabled' },
+      { name: 'user.bots', label: 'AI Trading Bots', icon: Bot, featureFlag: 'aiTradingEnabled' },
     ],
   },
   {
@@ -83,6 +83,13 @@ const NAV_SECTIONS = [
     ],
   },
 ]
+
+const visibleNavSections = computed(() => NAV_SECTIONS
+  .map(section => ({
+    ...section,
+    items: section.items.filter(item => !item.featureFlag || settingsStore.settings?.[item.featureFlag]),
+  }))
+  .filter(section => section.items.length > 0))
 
 const typeIcon = (type) => ({
   warning: AlertTriangle, success: CheckCircle, danger: AlertOctagon,
@@ -160,7 +167,7 @@ onMounted(() => {
         </div>
 
         <nav class="flex-1 overflow-y-auto no-scrollbar p-4 space-y-6 text-sm pb-20">
-          <div v-for="section in NAV_SECTIONS" :key="section.label" class="space-y-2">
+          <div v-for="section in visibleNavSections" :key="section.label" class="space-y-2">
             <div class="flex items-center gap-2 px-2 text-xs font-semibold text-gray-500 dark:text-gray-400 uppercase">
               <component :is="section.icon" class="w-4 h-4" />
               <span>{{ section.label }}</span>

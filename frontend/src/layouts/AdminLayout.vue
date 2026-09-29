@@ -43,11 +43,11 @@ const NAV_SECTIONS = [
     { name: 'admin.plans', label: 'Legacy Plans', icon: Target },
     { name: 'admin.investments', label: 'Active Investments', icon: TrendingUp },
   ] },
-  { label: 'Copy Trading', icon: Users2, roles: ['Super Admin', 'Admin'], items: [
+  { label: 'Copy Trading', icon: Users2, roles: ['Super Admin', 'Admin'], featureFlag: 'copyTradingEnabled', items: [
     { name: 'admin.copy-trading', label: 'Expert Traders', icon: Users2 },
     { name: 'admin.copy-trading-active', label: 'Copy Trading History', icon: Activity },
   ] },
-  { label: 'Trading Bots', icon: Bot, roles: ['Super Admin', 'Admin'], items: [
+  { label: 'Trading Bots', icon: Bot, roles: ['Super Admin', 'Admin'], featureFlag: 'aiTradingEnabled', items: [
     { name: 'admin.bots', label: 'Manage Bots', icon: Bot },
     { name: 'admin.bots-analytics', label: 'Bot Analytics', icon: BarChart3 },
     { name: 'admin.bots-investments', label: 'Bot Investment History', icon: History },
@@ -77,8 +77,9 @@ const NAV_SECTIONS = [
 ]
 
 const visibleSections = computed(() => NAV_SECTIONS.filter((section) => {
-  if (!section.roles) return true
-  return section.roles.includes(authAdmin.admin?.type)
+  if (section.roles && !section.roles.includes(authAdmin.admin?.type)) return false
+  if (section.featureFlag && !settingsStore.settings?.[section.featureFlag]) return false
+  return true
 }))
 
 async function logout() {

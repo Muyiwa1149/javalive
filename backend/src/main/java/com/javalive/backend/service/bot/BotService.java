@@ -17,6 +17,7 @@ import com.javalive.backend.repository.UserBotInvestmentRepository;
 import com.javalive.backend.repository.UserRepository;
 import com.javalive.backend.service.mail.MailService;
 import com.javalive.backend.service.notification.NotificationService;
+import com.javalive.backend.service.settings.SettingsService;
 import com.javalive.backend.util.MoneyFormat;
 import com.javalive.backend.web.exception.ApiException;
 import org.springframework.http.HttpStatus;
@@ -39,11 +40,12 @@ public class BotService {
     private final LedgerTransactionRepository ledgerTransactionRepository;
     private final MailService mailService;
     private final NotificationService notificationService;
+    private final SettingsService settingsService;
 
     public BotService(TradingBotRepository botRepository, UserBotInvestmentRepository investmentRepository,
                        BotTradingHistoryRepository tradingHistoryRepository, UserRepository userRepository,
                        LedgerTransactionRepository ledgerTransactionRepository, MailService mailService,
-                       NotificationService notificationService) {
+                       NotificationService notificationService, SettingsService settingsService) {
         this.botRepository = botRepository;
         this.investmentRepository = investmentRepository;
         this.tradingHistoryRepository = tradingHistoryRepository;
@@ -51,6 +53,7 @@ public class BotService {
         this.ledgerTransactionRepository = ledgerTransactionRepository;
         this.mailService = mailService;
         this.notificationService = notificationService;
+        this.settingsService = settingsService;
     }
 
     @Transactional(readOnly = true)
@@ -81,6 +84,9 @@ public class BotService {
 
     @Transactional
     public BotInvestmentSummary invest(Long userId, Long botId, InvestBotRequest request) {
+        if (!Boolean.TRUE.equals(settingsService.get().getAiTradingEnabled())) {
+            throw new ApiException(HttpStatus.FORBIDDEN, "AI trading bots are currently unavailable.");
+        }
         User user = findUser(userId);
         TradingBot bot = botRepository.findById(botId)
                 .orElseThrow(() -> new ApiException(HttpStatus.NOT_FOUND, "Bot not found."));

@@ -15,6 +15,7 @@ import com.javalive.backend.repository.UserCopyTradeRepository;
 import com.javalive.backend.repository.UserRepository;
 import com.javalive.backend.service.mail.MailService;
 import com.javalive.backend.service.notification.NotificationService;
+import com.javalive.backend.service.settings.SettingsService;
 import com.javalive.backend.util.MoneyFormat;
 import com.javalive.backend.web.exception.ApiException;
 import org.springframework.http.HttpStatus;
@@ -46,16 +47,18 @@ public class CopyTradingService {
     private final LedgerTransactionRepository ledgerTransactionRepository;
     private final MailService mailService;
     private final NotificationService notificationService;
+    private final SettingsService settingsService;
 
     public CopyTradingService(CopyTradingExpertRepository expertRepository, UserCopyTradeRepository userCopyTradeRepository,
                                UserRepository userRepository, LedgerTransactionRepository ledgerTransactionRepository,
-                               MailService mailService, NotificationService notificationService) {
+                               MailService mailService, NotificationService notificationService, SettingsService settingsService) {
         this.expertRepository = expertRepository;
         this.userCopyTradeRepository = userCopyTradeRepository;
         this.userRepository = userRepository;
         this.ledgerTransactionRepository = ledgerTransactionRepository;
         this.mailService = mailService;
         this.notificationService = notificationService;
+        this.settingsService = settingsService;
     }
 
     @Transactional(readOnly = true)
@@ -84,6 +87,9 @@ public class CopyTradingService {
 
     @Transactional
     public CopyTradeSummary start(Long userId, StartCopyTradingRequest request) {
+        if (!Boolean.TRUE.equals(settingsService.get().getCopyTradingEnabled())) {
+            throw new ApiException(HttpStatus.FORBIDDEN, "Copy trading is currently unavailable.");
+        }
         User user = findUser(userId);
         CopyTradingExpert expert = expertRepository.findById(request.expertId())
                 .orElseThrow(() -> new ApiException(HttpStatus.BAD_REQUEST, "Expert trader not available."));

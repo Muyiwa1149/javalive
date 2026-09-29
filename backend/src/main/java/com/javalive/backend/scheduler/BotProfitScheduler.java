@@ -90,7 +90,7 @@ public class BotProfitScheduler {
     @Transactional
     public void processBotTrading() {
         AppSetting settings = settingsService.get();
-        if (settings == null || !"on".equals(settings.getTradeMode())) {
+        if (settings == null || !"on".equals(settings.getTradeMode()) || !Boolean.TRUE.equals(settings.getAiTradingEnabled())) {
             return;
         }
 

@@ -1,0 +1,2 @@
+ALTER TABLE app_settings ADD COLUMN copy_trading_enabled BOOLEAN NOT NULL DEFAULT TRUE;
+ALTER TABLE app_settings ADD COLUMN ai_trading_enabled BOOLEAN NOT NULL DEFAULT TRUE;

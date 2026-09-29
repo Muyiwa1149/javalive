@@ -95,6 +95,8 @@ const labelCls = 'text-xs font-medium text-slate-500 dark:text-slate-400 mb-1 bl
 const toggles = [
   { key: 'googleTranslateEnabled', label: 'Google Translate', hint: 'Show the language switcher widget' },
   { key: 'weekendTradeEnabled', label: 'Weekend trading', hint: 'Allow ROI processing on Sat/Sun' },
+  { key: 'copyTradingEnabled', label: 'Copy trading', hint: 'Show Copy Trading in nav and allow new copy trades' },
+  { key: 'aiTradingEnabled', label: 'AI trading bots', hint: 'Show AI Trading Bots in nav and allow new bot investments' },
   { key: 'enableEmailVerification', label: 'Email verification', hint: 'Require verified email to log in' },
   { key: 'enableKyc', label: 'KYC required', hint: 'Require KYC before withdrawals' },
   { key: 'enableKycRegistration', label: 'KYC at registration', hint: 'Collect KYC during sign-up' },

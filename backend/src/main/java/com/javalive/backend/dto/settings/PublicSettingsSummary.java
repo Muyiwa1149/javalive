@@ -21,6 +21,8 @@ public record PublicSettingsSummary(
         boolean enable2fa,
         boolean googleTranslateEnabled,
         boolean useCryptoFeature,
+        boolean copyTradingEnabled,
+        boolean aiTradingEnabled,
         String tawkToEmbed
 ) {
     public static PublicSettingsSummary from(AppSetting s) {
@@ -30,6 +32,7 @@ public record PublicSettingsSummary(
                 Boolean.TRUE.equals(s.getSocialLoginEnabled()), Boolean.TRUE.equals(s.getEnableKyc()),
                 Boolean.TRUE.equals(s.getEnableKycRegistration()), Boolean.TRUE.equals(s.getEnable2fa()),
                 Boolean.TRUE.equals(s.getGoogleTranslateEnabled()), Boolean.TRUE.equals(s.getUseCryptoFeature()),
+                Boolean.TRUE.equals(s.getCopyTradingEnabled()), Boolean.TRUE.equals(s.getAiTradingEnabled()),
                 s.getTawkToEmbed()
         );
     }

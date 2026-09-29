@@ -11,7 +11,8 @@ public record AdminSettingsSummary(
         String favicon, String timezone, String welcomeMessage, boolean googleTranslateEnabled, String tradeMode,
         Integer tradingWinrate, String merchantKey,
         // Preferences
-        String contactEmail, String defaultCurrencySymbol, boolean weekendTradeEnabled, boolean enableEmailVerification,
+        String contactEmail, String defaultCurrencySymbol, boolean weekendTradeEnabled, boolean copyTradingEnabled,
+        boolean aiTradingEnabled, boolean enableEmailVerification,
         boolean enableKyc, boolean enableKycRegistration, String captchaProvider, boolean socialLoginEnabled,
         boolean returnCapital, boolean shouldCancelPlan,
         // Email/SMTP
@@ -43,7 +44,8 @@ public record AdminSettingsSummary(
                 s.getSiteName(), s.getSiteTitle(), s.getSiteAddress(), s.getDescription(), s.getKeywords(), s.getLogo(),
                 s.getFavicon(), s.getTimezone(), s.getWelcomeMessage(), bool(s.getGoogleTranslateEnabled()), s.getTradeMode(),
                 s.getTradingWinrate(), s.getMerchantKey(),
-                s.getContactEmail(), s.getDefaultCurrencySymbol(), bool(s.getWeekendTradeEnabled()), bool(s.getEnableEmailVerification()),
+                s.getContactEmail(), s.getDefaultCurrencySymbol(), bool(s.getWeekendTradeEnabled()), bool(s.getCopyTradingEnabled()),
+                bool(s.getAiTradingEnabled()), bool(s.getEnableEmailVerification()),
                 bool(s.getEnableKyc()), bool(s.getEnableKycRegistration()), s.getCaptchaProvider(), bool(s.getSocialLoginEnabled()),
                 bool(s.getReturnCapital()), bool(s.getShouldCancelPlan()),
                 s.getMailServer(), s.getMailFromAddress(), s.getMailFromName(), s.getSmtpHost(), s.getSmtpPort(),

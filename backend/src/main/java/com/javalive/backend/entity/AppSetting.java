@@ -79,6 +79,14 @@ public class AppSetting {
     @Column(name = "trading_winrate", nullable = false)
     private Integer tradingWinrate;
 
+    /** Global on/off switch for the copy-trading feature — hides it from both user and admin nav when false. */
+    @Column(name = "copy_trading_enabled", nullable = false)
+    private Boolean copyTradingEnabled;
+
+    /** Global on/off switch for the AI trading bots feature — hides it from both user and admin nav when false. */
+    @Column(name = "ai_trading_enabled", nullable = false)
+    private Boolean aiTradingEnabled;
+
     // --- Mail ---
     @Column(name = "mail_server")
     private String mailServer;
