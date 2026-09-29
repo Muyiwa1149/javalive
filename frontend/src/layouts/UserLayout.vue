@@ -222,7 +222,7 @@ onMounted(() => {
                   </div>
                 </div>
               </li>
-              <li>
+              <li v-if="settingsStore.settings?.walletEnabled">
                 <RouterLink :to="{ name: 'user.wallet-connect' }"
                   class="flex items-center px-3 py-2 rounded-lg text-gray-700 dark:text-gray-200 hover:bg-blue-50 dark:hover:bg-blue-900/40 transition-colors"
                   :class="route.name === 'user.wallet-connect' ? 'bg-blue-50 dark:bg-blue-900/50 text-blue-600 dark:text-blue-400 font-medium' : ''">

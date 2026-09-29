@@ -1,7 +1,7 @@
 <script setup>
 import { ref, onMounted } from 'vue'
 import Swal from 'sweetalert2'
-import { Bot, TrendingUp, Users, ChevronDown, XCircle } from 'lucide-vue-next'
+import { Bot, TrendingUp, ChevronDown, XCircle } from 'lucide-vue-next'
 import { useAuthUserStore } from '@/stores/authUser'
 import api from '@/lib/api'
 
@@ -112,14 +112,11 @@ async function toggleExpand(inv) {
         <div v-for="b in bots" :key="b.id" class="bg-white dark:bg-gray-900 border border-gray-200 dark:border-gray-800 rounded-2xl p-6 flex flex-col">
           <div class="flex items-center justify-between mb-2">
             <h3 class="font-bold text-gray-900 dark:text-white">{{ b.name }}</h3>
-            <span class="px-2 py-1 text-xs font-semibold rounded-full bg-indigo-100 text-indigo-700 dark:bg-indigo-900/30 dark:text-indigo-300 capitalize">{{ b.botType }}</span>
           </div>
           <p class="text-sm text-gray-500 dark:text-gray-400 mb-4 line-clamp-3">{{ b.description }}</p>
           <div class="grid grid-cols-2 gap-3 text-sm mb-4">
             <div><div class="text-gray-500 dark:text-gray-400">Daily Profit</div><div class="font-semibold text-emerald-600 dark:text-emerald-400 flex items-center gap-1"><TrendingUp class="w-3 h-3" />{{ b.dailyProfitMin }}%–{{ b.dailyProfitMax }}%</div></div>
-            <div><div class="text-gray-500 dark:text-gray-400">Success Rate</div><div class="font-semibold text-gray-900 dark:text-white">{{ b.successRate }}%</div></div>
             <div><div class="text-gray-500 dark:text-gray-400">Duration</div><div class="font-semibold text-gray-900 dark:text-white">{{ b.durationDays }} days</div></div>
-            <div><div class="text-gray-500 dark:text-gray-400">Investors</div><div class="font-semibold text-gray-900 dark:text-white flex items-center gap-1"><Users class="w-3 h-3" />{{ b.totalUsers }}</div></div>
           </div>
           <div class="text-xs text-gray-500 dark:text-gray-400 mb-4">
             Range: {{ authUser.user?.currencySymbol }}{{ Number(b.minInvestment).toLocaleString() }} – {{ authUser.user?.currencySymbol }}{{ Number(b.maxInvestment).toLocaleString() }}

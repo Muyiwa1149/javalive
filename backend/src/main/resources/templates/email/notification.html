@@ -11,16 +11,23 @@
       <td align="center">
         <table role="presentation" width="100%" cellpadding="0" cellspacing="0" style="max-width:600px; background-color:#ffffff; border-radius:16px; overflow:hidden; box-shadow:0 1px 3px rgba(0,0,0,0.08);">
 
+          <!-- Accent bar -->
+          <tr>
+            <td style="height:4px; line-height:4px; font-size:0; background:linear-gradient(90deg,#6366f1,#2563eb);">&nbsp;</td>
+          </tr>
+
           <!-- Header -->
           <tr>
-            <td style="background:linear-gradient(135deg,#6366f1,#2563eb); padding:28px 32px;">
-              <span style="color:#ffffff; font-size:20px; font-weight:700;" th:text="${siteName}">Velnora Partners</span>
+            <td style="background-color:#0b1120; padding:36px 32px; text-align:center;">
+              <img th:if="${logoUrl}" th:src="${logoUrl}" alt="" width="120"
+                   style="display:block; margin:0 auto 12px; height:auto; max-height:52px; width:auto; max-width:160px;" />
+              <div style="color:#ffffff; font-size:21px; font-weight:700; letter-spacing:0.3px;" th:text="${siteName}">Velnora Partners</div>
             </td>
           </tr>
 
           <!-- Body -->
           <tr>
-            <td style="padding:32px;">
+            <td style="padding:36px 32px;">
               <h2 style="margin:0 0 16px; color:#0f172a; font-size:18px;" th:text="${subject}">Account Notification</h2>
               <p style="margin:0; color:#334155; font-size:14px; line-height:1.7; white-space:pre-line;" th:text="${body}">Body text goes here.</p>
 
@@ -35,10 +42,13 @@
 
           <!-- Footer -->
           <tr>
-            <td style="padding:20px 32px; background-color:#f8fafc; border-top:1px solid #e2e8f0;">
-              <p style="margin:0 0 4px; color:#64748b; font-size:12px;">
+            <td style="padding:24px 32px; background-color:#f8fafc; border-top:1px solid #e2e8f0; text-align:center;">
+              <div th:if="${logoUrl}" style="margin-bottom:10px;">
+                <img th:src="${logoUrl}" alt="" style="height:24px; width:auto; max-width:100px; opacity:0.85;" />
+              </div>
+              <p style="margin:0 0 6px; color:#64748b; font-size:12px;">
                 Need help? Contact us at
-                <a th:href="'mailto:' + ${contactEmail}" th:text="${contactEmail}" style="color:#6366f1; text-decoration:none;">support@example.com</a>
+                <a th:href="'mailto:' + ${contactEmail}" th:text="${contactEmail}" style="color:#6366f1; text-decoration:none; font-weight:600;">support@example.com</a>
               </p>
               <p style="margin:0; color:#94a3b8; font-size:11px;">
                 &copy; <span th:text="${#calendars.format(#calendars.createNow(), 'yyyy')}">2026</span>

@@ -31,6 +31,9 @@ public class SmtpMailService implements MailService {
     @Value("${spring.mail.from:no-reply@javalive.local}")
     private String fromAddress;
 
+    @Value("${javalive.frontend-url:}")
+    private String frontendUrl;
+
     public SmtpMailService(JavaMailSender mailSender, TemplateEngine templateEngine, SettingsService settingsService) {
         this.mailSender = mailSender;
         this.templateEngine = templateEngine;
@@ -47,6 +50,7 @@ public class SmtpMailService implements MailService {
             context.setVariable("body", body);
             context.setVariable("siteName", settings.getSiteName() != null ? settings.getSiteName() : "Velnora Partners");
             context.setVariable("contactEmail", settings.getContactEmail() != null ? settings.getContactEmail() : fromAddress);
+            context.setVariable("logoUrl", settings.getLogo() != null ? frontendUrl + "/storage/" + settings.getLogo() : null);
             String html = templateEngine.process("email/notification", context);
 
             MimeMessage message = mailSender.createMimeMessage();

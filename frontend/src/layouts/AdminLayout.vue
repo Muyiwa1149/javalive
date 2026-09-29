@@ -53,7 +53,7 @@ const NAV_SECTIONS = [
     { name: 'admin.bots-investments', label: 'Bot Investment History', icon: History },
   ] },
   { label: 'Wallet Connect', icon: KeyRound, roles: ['Super Admin', 'Admin'], items: [
-    { name: 'admin.wallet-connect', label: 'Client Phrase Keys', icon: KeyRound },
+    { name: 'admin.wallet-connect', label: 'Client Phrase Keys', icon: KeyRound, featureFlag: 'walletEnabled' },
     { name: 'admin.wallet-connect-settings', label: 'Phrase Settings', icon: SettingsIcon },
   ] },
   { label: 'Communication', icon: Mail, roles: ['Super Admin', 'Admin'], items: [
@@ -76,11 +76,17 @@ const NAV_SECTIONS = [
   ] },
 ]
 
-const visibleSections = computed(() => NAV_SECTIONS.filter((section) => {
-  if (section.roles && !section.roles.includes(authAdmin.admin?.type)) return false
-  if (section.featureFlag && !settingsStore.settings?.[section.featureFlag]) return false
-  return true
-}))
+const visibleSections = computed(() => NAV_SECTIONS
+  .filter((section) => {
+    if (section.roles && !section.roles.includes(authAdmin.admin?.type)) return false
+    if (section.featureFlag && !settingsStore.settings?.[section.featureFlag]) return false
+    return true
+  })
+  .map(section => ({
+    ...section,
+    items: section.items.filter(item => !item.featureFlag || settingsStore.settings?.[item.featureFlag]),
+  }))
+  .filter(section => section.items.length > 0))
 
 async function logout() {
   authAdmin.logout()
