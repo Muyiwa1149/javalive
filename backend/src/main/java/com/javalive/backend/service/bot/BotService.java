@@ -58,7 +58,7 @@ public class BotService {
 
     @Transactional(readOnly = true)
     public List<BotSummary> listBots(Long userId) {
-        List<TradingBot> bots = botRepository.findByStatus("active");
+        List<TradingBot> bots = botRepository.findByStatusOrderBySortOrderAsc("active");
         return bots.stream().map(b -> BotSummary.from(b, hasActiveInvestment(userId, b.getId()))).toList();
     }
 

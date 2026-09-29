@@ -7,7 +7,7 @@ import java.util.List;
 
 public interface TradingBotRepository extends JpaRepository<TradingBot, Long> {
 
-    List<TradingBot> findByStatus(String status);
+    List<TradingBot> findByStatusOrderBySortOrderAsc(String status);
 
     List<TradingBot> findAllByOrderByCreatedAtDesc();
 

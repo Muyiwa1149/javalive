@@ -77,6 +77,10 @@ public class TradingBot {
     @Column(name = "status", nullable = false, length = 20)
     private String status;
 
+    /** Ascending display order on the user-facing browse list. */
+    @Column(name = "sort_order", nullable = false)
+    private Integer sortOrder;
+
     /** Raw JSON text. */
     @Column(name = "trading_pairs")
     private String tradingPairs;
