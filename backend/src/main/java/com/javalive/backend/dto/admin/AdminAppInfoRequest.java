@@ -9,6 +9,7 @@ public record AdminAppInfoRequest(
         boolean returnCapital, boolean shouldCancelPlan,
         String mailServer, String mailFromAddress, String mailFromName, String smtpHost, String smtpPort,
         String smtpEncryption, String smtpUsername, String smtpPassword, String googleClientId,
-        String googleClientSecret, String googleRedirectUri, String captchaSecret, String captchaSiteKey
+        String googleClientSecret, String googleRedirectUri, String captchaSecret, String captchaSiteKey,
+        String tawkToEmbed
 ) {
 }

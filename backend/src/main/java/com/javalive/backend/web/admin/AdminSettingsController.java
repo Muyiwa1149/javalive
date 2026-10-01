@@ -50,7 +50,7 @@ public class AdminSettingsController {
             @RequestParam(required = false) String smtpUsername, @RequestParam(required = false) String smtpPassword,
             @RequestParam(required = false) String googleClientId, @RequestParam(required = false) String googleClientSecret,
             @RequestParam(required = false) String googleRedirectUri, @RequestParam(required = false) String captchaSecret,
-            @RequestParam(required = false) String captchaSiteKey,
+            @RequestParam(required = false) String captchaSiteKey, @RequestParam(required = false) String tawkToEmbed,
             @RequestParam(required = false) MultipartFile logo, @RequestParam(required = false) MultipartFile favicon) {
         return adminSettingsService.updateAppInfo(new AdminAppInfoRequest(siteName, siteTitle, siteAddress, description,
                 keywords, timezone, welcomeMessage, googleTranslateEnabled, tradeMode, tradingWinrate, merchantKey,
@@ -58,7 +58,8 @@ public class AdminSettingsController {
                 enableEmailVerification, enableKyc,
                 enableKycRegistration, captchaProvider, socialLoginEnabled, returnCapital, shouldCancelPlan,
                 mailServer, mailFromAddress, mailFromName, smtpHost, smtpPort, smtpEncryption, smtpUsername,
-                smtpPassword, googleClientId, googleClientSecret, googleRedirectUri, captchaSecret, captchaSiteKey),
+                smtpPassword, googleClientId, googleClientSecret, googleRedirectUri, captchaSecret, captchaSiteKey,
+                tawkToEmbed),
                 logo, favicon);
     }
 

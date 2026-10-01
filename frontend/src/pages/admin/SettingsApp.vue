@@ -154,6 +154,11 @@ const toggles = [
             <div class="md:col-span-2"><label :class="labelCls">Description</label><textarea v-model="form.description" rows="2" :class="inputCls"></textarea></div>
             <div class="md:col-span-2"><label :class="labelCls">Keywords</label><input v-model="form.keywords" :class="inputCls" /></div>
             <div class="md:col-span-2"><label :class="labelCls">Welcome message</label><textarea v-model="form.welcomeMessage" rows="2" :class="inputCls"></textarea></div>
+            <div class="md:col-span-2">
+              <label :class="labelCls">Live chat embed code (e.g. Tawk.to)</label>
+              <textarea v-model="form.tawkToEmbed" rows="6" placeholder="Paste the full widget script snippet here" :class="[inputCls, 'font-mono text-xs']"></textarea>
+              <p class="text-xs text-slate-500 dark:text-slate-400 mt-1">Shown on public pages and the login/register screens. Leave blank to disable.</p>
+            </div>
           </div>
 
           <div class="grid grid-cols-1 sm:grid-cols-2 gap-4 pt-2 border-t border-slate-100 dark:border-white/5">

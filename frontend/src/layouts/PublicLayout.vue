@@ -5,6 +5,7 @@ import { RouterLink, RouterView } from 'vue-router'
 import { useAuthUserStore } from '@/stores/authUser'
 import { usePublicSettingsStore } from '@/stores/publicSettings'
 import { storageUrl } from '@/lib/storage'
+import { injectChatWidget } from '@/lib/chatWidget'
 
 const authUser = useAuthUserStore()
 const settingsStore = usePublicSettingsStore()
@@ -21,6 +22,7 @@ onMounted(async () => {
   if (settingsStore.settings?.siteTitle) {
     document.title = `${settingsStore.settings.siteTitle}`
   }
+  injectChatWidget(settingsStore.settings?.tawkToEmbed)
 })
 
 watch(() => settingsStore.settings, (s) => {

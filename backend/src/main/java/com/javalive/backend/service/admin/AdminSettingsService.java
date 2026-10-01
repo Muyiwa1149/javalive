@@ -90,6 +90,7 @@ public class AdminSettingsService {
             s.setGoogleRedirectUri(r.googleRedirectUri());
             s.setCaptchaSecret(r.captchaSecret());
             s.setCaptchaSiteKey(r.captchaSiteKey());
+            s.setTawkToEmbed(r.tawkToEmbed());
             if (logo != null && !logo.isEmpty()) {
                 fileStorageService.delete(s.getLogo());
                 s.setLogo(fileStorageService.storeImage(logo, "photos", ALLOWED_IMAGE_EXTENSIONS));

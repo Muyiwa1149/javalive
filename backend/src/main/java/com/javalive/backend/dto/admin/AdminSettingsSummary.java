@@ -37,7 +37,8 @@ public record AdminSettingsSummary(
         boolean useInternalTransfer, BigDecimal minTransferAmount, BigDecimal transferCharges,
         // Crypto / exchange
         boolean useCryptoFeature, BigDecimal exchangeFeePct, BigDecimal currencyRate, String localCurrency,
-        String baseCurrency
+        String baseCurrency,
+        String tawkToEmbed
 ) {
     public static AdminSettingsSummary from(AppSetting s) {
         return new AdminSettingsSummary(
@@ -64,7 +65,8 @@ public record AdminSettingsSummary(
                 s.getCoinpaymentsDebugEmail(),
                 bool(s.getUseInternalTransfer()), s.getMinTransferAmount(), s.getTransferCharges(),
                 bool(s.getUseCryptoFeature()), s.getExchangeFeePct(), s.getCurrencyRate(), s.getLocalCurrency(),
-                s.getBaseCurrency()
+                s.getBaseCurrency(),
+                s.getTawkToEmbed()
         );
     }
 
